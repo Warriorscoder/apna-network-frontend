@@ -133,7 +133,7 @@ export default function ServiceProviderSignUp({ onSuccess }) {
     }
     // Redirect to dashboard after successful provider signup
     if (onSuccess) onSuccess();
-    else router.push('/dashboard/service-dashboard'); 
+    else router.push('/dashboard/provider-dashboard'); 
   } else {
     const data = await res.json();
     alert(data.message || 'Registration failed');
