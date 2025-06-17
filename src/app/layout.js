@@ -1,5 +1,5 @@
 import './globals.css';
-import Navbar from '@/app/Navbar';
+import ConditionalNavbar from '@/components/ConditionalNavbar';
 import { Inter, Roboto } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className='scroll-smooth'>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <Navbar />
+        <ConditionalNavbar />
         <main className="flex-grow">{children}</main>
       </body>
     </html>

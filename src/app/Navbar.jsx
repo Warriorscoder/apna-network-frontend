@@ -113,12 +113,9 @@ export default function Navbar() {
           {/* Desktop Auth */}
           <div className="hidden md:flex items-center space-x-3">
             <Link
-              href="/login"
+              href="/auth/login"
               className="text-base px-5 py-2 rounded-md font-semibold border transition-all hover:text-white"
-              style={{ 
-                borderColor: '#695aa6', 
-                color: '#695aa6'
-              }}
+              style={{ borderColor: '#695aa6', color: '#695aa6' }}
               onMouseEnter={(e) => {
                 e.target.style.backgroundColor = '#695aa6';
                 e.target.style.color = 'white';
@@ -131,7 +128,7 @@ export default function Navbar() {
               Login
             </Link>
             <Link
-              href="/register"
+              href="/auth/user-signup"
               className="text-base px-5 py-2 rounded-md font-semibold text-white transition-all transform hover:scale-105"
               style={{ 
                 background: 'linear-gradient(to right, #695aa6, #5a4d8a)'
@@ -210,7 +207,7 @@ export default function Navbar() {
             ))}
             <div className="border-t pt-3 space-y-2">
               <button
-                onClick={() => handleNavigate('/login')}
+                onClick={() => handleNavigate('/auth/login')}
                 className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg transition"
                 style={{ color: '#695aa6' }}
                 onMouseEnter={(e) => {
@@ -223,11 +220,9 @@ export default function Navbar() {
                 Login
               </button>
               <button
-                onClick={() => handleNavigate('/register')}
+                onClick={() => handleNavigate('/auth/user-signup')}
                 className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg text-white"
-                style={{ 
-                  background: 'linear-gradient(to right, #695aa6, #5a4d8a)'
-                }}
+                style={{ background: 'linear-gradient(to right, #695aa6, #5a4d8a)' }}
                 onMouseEnter={(e) => {
                   e.target.style.background = 'linear-gradient(to right, #5a4d8a, #4a3f73)';
                 }}
