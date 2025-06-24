@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { User, Edit, Calendar, LogOut } from "lucide-react"; // or any icon library you use
 
 const navLinks = [
   { href: '#', label: 'Home' },
@@ -29,17 +30,31 @@ const HamburgerIcon = ({ open }) => (
   </svg>
 );
 
-export default function Navbar() {
+export default function Navbar({ showProfile = false, userName = "" }) {
   const pathname = usePathname();
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    }
+    if (profileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileOpen]);
 
   const handleNavigate = (href) => {
     setIsMobileMenuOpen(false);
@@ -110,38 +125,69 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Desktop Auth */}
+          {/* Desktop Auth/Profile */}
           <div className="hidden md:flex items-center space-x-3">
-            <Link
-              href="/auth/login"
-              className="text-base px-5 py-2 rounded-md font-semibold border transition-all hover:text-white"
-              style={{ borderColor: '#695aa6', color: '#695aa6' }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#695aa6';
-                e.target.style.color = 'white';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-                e.target.style.color = '#695aa6';
-              }}
-            >
-              Login
-            </Link>
-            <Link
-              href="/auth/user-signup"
-              className="text-base px-5 py-2 rounded-md font-semibold text-white transition-all transform hover:scale-105"
-              style={{ 
-                background: 'linear-gradient(to right, #695aa6, #5a4d8a)'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = 'linear-gradient(to right, #5a4d8a, #4a3f73)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'linear-gradient(to right, #695aa6, #5a4d8a)';
-              }}
-            >
-              Register
-            </Link>
+            {showProfile ? (
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setProfileOpen((v) => !v)}
+                  className="flex items-center gap-2 p-2 rounded-full border border-gray-300 hover:bg-gray-100 transition"
+                  aria-label="Profile"
+                >
+                  <User className="w-7 h-7 text-[#695aa6]" />
+                  <span className="font-semibold text-[#695aa6] text-base">{userName}</span>
+                </button>
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg w-56 z-20 py-2">
+                    <button className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 gap-2">
+                      <Edit className="w-5 h-5 text-[#695aa6]" />
+                      Edit Profile
+                    </button>
+                    <button className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 gap-2">
+                      <Calendar className="w-5 h-5 text-[#695aa6]" />
+                      Update Availability
+                    </button>
+                    <button className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-gray-100 gap-2">
+                      <LogOut className="w-5 h-5" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="text-base px-5 py-2 rounded-md font-semibold border transition-all hover:text-white"
+                  style={{ borderColor: '#695aa6', color: '#695aa6' }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#695aa6';
+                    e.target.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.color = '#695aa6';
+                  }}
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/auth/user-signup"
+                  className="text-base px-5 py-2 rounded-md font-semibold text-white transition-all transform hover:scale-105"
+                  style={{ 
+                    background: 'linear-gradient(to right, #695aa6, #5a4d8a)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'linear-gradient(to right, #5a4d8a, #4a3f73)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'linear-gradient(to right, #695aa6, #5a4d8a)';
+                  }}
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Toggle */}
@@ -206,32 +252,44 @@ export default function Navbar() {
               </button>
             ))}
             <div className="border-t pt-3 space-y-2">
-              <button
-                onClick={() => handleNavigate('/auth/login')}
-                className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg transition"
-                style={{ color: '#695aa6' }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = 'rgba(105, 90, 166, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = 'transparent';
-                }}
-              >
-                Login
-              </button>
-              <button
-                onClick={() => handleNavigate('/auth/user-signup')}
-                className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg text-white"
-                style={{ background: 'linear-gradient(to right, #695aa6, #5a4d8a)' }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'linear-gradient(to right, #5a4d8a, #4a3f73)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'linear-gradient(to right, #695aa6, #5a4d8a)';
-                }}
-              >
-                Register
-              </button>
+              {showProfile ? (
+                <button
+                  onClick={() => handleNavigate('/profile')}
+                  className="w-full flex items-center gap-2 text-left px-4 py-2 rounded-md font-semibold text-lg transition"
+                >
+                  <User className="w-6 h-6 text-[#695aa6]" />
+                  <span className="font-semibold text-[#695aa6] text-base">{userName}</span>
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleNavigate('/auth/login')}
+                    className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg transition"
+                    style={{ color: '#695aa6' }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'rgba(105, 90, 166, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => handleNavigate('/auth/user-signup')}
+                    className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg text-white"
+                    style={{ background: 'linear-gradient(to right, #695aa6, #5a4d8a)' }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'linear-gradient(to right, #5a4d8a, #4a3f73)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'linear-gradient(to right, #695aa6, #5a4d8a)';
+                    }}
+                  >
+                    Register
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

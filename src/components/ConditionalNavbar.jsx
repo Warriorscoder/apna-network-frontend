@@ -3,7 +3,8 @@
 import { usePathname } from "next/navigation"
 import Navbar from "@/app/Navbar"
 
-export default function ConditionalNavbar() {
+// Accept user and userName as props
+export default function ConditionalNavbar({ user, userName }) {
   const pathname = usePathname()
 
   // Check if the current path matches the service pattern
@@ -14,5 +15,6 @@ export default function ConditionalNavbar() {
     return null
   }
 
-  return <Navbar />
+  // Show profile only if user is logged in
+  return <Navbar showProfile={!!user} userName={userName || ""} />
 }

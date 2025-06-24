@@ -1,6 +1,7 @@
 import './globals.css';
-import ConditionalNavbar from '@/components/ConditionalNavbar';
 import { Inter, Roboto } from 'next/font/google';
+import Footer from './Footer';
+import { AuthProvider } from "./context/Authcontext";
 
 const inter = Inter({ subsets: ['latin'] });
 const roboto = Roboto({ 
@@ -17,8 +18,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className='scroll-smooth'>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <ConditionalNavbar />
-        <main className="flex-grow">{children}</main>
+        <AuthProvider>
+          <main className="flex-grow">{children}</main>
+          <Footer/>
+        </AuthProvider>
       </body>
     </html>
   );

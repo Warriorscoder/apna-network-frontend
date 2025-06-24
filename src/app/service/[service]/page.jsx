@@ -496,9 +496,6 @@ export default function ServicePage({ params }) {
         </div>
       </div>
 
-      {/* Footer - Now properly aligned at bottom with no space beneath */}
-      <Footer />
-
       {/* Provider Details Modal */}
       <ProviderModal provider={selectedProvider} isOpen={isModalOpen} onClose={closeModal} />
     </div>

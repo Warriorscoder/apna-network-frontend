@@ -3,19 +3,14 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
-const ServiceCard = ({ service }) => {
+const ServiceCard = ({ service, onClick }) => {
   const [hovered, setHovered] = useState(false)
-  const router = useRouter()
-
-  const handleCardClick = () => {
-    router.push(`/service/${service.serviceKey}`)
-  }
 
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onClick={handleCardClick}
+      onClick={onClick}
       className="bg-white border rounded-xl p-4 text-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(105,90,166,0.15)] flex flex-col items-center justify-center h-56 relative overflow-hidden cursor-pointer"
       style={{ borderColor: "#a99fd4" }}
     >
@@ -147,26 +142,71 @@ const services = [
   },
 ];
 
-const FeaturedServices = () => (
-  <section
-    className="py-20"
-    style={{
-      background: "linear-gradient(to top, #fff 0%, rgba(105, 90, 166, 0.35) 99%, rgba(105, 90, 166, 0.5) 100%)",
-    }}
-  >
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="text-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-bold mb-8" style={{ color: "#695aa6" }}>
-          Services We Offer
-        </h2>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        {services.map((service, index) => (
-          <ServiceCard key={service.serviceKey || index} service={service} />
-        ))}
-      </div>
+const LoginModal = ({ onClose }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="bg-white rounded-xl shadow-lg p-8 max-w-sm w-full text-center">
+      <h2 className="text-2xl font-bold mb-4 text-[#695aa6]">Login Required</h2>
+      <p className="mb-6 text-gray-700">Please log in or register to view service providers.</p>
+      <a
+        href="/auth/login"
+        className="block w-full py-3 rounded-lg font-semibold text-white bg-[#695aa6] hover:bg-[#5a4d8a] transition mb-3"
+      >
+        Login
+      </a>
+      <a
+        href="/auth/user-signup"
+        className="block w-full py-2 rounded-lg font-semibold text-[#695aa6] bg-gray-100 hover:bg-gray-200 transition"
+      >
+        Register
+      </a>
+      <button
+        className="w-full py-2 rounded-lg font-semibold text-gray-500 bg-gray-50 hover:bg-gray-100 transition mt-2"
+        onClick={onClose}
+      >
+        Cancel
+      </button>
     </div>
-  </section>
+  </div>
 );
+
+const FeaturedServices = ({ user }) => {
+  const router = useRouter();
+  const [showLogin, setShowLogin] = useState(false);
+
+  const handleServiceClick = (serviceKey) => {
+    if (!user) {
+      setShowLogin(true);
+    } else {
+      router.push(`/service/${serviceKey}`);
+    }
+  };
+
+  return (
+    <section
+      className="py-20"
+      style={{
+        background: "linear-gradient(to top, #fff 0%, rgba(105, 90, 166, 0.35) 99%, rgba(105, 90, 166, 0.5) 100%)",
+      }}
+    >
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold mb-8" style={{ color: "#695aa6" }}>
+            Services We Offer
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          {services.map((service, index) => (
+            <ServiceCard
+              key={service.serviceKey || index}
+              service={service}
+              onClick={() => handleServiceClick(service.serviceKey)}
+            />
+          ))}
+        </div>
+      </div>
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+    </section>
+  );
+};
 
 export default FeaturedServices;
