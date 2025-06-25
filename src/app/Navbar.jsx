@@ -115,10 +115,7 @@ export default function Navbar() {
             <Link
               href="/login"
               className="text-base px-5 py-2 rounded-md font-semibold border transition-all hover:text-white"
-              style={{ 
-                borderColor: '#695aa6', 
-                color: '#695aa6'
-              }}
+               style={{ borderColor: '#695aa6', color: '#695aa6' }}
               onMouseEnter={(e) => {
                 e.target.style.backgroundColor = '#695aa6';
                 e.target.style.color = 'white';

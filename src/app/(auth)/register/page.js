@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import axios from "axios";
 
 export default function ServiceTakerSignUp() {
   const router = useRouter();
@@ -9,51 +11,71 @@ export default function ServiceTakerSignUp() {
     name: "",
     gender: "",
     address: "",
-   
+
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.gender.trim()) newErrors.gender = "Gender is required";
-    if (!formData.address.trim()) newErrors.address = "Address is required";
-    // Add validation for more fields if needed
-    return newErrors;
-  };
+  const newErrors = {};
+  if (!formData.name.trim()) newErrors.name = "Name is required";
+  if (!formData.gender.trim()) newErrors.gender = "Gender is required";
+  if (!formData.address.trim()) newErrors.address = "Address is required";
+  // Add validation for more fields if needed
+  return newErrors;
+};
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+const handleChange = (e) => {
+  setFormData({ ...formData, [e.target.name]: e.target.value });
+};
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) return;
-    setIsSubmitting(true);
-    try {
-      // Replace with your API endpoint
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-      const res = await fetch(`${apiUrl}/users/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        alert("Registration successful!");
-        router.push("/dashboard/user-dashboard"); 
-      } else {
-        const data = await res.json();
-        alert(data.message || "Registration failed");
-      }
-    } catch {
-      alert("Error submitting form");
-    } finally {
-      setIsSubmitting(false);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log("Form submission started");
+
+  const validationErrors = validate();
+  setErrors(validationErrors);
+  console.log("Validation Errors:", validationErrors);
+
+  if (Object.keys(validationErrors).length > 0) {
+    console.log("Form validation failed. Aborting submission.");
+    return;
+  }
+
+  setIsSubmitting(true);
+  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  try {
+    console.log("API URL:", apiUrl);
+    console.log("Form Data being submitted:", formData);
+
+    const res = await axios.post(`${apiUrl}/users/create`, formData);
+    console.log("Server Response:", res);
+
+    if (res.status === 201 || res.status === 200) {
+      console.log("Registration successful!");
+      router.push("/dashboard/user-dashboard");
+    } else {
+      console.log("Unexpected server response status:", res.status);
+      console.log("Server message:", res.data.message || "Registration failed");
     }
-  };
+
+  } catch (err) {
+    console.error("Error occurred during form submission:", err);
+
+    if (err.response) {
+      console.log("Server responded with error:", err.response.data.message);
+    } else if (err.request) {
+      console.log("No response received from server. Possible network error.");
+    } else {
+      console.log("Client-side error:", err.message);
+    }
+  } finally {
+    setIsSubmitting(false);
+    console.log("Form submission ended");
+  }
+};
+
 
   const renderError = (field) =>
     errors[field] ? (
@@ -64,7 +86,7 @@ export default function ServiceTakerSignUp() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-t from-white to-[rgba(105,90,166,0.99)]">
       <div className="p-8 rounded-xl w-full max-w-[32rem] bg-white/95 backdrop-blur-sm shadow-lg">
         <h2 className="text-3xl font-bold text-center mb-8 text-[#695aa6]">
-          Service Taker Signup
+          Sign-Up
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -112,7 +134,7 @@ export default function ServiceTakerSignUp() {
             />
             {renderError("address")}
           </div>
-          
+
           <button
             type="submit"
             disabled={isSubmitting}
@@ -124,8 +146,19 @@ export default function ServiceTakerSignUp() {
           >
             {isSubmitting ? "Registering..." : "Register"}
           </button>
+
+          <div className="mt-6 text-center text-sm text-gray-700">
+            Already have an account?{' '}
+              <button
+                className="text-[#695aa6] hover:underline font-medium"
+              >
+            <Link href={'/login'}>
+                Click here to Login
+            </Link>
+              </button>
+          </div>
         </form>
-       
+
       </div>
     </div>
   );
