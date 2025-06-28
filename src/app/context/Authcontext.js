@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     // Replace with your backend endpoint
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/me`, { credentials: "include" })
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/me`, { credentials: "include" })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         setUser(data?.user || null);
@@ -18,8 +18,18 @@ export function AuthProvider({ children }) {
       .catch(() => setLoading(false));
   }, []);
 
+  async function login(apiUrl) {
+    await fetch(`${apiUrl}/api/auth/login`, { 
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ username: "example", password: "example" })
+    });
+  }
+
   return (
-    <AuthContext.Provider value={{ user, setUser, loading }}>
+    <AuthContext.Provider value={{ user, setUser, loading, login }}>
       {children}
     </AuthContext.Provider>
   );

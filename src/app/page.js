@@ -5,8 +5,8 @@ import ProviderDashboard from './dashboard/provider-dashboard/page';
 export default function Home() {
   return (
     <>
-       <HomePage /> 
-      {/* <ProviderDashboard /> */}
+       {/* <HomePage /> 
+       <ProviderDashboard /> */}
     </>
   );
 }

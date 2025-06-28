@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState, useRef, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import Link from "next/link";
+import { useState, useRef, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { User, Edit, Calendar, LogOut } from "lucide-react"; // or any icon library you use
 
 const navLinks = [
-  { href: '#', label: 'Home' },
-  { href: '#about', label: 'About' },
-  { href: '#services', label: 'Services' },
-  { href: '#contact', label: 'Contact' },
+  { href: "#", label: "Home" },
+  { href: "#about", label: "About" },
+  { href: "#services", label: "Services" },
+  { href: "#contact", label: "Contact" },
 ];
 
 const HamburgerIcon = ({ open }) => (
@@ -40,8 +40,8 @@ export default function Navbar({ showProfile = false, userName = "" }) {
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -68,21 +68,21 @@ export default function Navbar({ showProfile = false, userName = "" }) {
       className={`border-b-1 fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ease-in-out 
       ${
         scrolled || isMobileMenuOpen
-          ? 'bg-white backdrop-blur-lg shadow border-b border-gray-200'
-          : 'bg-transparent'
+          ? "bg-white backdrop-blur-lg shadow border-b border-gray-200"
+          : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <button
-            onClick={() => handleNavigate('/')}
+            onClick={() => handleNavigate("/")}
             className="text-4xl font-bold transition-transform hover:scale-105"
-            style={{ 
-              background: 'linear-gradient(to right, #695aa6, #5a4d8a)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
+            style={{
+              background: "linear-gradient(to right, #695aa6, #5a4d8a)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
             }}
           >
             Apna Network
@@ -97,26 +97,30 @@ export default function Navbar({ showProfile = false, userName = "" }) {
                 className={`text-base font-semibold transition-all px-3 py-2 rounded-md 
                   ${
                     isActive(href)
-                      ? 'border-transparent'
-                      : 'text-gray-700 border-transparent hover:text-gray-900'
+                      ? "border-transparent"
+                      : "text-gray-700 border-transparent hover:text-gray-900"
                   }`}
-                style={isActive(href) ? {
-                  color: '#695aa6',
-                  backgroundColor: 'rgba(105, 90, 166, 0.1)',
-                  borderColor: '#695aa6'
-                } : {}}
+                style={
+                  isActive(href)
+                    ? {
+                        color: "#695aa6",
+                        backgroundColor: "rgba(105, 90, 166, 0.1)",
+                        borderColor: "#695aa6",
+                      }
+                    : {}
+                }
                 onMouseEnter={(e) => {
                   if (!isActive(href)) {
-                    e.target.style.color = '#695aa6';
-                    e.target.style.backgroundColor = 'rgba(105, 90, 166, 0.05)';
-                    e.target.style.borderColor = '#695aa6';
+                    e.target.style.color = "#695aa6";
+                    e.target.style.backgroundColor = "rgba(105, 90, 166, 0.05)";
+                    e.target.style.borderColor = "#695aa6";
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive(href)) {
-                    e.target.style.color = '#374151';
-                    e.target.style.backgroundColor = 'transparent';
-                    e.target.style.borderColor = 'transparent';
+                    e.target.style.color = "#374151";
+                    e.target.style.backgroundColor = "transparent";
+                    e.target.style.borderColor = "transparent";
                   }
                 }}
               >
@@ -128,45 +132,25 @@ export default function Navbar({ showProfile = false, userName = "" }) {
           {/* Desktop Auth/Profile */}
           <div className="hidden md:flex items-center space-x-3">
             {showProfile ? (
-              <div className="relative" ref={profileRef}>
-                <button
-                  onClick={() => setProfileOpen((v) => !v)}
-                  className="flex items-center gap-2 p-2 rounded-full border border-gray-300 hover:bg-gray-100 transition"
-                  aria-label="Profile"
-                >
-                  <User className="w-7 h-7 text-[#695aa6]" />
-                  <span className="font-semibold text-[#695aa6] text-base">{userName}</span>
-                </button>
-                {profileOpen && (
-                  <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg w-56 z-20 py-2">
-                    <button className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 gap-2">
-                      <Edit className="w-5 h-5 text-[#695aa6]" />
-                      Edit Profile
-                    </button>
-                    <button className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 gap-2">
-                      <Calendar className="w-5 h-5 text-[#695aa6]" />
-                      Update Availability
-                    </button>
-                    <button className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-gray-100 gap-2">
-                      <LogOut className="w-5 h-5" />
-                      Logout
-                    </button>
-                  </div>
-                )}
+              <div className="flex items-center gap-2">
+                <User className="w-7 h-7 text-[#695aa6]" />
+                <span className="font-semibold text-[#695aa6] text-base">
+                  Welcome, {userName}
+                </span>
               </div>
             ) : (
               <>
                 <Link
                   href="/auth/login"
                   className="text-base px-5 py-2 rounded-md font-semibold border transition-all hover:text-white"
-                  style={{ borderColor: '#695aa6', color: '#695aa6' }}
+                  style={{ borderColor: "#695aa6", color: "#695aa6" }}
                   onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = '#695aa6';
-                    e.target.style.color = 'white';
+                    e.target.style.backgroundColor = "#695aa6";
+                    e.target.style.color = "white";
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'transparent';
-                    e.target.style.color = '#695aa6';
+                    e.target.style.backgroundColor = "transparent";
+                    e.target.style.color = "#695aa6";
                   }}
                 >
                   Login
@@ -174,14 +158,16 @@ export default function Navbar({ showProfile = false, userName = "" }) {
                 <Link
                   href="/auth/user-signup"
                   className="text-base px-5 py-2 rounded-md font-semibold text-white transition-all transform hover:scale-105"
-                  style={{ 
-                    background: 'linear-gradient(to right, #695aa6, #5a4d8a)'
+                  style={{
+                    background: "linear-gradient(to right, #695aa6, #5a4d8a)",
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.background = 'linear-gradient(to right, #5a4d8a, #4a3f73)';
+                    e.target.style.background =
+                      "linear-gradient(to right, #5a4d8a, #4a3f73)";
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.background = 'linear-gradient(to right, #695aa6, #5a4d8a)';
+                    e.target.style.background =
+                      "linear-gradient(to right, #695aa6, #5a4d8a)";
                   }}
                 >
                   Register
@@ -196,15 +182,15 @@ export default function Navbar({ showProfile = false, userName = "" }) {
               onClick={() => setIsMobileMenuOpen((prev) => !prev)}
               className="p-2 rounded-md transition"
               style={{
-                '&:hover': {
-                  backgroundColor: 'rgba(105, 90, 166, 0.1)'
-                }
+                "&:hover": {
+                  backgroundColor: "rgba(105, 90, 166, 0.1)",
+                },
               }}
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'rgba(105, 90, 166, 0.1)';
+                e.target.style.backgroundColor = "rgba(105, 90, 166, 0.1)";
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
+                e.target.style.backgroundColor = "transparent";
               }}
               aria-label="Toggle menu"
             >
@@ -225,26 +211,30 @@ export default function Navbar({ showProfile = false, userName = "" }) {
                 className={`block w-full text-left px-4 py-2 rounded-md text-lg font-semibold border-b-2 transition
                   ${
                     isActive(href)
-                      ? 'text-gray-700 border-transparent'
-                      : 'text-gray-700 border-transparent'
+                      ? "text-gray-700 border-transparent"
+                      : "text-gray-700 border-transparent"
                   }`}
-                style={isActive(href) ? {
-                  backgroundColor: 'rgba(105, 90, 166, 0.1)',
-                  color: '#695aa6',
-                  borderColor: '#695aa6'
-                } : {}}
+                style={
+                  isActive(href)
+                    ? {
+                        backgroundColor: "rgba(105, 90, 166, 0.1)",
+                        color: "#695aa6",
+                        borderColor: "#695aa6",
+                      }
+                    : {}
+                }
                 onMouseEnter={(e) => {
                   if (!isActive(href)) {
-                    e.target.style.color = '#695aa6';
-                    e.target.style.backgroundColor = 'rgba(105, 90, 166, 0.05)';
-                    e.target.style.borderColor = '#695aa6';
+                    e.target.style.color = "#695aa6";
+                    e.target.style.backgroundColor = "rgba(105, 90, 166, 0.05)";
+                    e.target.style.borderColor = "#695aa6";
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive(href)) {
-                    e.target.style.color = '#374151';
-                    e.target.style.backgroundColor = 'transparent';
-                    e.target.style.borderColor = 'transparent';
+                    e.target.style.color = "#374151";
+                    e.target.style.backgroundColor = "transparent";
+                    e.target.style.borderColor = "transparent";
                   }
                 }}
               >
@@ -254,36 +244,43 @@ export default function Navbar({ showProfile = false, userName = "" }) {
             <div className="border-t pt-3 space-y-2">
               {showProfile ? (
                 <button
-                  onClick={() => handleNavigate('/profile')}
+                  onClick={() => handleNavigate("/profile")}
                   className="w-full flex items-center gap-2 text-left px-4 py-2 rounded-md font-semibold text-lg transition"
                 >
                   <User className="w-6 h-6 text-[#695aa6]" />
-                  <span className="font-semibold text-[#695aa6] text-base">{userName}</span>
+                  <span className="font-semibold text-[#695aa6] text-base">
+                    {userName}
+                  </span>
                 </button>
               ) : (
                 <>
                   <button
-                    onClick={() => handleNavigate('/auth/login')}
+                    onClick={() => handleNavigate("/auth/login")}
                     className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg transition"
-                    style={{ color: '#695aa6' }}
+                    style={{ color: "#695aa6" }}
                     onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = 'rgba(105, 90, 166, 0.1)';
+                      e.target.style.backgroundColor =
+                        "rgba(105, 90, 166, 0.1)";
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'transparent';
+                      e.target.style.backgroundColor = "transparent";
                     }}
                   >
                     Login
                   </button>
                   <button
-                    onClick={() => handleNavigate('/auth/user-signup')}
+                    onClick={() => handleNavigate("/auth/user-signup")}
                     className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg text-white"
-                    style={{ background: 'linear-gradient(to right, #695aa6, #5a4d8a)' }}
+                    style={{
+                      background: "linear-gradient(to right, #695aa6, #5a4d8a)",
+                    }}
                     onMouseEnter={(e) => {
-                      e.target.style.background = 'linear-gradient(to right, #5a4d8a, #4a3f73)';
+                      e.target.style.background =
+                        "linear-gradient(to right, #5a4d8a, #4a3f73)";
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.background = 'linear-gradient(to right, #695aa6, #5a4d8a)';
+                      e.target.style.background =
+                        "linear-gradient(to right, #695aa6, #5a4d8a)";
                     }}
                   >
                     Register
