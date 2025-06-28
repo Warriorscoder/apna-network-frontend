@@ -1,14 +1,15 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import Link from "next/link";
+import { useState, useRef, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { User, Edit, Calendar, LogOut } from "lucide-react"; // or any icon library you use
 
 const navLinks = [
-  { href: '#', label: 'Home' },
-  { href: '#about', label: 'About' },
-  { href: '#services', label: 'Services' },
-  { href: '#contact', label: 'Contact' },
+  { href: "#", label: "Home" },
+  { href: "#about", label: "About" },
+  { href: "#services", label: "Services" },
+  { href: "#contact", label: "Contact" },
 ];
 
 const HamburgerIcon = ({ open }) => (
@@ -29,17 +30,31 @@ const HamburgerIcon = ({ open }) => (
   </svg>
 );
 
-export default function Navbar() {
+export default function Navbar({ showProfile = false, userName = "" }) {
   const pathname = usePathname();
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    }
+    if (profileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileOpen]);
 
   const handleNavigate = (href) => {
     setIsMobileMenuOpen(false);
@@ -53,21 +68,21 @@ export default function Navbar() {
       className={`border-b-1 fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ease-in-out 
       ${
         scrolled || isMobileMenuOpen
-          ? 'bg-white backdrop-blur-lg shadow border-b border-gray-200'
-          : 'bg-transparent'
+          ? "bg-white backdrop-blur-lg shadow border-b border-gray-200"
+          : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <button
-            onClick={() => handleNavigate('/')}
+            onClick={() => handleNavigate("/")}
             className="text-4xl font-bold transition-transform hover:scale-105"
-            style={{ 
-              background: 'linear-gradient(to right, #695aa6, #5a4d8a)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
+            style={{
+              background: "linear-gradient(to right, #695aa6, #5a4d8a)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
             }}
           >
             Apna Network
@@ -82,26 +97,30 @@ export default function Navbar() {
                 className={`text-base font-semibold transition-all px-3 py-2 rounded-md 
                   ${
                     isActive(href)
-                      ? 'border-transparent'
-                      : 'text-gray-700 border-transparent hover:text-gray-900'
+                      ? "border-transparent"
+                      : "text-gray-700 border-transparent hover:text-gray-900"
                   }`}
-                style={isActive(href) ? {
-                  color: '#695aa6',
-                  backgroundColor: 'rgba(105, 90, 166, 0.1)',
-                  borderColor: '#695aa6'
-                } : {}}
+                style={
+                  isActive(href)
+                    ? {
+                        color: "#695aa6",
+                        backgroundColor: "rgba(105, 90, 166, 0.1)",
+                        borderColor: "#695aa6",
+                      }
+                    : {}
+                }
                 onMouseEnter={(e) => {
                   if (!isActive(href)) {
-                    e.target.style.color = '#695aa6';
-                    e.target.style.backgroundColor = 'rgba(105, 90, 166, 0.05)';
-                    e.target.style.borderColor = '#695aa6';
+                    e.target.style.color = "#695aa6";
+                    e.target.style.backgroundColor = "rgba(105, 90, 166, 0.05)";
+                    e.target.style.borderColor = "#695aa6";
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive(href)) {
-                    e.target.style.color = '#374151';
-                    e.target.style.backgroundColor = 'transparent';
-                    e.target.style.borderColor = 'transparent';
+                    e.target.style.color = "#374151";
+                    e.target.style.backgroundColor = "transparent";
+                    e.target.style.borderColor = "transparent";
                   }
                 }}
               >
@@ -110,7 +129,7 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Desktop Auth */}
+          {/* Desktop Auth/Profile */}
           <div className="hidden md:flex items-center space-x-3">
             <Link
               href="/login"
@@ -150,15 +169,15 @@ export default function Navbar() {
               onClick={() => setIsMobileMenuOpen((prev) => !prev)}
               className="p-2 rounded-md transition"
               style={{
-                '&:hover': {
-                  backgroundColor: 'rgba(105, 90, 166, 0.1)'
-                }
+                "&:hover": {
+                  backgroundColor: "rgba(105, 90, 166, 0.1)",
+                },
               }}
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'rgba(105, 90, 166, 0.1)';
+                e.target.style.backgroundColor = "rgba(105, 90, 166, 0.1)";
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
+                e.target.style.backgroundColor = "transparent";
               }}
               aria-label="Toggle menu"
             >
@@ -179,26 +198,30 @@ export default function Navbar() {
                 className={`block w-full text-left px-4 py-2 rounded-md text-lg font-semibold border-b-2 transition
                   ${
                     isActive(href)
-                      ? 'text-gray-700 border-transparent'
-                      : 'text-gray-700 border-transparent'
+                      ? "text-gray-700 border-transparent"
+                      : "text-gray-700 border-transparent"
                   }`}
-                style={isActive(href) ? {
-                  backgroundColor: 'rgba(105, 90, 166, 0.1)',
-                  color: '#695aa6',
-                  borderColor: '#695aa6'
-                } : {}}
+                style={
+                  isActive(href)
+                    ? {
+                        backgroundColor: "rgba(105, 90, 166, 0.1)",
+                        color: "#695aa6",
+                        borderColor: "#695aa6",
+                      }
+                    : {}
+                }
                 onMouseEnter={(e) => {
                   if (!isActive(href)) {
-                    e.target.style.color = '#695aa6';
-                    e.target.style.backgroundColor = 'rgba(105, 90, 166, 0.05)';
-                    e.target.style.borderColor = '#695aa6';
+                    e.target.style.color = "#695aa6";
+                    e.target.style.backgroundColor = "rgba(105, 90, 166, 0.05)";
+                    e.target.style.borderColor = "#695aa6";
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive(href)) {
-                    e.target.style.color = '#374151';
-                    e.target.style.backgroundColor = 'transparent';
-                    e.target.style.borderColor = 'transparent';
+                    e.target.style.color = "#374151";
+                    e.target.style.backgroundColor = "transparent";
+                    e.target.style.borderColor = "transparent";
                   }
                 }}
               >
@@ -206,34 +229,51 @@ export default function Navbar() {
               </button>
             ))}
             <div className="border-t pt-3 space-y-2">
-              <button
-                onClick={() => handleNavigate('/login')}
-                className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg transition"
-                style={{ color: '#695aa6' }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = 'rgba(105, 90, 166, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = 'transparent';
-                }}
-              >
-                Login
-              </button>
-              <button
-                onClick={() => handleNavigate('/register')}
-                className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg text-white"
-                style={{ 
-                  background: 'linear-gradient(to right, #695aa6, #5a4d8a)'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'linear-gradient(to right, #5a4d8a, #4a3f73)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'linear-gradient(to right, #695aa6, #5a4d8a)';
-                }}
-              >
-                Register
-              </button>
+              {showProfile ? (
+                <button
+                  onClick={() => handleNavigate("/profile")}
+                  className="w-full flex items-center gap-2 text-left px-4 py-2 rounded-md font-semibold text-lg transition"
+                >
+                  <User className="w-6 h-6 text-[#695aa6]" />
+                  <span className="font-semibold text-[#695aa6] text-base">
+                    {userName}
+                  </span>
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleNavigate("/auth/login")}
+                    className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg transition"
+                    style={{ color: "#695aa6" }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor =
+                        "rgba(105, 90, 166, 0.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => handleNavigate("/auth/user-signup")}
+                    className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg text-white"
+                    style={{
+                      background: "linear-gradient(to right, #695aa6, #5a4d8a)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background =
+                        "linear-gradient(to right, #5a4d8a, #4a3f73)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background =
+                        "linear-gradient(to right, #695aa6, #5a4d8a)";
+                    }}
+                  >
+                    Register
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

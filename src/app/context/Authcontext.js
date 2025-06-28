@@ -8,7 +8,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Replace with your backend endpoint
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/me`, { credentials: "include" })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
@@ -17,7 +16,6 @@ export function AuthProvider({ children }) {
       })
       .catch(() => setLoading(false));
   }, []);
-
   return (
     <AuthContext.Provider value={{ user, setUser, loading }}>
       {children}
