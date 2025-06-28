@@ -2,24 +2,40 @@
 import React, { useState } from "react";
 import ContentModal from "./ContentModal";
 
-const initialSubscribers = [
-  { id: 1, email: "user1@example.com", subscribedOn: "2025-06-01" },
-  { id: 2, email: "user2@example.com", subscribedOn: "2025-06-15" },
+const initialNewsletters = [
+  {
+    id: 1,
+    image_url: "https://example.com/image1.jpg",
+    category: "Community",
+    title: "June Newsletter",
+    content: "Our latest updates and stories.",
+    date: "2025-06-01",
+    site_url: "https://example.com/news/june",
+  },
+  {
+    id: 2,
+    image_url: "https://example.com/image2.jpg",
+    category: "Events",
+    title: "Special Event",
+    content: "Join our upcoming event!",
+    date: "2025-06-15",
+    site_url: "https://example.com/news/event",
+  },
 ];
 
 export default function NewsletterManager() {
-  const [subscribers, setSubscribers] = useState(initialSubscribers);
+  const [newsletters, setNewsletters] = useState(initialNewsletters);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
   const handleAdd = () => { setEditing(null); setModalOpen(true); };
-  const handleEdit = (subscriber) => { setEditing(subscriber); setModalOpen(true); };
-  const handleDelete = (id) => { setSubscribers(subscribers.filter(n => n.id !== id)); };
+  const handleEdit = (item) => { setEditing(item); setModalOpen(true); };
+  const handleDelete = (id) => { setNewsletters(newsletters.filter(n => n.id !== id)); };
   const handleSubmit = (data) => {
     if (editing) {
-      setSubscribers(subscribers.map(n => n.id === editing.id ? { ...n, ...data } : n));
+      setNewsletters(newsletters.map(n => n.id === editing.id ? { ...n, ...data } : n));
     } else {
-      setSubscribers([...subscribers, { ...data, id: Date.now() }]);
+      setNewsletters([...newsletters, { ...data, id: Date.now() }]);
     }
     setModalOpen(false); setEditing(null);
   };
@@ -30,27 +46,37 @@ export default function NewsletterManager() {
         onClick={handleAdd}
         className="mb-4 bg-sky-400 text-white px-4 py-2 rounded font-semibold shadow hover:bg-sky-500 transition"
       >
-        + Add Subscriber
+        + Add Newsletter
       </button>
       <div className="overflow-x-auto">
         <table className="min-w-full text-left bg-white rounded-xl shadow border border-sky-400/10">
           <thead>
             <tr>
-              <th className="py-2 px-3 font-semibold text-sky-600">Email</th>
-              <th className="py-2 px-3 font-semibold text-sky-600">Subscribed On</th>
+              <th className="py-2 px-3 font-semibold text-sky-600">Image</th>
+              <th className="py-2 px-3 font-semibold text-sky-600">Category</th>
+              <th className="py-2 px-3 font-semibold text-sky-600">Title</th>
+              <th className="py-2 px-3 font-semibold text-sky-600">Date</th>
+              <th className="py-2 px-3 font-semibold text-sky-600">Site URL</th>
               <th className="py-2 px-3 font-semibold text-sky-600">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {subscribers.length === 0 ? (
+            {newsletters.length === 0 ? (
               <tr>
-                <td colSpan={3} className="text-gray-400 py-4 text-center">No newsletter subscribers found.</td>
+                <td colSpan={6} className="text-gray-400 py-4 text-center">No newsletters found.</td>
               </tr>
             ) : (
-              subscribers.map((n) => (
+              newsletters.map((n) => (
                 <tr key={n.id} className="border-t hover:bg-sky-50">
-                  <td className="py-2 px-3">{n.email}</td>
-                  <td className="py-2 px-3">{n.subscribedOn}</td>
+                  <td className="py-2 px-3">
+                    <img src={n.image_url} alt={n.title} className="w-12 h-12 object-cover rounded" />
+                  </td>
+                  <td className="py-2 px-3">{n.category}</td>
+                  <td className="py-2 px-3">{n.title}</td>
+                  <td className="py-2 px-3">{n.date?.slice(0,10)}</td>
+                  <td className="py-2 px-3">
+                    <a href={n.site_url} target="_blank" rel="noopener noreferrer" className="text-sky-600 underline">{n.site_url}</a>
+                  </td>
                   <td className="py-2 px-3 flex gap-2">
                     <button
                       onClick={() => handleEdit(n)}

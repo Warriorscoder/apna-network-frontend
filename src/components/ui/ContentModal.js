@@ -1,11 +1,15 @@
 'use client';
 import React, { useEffect, useState, useRef } from "react";
 
-// Icon SVGs for each type
 const icons = {
+  newsletter: (
+    <svg className="w-8 h-8 text-[#38bdf8]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 12H8m8 4H8m8-8H8m12 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h8l6 6z" />
+    </svg>
+  ),
   blog: (
     <svg className="w-8 h-8 text-[#695aa6]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m-4 4h10M5 6v12a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m-4 4h10M5 6v12a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2 2H7a2 2 0 00-2 2z" />
     </svg>
   ),
   story: (
@@ -13,35 +17,120 @@ const icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 17.75l-6.172 3.245 1.179-6.873L2 9.635l6.908-1.004L12 2.5l3.092 6.131L22 9.635l-5.007 4.487 1.179 6.873z" />
     </svg>
   ),
-  newsletter: (
-    <svg className="w-8 h-8 text-[#38bdf8]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M16 12H8m8 4H8m8-8H8m12 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h8l6 6z" />
-    </svg>
-  ),
 };
 
 const titles = {
   blog: "Add New Blog",
   story: "Add Success Story",
-  newsletter: "Add Newsletter Subscriber"
+  newsletter: "Add Newsletter",
 };
 
 const descriptions = {
   blog: "Share a new blog post with your users.",
   story: "Highlight a user's journey or achievement.",
-  newsletter: "Add a new subscriber to the newsletter."
+  newsletter: "Add a new newsletter issue.",
 };
 
 export default function ContentModal({ open, onClose, onSubmit, type, initialData }) {
-  const [form, setForm] = useState(initialData || {});
+  const [form, setForm] = useState({
+    // Newsletter
+    image_url: "",
+    category: "",
+    title: "",
+    content: "",
+    date: "",
+    site_url: "",
+    // Blog
+    author: "",
+    tags: "",
+    images: "",
+    // Success Story
+    message: "",
+    name: "",
+    service: "",
+    state: "",
+    city: "",
+    user_id: "",
+    provider_id: "",
+  });
   const [added, setAdded] = useState(false);
   const inputRef = useRef(null);
 
   useEffect(() => {
-    setForm(initialData || {});
+    if (!open) return;
+    if (type === "newsletter") {
+      setForm({
+        image_url: initialData?.image_url ?? "",
+        category: initialData?.category ?? "",
+        title: initialData?.title ?? "",
+        content: initialData?.content ?? "",
+        date: initialData?.date
+          ? typeof initialData.date === "string"
+            ? initialData.date.slice(0, 10)
+            : new Date(initialData.date).toISOString().slice(0, 10)
+          : "",
+        site_url: initialData?.site_url ?? "",
+        author: "",
+        tags: "",
+        images: "",
+        message: "",
+        name: "",
+        service: "",
+        state: "",
+        city: "",
+        user_id: "",
+        provider_id: "",
+      });
+    } else if (type === "blog") {
+      setForm({
+        title: initialData?.title ?? "",
+        content: initialData?.content ?? "",
+        author: initialData?.author ?? "",
+        date: initialData?.date
+          ? typeof initialData.date === "string"
+            ? initialData.date.slice(0, 10)
+            : new Date(initialData.date).toISOString().slice(0, 10)
+          : "",
+        tags: initialData?.tags ? initialData.tags.join(", ") : "",
+        images: initialData?.images ? initialData.images.join(", ") : "",
+        image_url: "",
+        category: "",
+        site_url: "",
+        message: "",
+        name: "",
+        service: "",
+        state: "",
+        city: "",
+        user_id: "",
+        provider_id: "",
+      });
+    } else if (type === "story") {
+      setForm({
+        message: initialData?.message ?? "",
+        name: initialData?.name ?? "",
+        service: initialData?.service ?? "",
+        state: initialData?.state ?? "",
+        city: initialData?.city ?? "",
+        user_id: initialData?.user_id ?? "",
+        provider_id: initialData?.provider_id ?? "",
+        date: initialData?.date
+          ? typeof initialData.date === "string"
+            ? initialData.date.slice(0, 10)
+            : new Date(initialData.date).toISOString().slice(0, 10)
+          : "",
+        image_url: "",
+        category: "",
+        site_url: "",
+        title: "",
+        content: "",
+        author: "",
+        tags: "",
+        images: "",
+      });
+    }
     setAdded(false);
-    if (open) setTimeout(() => inputRef.current?.focus(), 100);
-  }, [open, initialData]);
+    setTimeout(() => inputRef.current?.focus(), 100);
+  }, [open, initialData, type]);
 
   if (!open) return null;
 
@@ -51,136 +140,235 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
     e.preventDefault();
     setAdded(true);
     setTimeout(() => {
-      onSubmit(form);
-      setForm({});
+      if (type === "newsletter") {
+        onSubmit({
+          image_url: form.image_url,
+          category: form.category,
+          title: form.title,
+          content: form.content,
+          date: form.date ? new Date(form.date) : null,
+          site_url: form.site_url,
+        });
+      } else if (type === "blog") {
+        onSubmit({
+          title: form.title,
+          content: form.content,
+          author: form.author,
+          date: form.date ? new Date(form.date) : null,
+          tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
+          images: form.images.split(",").map(i => i.trim()).filter(Boolean),
+        });
+      } else if (type === "story") {
+        onSubmit({
+          message: form.message,
+          name: form.name,
+          service: form.service,
+          state: form.state,
+          city: form.city,
+          user_id: form.user_id,
+          provider_id: form.provider_id,
+          date: form.date ? new Date(form.date) : null,
+        });
+      }
       setAdded(false);
       onClose();
     }, 900);
   };
 
-  // Success animation
-  const SuccessIcon = (
-    <svg className="w-16 h-16 text-green-500 mb-2 animate-bounceIn" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 13l3 3 7-7" />
-    </svg>
-  );
-
-  // Fields for each type
   const fields = {
+    newsletter: (
+      <>
+        <input
+          ref={inputRef}
+          name="image_url"
+          placeholder="Image URL"
+          value={form.image_url}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border-2 border-sky-400/30 rounded-lg outline-none focus:border-sky-400 text-lg"
+        />
+        <input
+          name="category"
+          placeholder="Category"
+          value={form.category}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border-2 border-sky-400/30 rounded-lg outline-none focus:border-sky-400 text-lg"
+        />
+        <input
+          name="title"
+          placeholder="Title"
+          value={form.title}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border-2 border-sky-400/30 rounded-lg outline-none focus:border-sky-400 text-lg"
+        />
+        <textarea
+          name="content"
+          placeholder="Content"
+          value={form.content}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border-2 border-sky-400/30 rounded-lg outline-none focus:border-sky-400 text-lg min-h-[100px]"
+        />
+        <input
+          name="date"
+          type="date"
+          value={form.date}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border-2 border-sky-400/30 rounded-lg outline-none focus:border-sky-400 text-lg"
+        />
+        <input
+          name="site_url"
+          placeholder="Site URL"
+          value={form.site_url}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border-2 border-sky-400/30 rounded-lg outline-none focus:border-sky-400 text-lg"
+        />
+      </>
+    ),
     blog: (
       <>
-        <div className="relative">
-          <input
-            ref={inputRef}
-            name="title"
-            placeholder="Blog Title"
-            value={form.title || ""}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
-            required
-            maxLength={60}
-          />
-        </div>
-        <div className="relative">
-          <input
-            name="author"
-            placeholder="Author"
-            value={form.author || ""}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
-            required
-            maxLength={30}
-          />
-        </div>
-        <div className="relative">
-          <input
-            name="date"
-            type="date"
-            value={form.date || ""}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
-            required
-          />
-        </div>
+        <input
+          ref={inputRef}
+          name="title"
+          placeholder="Blog Title"
+          value={form.title}
+          onChange={handleChange}
+          className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] text-lg"
+          required
+          maxLength={60}
+        />
+        <textarea
+          name="content"
+          placeholder="Blog Content"
+          value={form.content}
+          onChange={handleChange}
+          className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] text-lg min-h-[100px]"
+          required
+          maxLength={4000}
+        />
+        <input
+          name="author"
+          placeholder="Author"
+          value={form.author}
+          onChange={handleChange}
+          className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] text-lg"
+          required
+          maxLength={30}
+        />
+        <input
+          name="date"
+          type="date"
+          value={form.date}
+          onChange={handleChange}
+          className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] text-lg"
+          required
+        />
+        <input
+          name="tags"
+          placeholder="Tags (comma separated)"
+          value={form.tags}
+          onChange={handleChange}
+          className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] text-lg"
+        />
+        <input
+          name="images"
+          placeholder="Image URLs (comma separated)"
+          value={form.images}
+          onChange={handleChange}
+          className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] text-lg"
+        />
       </>
     ),
     story: (
       <>
-        <div className="relative">
+        <input
+          ref={inputRef}
+          name="name"
+          placeholder="Name"
+          value={form.name}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
+        />
+        <textarea
+          name="message"
+          placeholder="Message"
+          value={form.message}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg min-h-[100px]"
+        />
+        <input
+          name="service"
+          placeholder="Service"
+          value={form.service}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
+        />
+        <div className="grid grid-cols-2 gap-4">
           <input
-            ref={inputRef}
-            name="title"
-            placeholder="Story Title"
-            value={form.title || ""}
+            name="state"
+            placeholder="State"
+            value={form.state}
             onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 transition-all shadow-sm focus:shadow-lg text-lg"
             required
-            maxLength={60}
+            className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
+          />
+          <input
+            name="city"
+            placeholder="City"
+            value={form.city}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
           />
         </div>
-        <div className="relative">
+        <div className="grid grid-cols-2 gap-4">
           <input
-            name="user"
-            placeholder="User"
-            value={form.user || ""}
+            name="user_id"
+            placeholder="User ID"
+            value={form.user_id}
             onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 transition-all shadow-sm focus:shadow-lg text-lg"
             required
-            maxLength={30}
+            className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
+          />
+          <input
+            name="provider_id"
+            placeholder="Provider ID"
+            value={form.provider_id}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
           />
         </div>
-        <div className="relative">
-          <input
-            name="date"
-            type="date"
-            value={form.date || ""}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 transition-all shadow-sm focus:shadow-lg text-lg"
-            required
-          />
-        </div>
-      </>
-    ),
-    newsletter: (
-      <>
-        <div className="relative">
-          <input
-            ref={inputRef}
-            name="email"
-            placeholder="Subscriber Email"
-            value={form.email || ""}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-sky-400/30 rounded-lg outline-none focus:border-sky-400 transition-all shadow-sm focus:shadow-lg text-lg"
-            required
-            type="email"
-            maxLength={50}
-          />
-        </div>
-        <div className="relative">
-          <input
-            name="subscribedOn"
-            type="date"
-            value={form.subscribedOn || ""}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-sky-400/30 rounded-lg outline-none focus:border-sky-400 transition-all shadow-sm focus:shadow-lg text-lg"
-            required
-          />
-        </div>
+        <input
+          name="date"
+          type="date"
+          value={form.date}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
+        />
       </>
     ),
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className={`bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fadeIn`}>
-        {/* Close button */}
+      <div className={`
+        bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fadeIn
+        max-h-[90vh] overflow-y-auto
+      `}>
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-[#695aa6] focus:outline-none text-2xl"
           aria-label="Close"
         >&times;</button>
-        {/* Icon and Title */}
         <div className="flex flex-col items-center mb-4">
           <div className="rounded-full p-4 mb-2 bg-gradient-to-tr from-white to-[#f3f0fa] shadow-inner">
             {icons[type]}
@@ -188,10 +376,12 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
           <h2 className="text-2xl font-bold text-[#695aa6] mb-1">{titles[type]}</h2>
           <p className="text-gray-500 text-sm">{descriptions[type]}</p>
         </div>
-        {/* Success Animation */}
         {added ? (
           <div className="flex flex-col items-center py-8 animate-fadeIn">
-            {SuccessIcon}
+            <svg className="w-16 h-16 text-green-500 mb-2 animate-bounceIn" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 13l3 3 7-7" />
+            </svg>
             <div className="text-green-600 font-semibold text-lg">Added!</div>
           </div>
         ) : (
@@ -220,16 +410,9 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
         )}
       </div>
       <style jsx>{`
-        .animate-fadeIn {
-          animation: fadeIn 0.3s;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(24px);}
-          to { opacity: 1; transform: none;}
-        }
-        .animate-bounceIn {
-          animation: bounceIn 0.6s;
-        }
+        .animate-fadeIn { animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(24px);} to { opacity: 1; transform: none;} }
+        .animate-bounceIn { animation: bounceIn 0.6s; }
         @keyframes bounceIn {
           0% { transform: scale(0.3); opacity: 0;}
           50% { transform: scale(1.05);}

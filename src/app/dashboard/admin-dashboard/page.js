@@ -15,7 +15,7 @@ import BlogsManager from "@/components/ui/BlogsManager";
 import SuccessStoriesManager from "@/components/ui/SuccessStoriesManager";
 import NewsletterManager from "@/components/ui/NewsletterManager";
 
-// 8 Stat Cards
+// Example stat cards data
 const initialStats = [
   { label: "Total Users", value: 120, icon: "👥" },
   { label: "Providers", value: 45, icon: "🛠️" },
@@ -27,6 +27,7 @@ const initialStats = [
   { label: "Newsletter Subs", value: 200, icon: "📧" },
 ];
 
+// Example data for other sections
 const initialServices = [
   { id: 1, title: "Plumbing", provider: "Ravi Kumar", category: "Plumbing", status: "Active" },
   { id: 2, title: "Tailoring", provider: "Sita Devi", category: "Tailoring", status: "Pending" },
@@ -206,7 +207,7 @@ export default function AdminDashboard() {
 
           {/* Newsletter */}
           <section ref={sectionRefs["Newsletter"]} id="Newsletter" className="mb-12 scroll-mt-20">
-            <h3 className="text-lg font-bold text-[#695aa6] mb-4">Newsletter Subscribers</h3>
+            <h3 className="text-lg font-bold text-[#695aa6] mb-4">Newsletter Issues</h3>
             <NewsletterManager />
           </section>
         </main>
