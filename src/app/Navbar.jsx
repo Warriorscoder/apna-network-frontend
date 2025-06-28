@@ -131,49 +131,36 @@ export default function Navbar({ showProfile = false, userName = "" }) {
 
           {/* Desktop Auth/Profile */}
           <div className="hidden md:flex items-center space-x-3">
-            {showProfile ? (
-              <div className="flex items-center gap-2">
-                <User className="w-7 h-7 text-[#695aa6]" />
-                <span className="font-semibold text-[#695aa6] text-base">
-                  Welcome, {userName}
-                </span>
-              </div>
-            ) : (
-              <>
-                <Link
-                  href="/auth/login"
-                  className="text-base px-5 py-2 rounded-md font-semibold border transition-all hover:text-white"
-                  style={{ borderColor: "#695aa6", color: "#695aa6" }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = "#695aa6";
-                    e.target.style.color = "white";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = "transparent";
-                    e.target.style.color = "#695aa6";
-                  }}
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/auth/user-signup"
-                  className="text-base px-5 py-2 rounded-md font-semibold text-white transition-all transform hover:scale-105"
-                  style={{
-                    background: "linear-gradient(to right, #695aa6, #5a4d8a)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background =
-                      "linear-gradient(to right, #5a4d8a, #4a3f73)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background =
-                      "linear-gradient(to right, #695aa6, #5a4d8a)";
-                  }}
-                >
-                  Register
-                </Link>
-              </>
-            )}
+            <Link
+              href="/login"
+              className="text-base px-5 py-2 rounded-md font-semibold border transition-all hover:text-white"
+               style={{ borderColor: '#695aa6', color: '#695aa6' }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = '#695aa6';
+                e.target.style.color = 'white';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = '#695aa6';
+              }}
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="text-base px-5 py-2 rounded-md font-semibold text-white transition-all transform hover:scale-105"
+              style={{ 
+                background: 'linear-gradient(to right, #695aa6, #5a4d8a)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(to right, #5a4d8a, #4a3f73)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(to right, #695aa6, #5a4d8a)';
+              }}
+            >
+              Register
+            </Link>
           </div>
 
           {/* Mobile Toggle */}

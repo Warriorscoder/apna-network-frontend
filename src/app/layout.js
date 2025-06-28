@@ -4,9 +4,9 @@ import Footer from './Footer';
 import { AuthProvider } from "./context/Authcontext";
 
 const inter = Inter({ subsets: ['latin'] });
-const roboto = Roboto({ 
+const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
-  subsets: ['latin'] 
+  subsets: ['latin'],
 });
 
 export const metadata = {
