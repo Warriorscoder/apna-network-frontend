@@ -148,6 +148,7 @@ const LoginModal = ({ onClose }) => (
       <h2 className="text-2xl font-bold mb-4 text-[#695aa6]">Login Required</h2>
       <p className="mb-6 text-gray-700">Please log in or register to view service providers.</p>
       <a
+
         href="/login"
         className="block w-full py-3 rounded-lg font-semibold text-white bg-[#695aa6] hover:bg-[#5a4d8a] transition mb-3"
       >
@@ -208,5 +209,4 @@ const FeaturedServices = ({ user }) => {
     </section>
   );
 };
-
 export default FeaturedServices;

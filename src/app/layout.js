@@ -1,5 +1,6 @@
 import './globals.css';
 import { Inter, Roboto } from 'next/font/google';
+import Footer from './Footer';
 import { AuthProvider } from "./context/Authcontext";
 
 const inter = Inter({ subsets: ['latin'] });
@@ -15,10 +16,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={`${inter.className} ${roboto.className} flex flex-col min-h-screen`}>
+    <html lang="en" className='scroll-smooth'>
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
         <AuthProvider>
-          {children}
+          <main className="flex-grow">{children}</main>
+          <Footer/>
         </AuthProvider>
       </body>
     </html>
