@@ -11,21 +11,18 @@ const Testimonial = () => {
       name: 'Rajesh Kumar',
       location: 'Bareilly, UP',
       role: 'Electrician',
-      rating: 5,
       text: 'Apna Network transformed my business. I now serve 5 villages and my income has tripled!'
     },
     {
       name: 'Priya Sharma',
       location: 'Sitapur, UP',
       role: 'Seamstress',
-      rating: 5,
       text: 'Through this platform, I found consistent work and learned new skills. My family\'s life has improved significantly.'
     },
     {
       name: 'Mohammad Ali',
       location: 'Hardoi, UP',
       role: 'Farmer',
-      rating: 5,
       text: 'The agricultural consultancy services helped me increase my crop yield by 40%. Truly game-changing!'
     }
   ];
@@ -48,11 +45,6 @@ const Testimonial = () => {
         <div className="max-w-4xl mx-auto">
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg" style={{borderColor: '#695aa6', borderWidth: '1px'}}>
             <div className="text-center">
-              <div className="flex justify-center mb-4">
-                {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                  <Star key={i} className="w-6 h-6 text-yellow-400 fill-current" />
-                ))}
-              </div>
               <blockquote className="text-xl text-gray-700 mb-6 italic">
                 "{testimonials[currentTestimonial].text}"
               </blockquote>

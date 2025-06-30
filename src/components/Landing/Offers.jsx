@@ -20,7 +20,7 @@ const offers = [
   },
   {
     icon: <Zap className="w-12 h-12" />,
-    title: "Carrier Opportunities",
+    title: "Career Opportunities",
     description: "Opening doors to new career paths and advancement",
   },
 ]

@@ -16,7 +16,7 @@ export default function HomePage() {
 
   return (
     <>
-      <ConditionalNavbar user={user} userName={user?.name} />
+      <ConditionalNavbar />
       <HeroSection />
       <section id="about">
         <About />
