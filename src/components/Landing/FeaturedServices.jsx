@@ -133,13 +133,7 @@ const services = [
     title: "Interior Designer",
     subtitle: "Contact Interior Designer",
     serviceKey: "interior-designer",
-  },
-  {
-    image: "/imgs/4.png",
-    title: "Other Services",
-    subtitle: "Explore additional services we offer",
-    serviceKey: "other-services",
-  },
+  }
 ];
 
 const LoginModal = ({ onClose }) => (
@@ -175,11 +169,11 @@ const FeaturedServices = ({ user }) => {
   const [showLogin, setShowLogin] = useState(false);
 
   const handleServiceClick = (serviceKey) => {
-    if (!user) {
-      setShowLogin(true);
-    } else {
+    // if (!user) {
+    //   setShowLogin(true);
+    // } else {
       router.push(`/service/${serviceKey}`);
-    }
+    // }
   };
 
   return (
