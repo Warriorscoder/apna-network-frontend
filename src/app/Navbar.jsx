@@ -134,14 +134,14 @@ export default function Navbar({ showProfile = false, userName = "" }) {
             <Link
               href="/login"
               className="text-base px-5 py-2 rounded-md font-semibold border transition-all hover:text-white"
-               style={{ borderColor: '#695aa6', color: '#695aa6' }}
+              style={{ borderColor: "#695aa6", color: "#695aa6" }}
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#695aa6';
-                e.target.style.color = 'white';
+                e.target.style.backgroundColor = "#695aa6";
+                e.target.style.color = "white";
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-                e.target.style.color = '#695aa6';
+                e.target.style.backgroundColor = "transparent";
+                e.target.style.color = "#695aa6";
               }}
             >
               Login
@@ -149,14 +149,16 @@ export default function Navbar({ showProfile = false, userName = "" }) {
             <Link
               href="/register"
               className="text-base px-5 py-2 rounded-md font-semibold text-white transition-all transform hover:scale-105"
-              style={{ 
-                background: 'linear-gradient(to right, #695aa6, #5a4d8a)'
+              style={{
+                background: "linear-gradient(to right, #695aa6, #5a4d8a)",
               }}
               onMouseEnter={(e) => {
-                e.target.style.background = 'linear-gradient(to right, #5a4d8a, #4a3f73)';
+                e.target.style.background =
+                  "linear-gradient(to right, #5a4d8a, #4a3f73)";
               }}
               onMouseLeave={(e) => {
-                e.target.style.background = 'linear-gradient(to right, #695aa6, #5a4d8a)';
+                e.target.style.background =
+                  "linear-gradient(to right, #695aa6, #5a4d8a)";
               }}
             >
               Register
@@ -230,15 +232,38 @@ export default function Navbar({ showProfile = false, userName = "" }) {
             ))}
             <div className="border-t pt-3 space-y-2">
               {showProfile ? (
-                <button
-                  onClick={() => handleNavigate("/profile")}
-                  className="w-full flex items-center gap-2 text-left px-4 py-2 rounded-md font-semibold text-lg transition"
-                >
-                  <User className="w-6 h-6 text-[#695aa6]" />
-                  <span className="font-semibold text-[#695aa6] text-base">
-                    {userName}
-                  </span>
-                </button>
+                <>
+                  <button
+                    onClick={() => handleNavigate("/profile/edit")}
+                    className="w-full flex items-center gap-2 text-left px-4 py-2 rounded-md font-semibold text-lg transition"
+                  >
+                    <Edit className="w-6 h-6 text-[#695aa6]" />
+                    <span className="font-semibold text-[#695aa6] text-base">
+                      Edit Profile
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => handleNavigate("/profile/calendar")}
+                    className="w-full flex items-center gap-2 text-left px-4 py-2 rounded-md font-semibold text-lg transition"
+                  >
+                    <Calendar className="w-6 h-6 text-[#695aa6]" />
+                    <span className="font-semibold text-[#695aa6] text-base">
+                      My Calendar
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem("token");
+                      handleNavigate("/auth/login");
+                    }}
+                    className="w-full flex items-center gap-2 text-left px-4 py-2 rounded-md font-semibold text-lg transition"
+                  >
+                    <LogOut className="w-6 h-6 text-[#695aa6]" />
+                    <span className="font-semibold text-[#695aa6] text-base">
+                      Logout
+                    </span>
+                  </button>
+                </>
               ) : (
                 <>
                   <button
@@ -276,6 +301,39 @@ export default function Navbar({ showProfile = false, userName = "" }) {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Profile Dropdown */}
+      {profileOpen && (
+        <div
+          ref={profileRef}
+          className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50"
+        >
+          <button
+            onClick={() => router.push("/profile/edit")}
+            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            <Edit className="inline w-4 h-4 mr-2" />
+            Edit Profile
+          </button>
+          <button
+            onClick={() => router.push("/profile/calendar")}
+            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            <Calendar className="inline w-4 h-4 mr-2" />
+            My Calendar
+          </button>
+          <button
+            onClick={() => {
+              localStorage.removeItem("token");
+              router.push("/auth/login");
+            }}
+            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            <LogOut className="inline w-4 h-4 mr-2" />
+            Logout
+          </button>
         </div>
       )}
     </header>

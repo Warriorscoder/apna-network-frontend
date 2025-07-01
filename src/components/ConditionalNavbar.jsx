@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { usePathname } from "next/navigation"
-import Navbar from "@/app/Navbar"
+import { usePathname } from "next/navigation";
+import Navbar from "@/app/Navbar";
+import { useAuth } from "@/app/context/Authcontext";
 
-// Accept user and userName as props
-export default function ConditionalNavbar({ user, userName }) {
-  const pathname = usePathname()
+export default function ConditionalNavbar() {
+  const { user } = useAuth();
+  const pathname = usePathname();
 
-  // Check if the current path matches the service pattern
-  const isServicePage = pathname.startsWith("/service/")
+  const isServicePage = pathname.startsWith("/service/");
+  const isAuthPage = pathname.startsWith("/auth/");
 
-  // Don't render navbar on service pages
-  if (isServicePage) {
-    return null
+  // Don't render navbar on service or auth pages
+  if (isServicePage || isAuthPage) {
+    return null;
   }
 
-  // Show profile only if user is logged in
-  return <Navbar showProfile={!!user} userName={userName || ""} />
+  return <Navbar showProfile={!!user} userName={user?.name || ""} />;
 }

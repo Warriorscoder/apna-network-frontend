@@ -44,5 +44,7 @@
     "url": "https://github.com/NagamaniByki/apna-network-frontend/issues"
   },
   "homepage": "https://github.com/NagamaniByki/apna-network-frontend#readme",
-  "keywords": []
+
+  "keywords": [],
+  "proxy": "http://localhost:8000"
 }
