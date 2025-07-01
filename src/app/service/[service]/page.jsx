@@ -1,293 +1,95 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { MapPin, Star, Clock, Award, User, ArrowLeft } from "lucide-react"
 import Footer from "@/app/Footer"
-
-// Service metadata for better display - Complete list for all services
-const serviceMetadata = {
-  plumbers: {
-    title: "Plumbers",
-    image: "/imgs/plumber 2.jpg",
-    description: "Professional plumbing services for your home and business",
-  },
-  electricians: {
-    title: "Electricians",
-    image: "/imgs/electrician.jpg",
-    description: "Expert electrical services and installations",
-  },
-  carpenters: {
-    title: "Carpenters",
-    image: "/imgs/Car.jpg",
-    description: "Skilled carpentry and woodworking services",
-  },
-  painters: {
-    title: "Painters",
-    image: "/imgs/painter.jpg",
-    description: "Professional painting and decoration services",
-  },
-  "construction-workers": {
-    title: "Construction Workers",
-    image: "/imgs/mason.jpg",
-    description: "Professional construction and masonry services",
-  },
-  welders: {
-    title: "Welders",
-    image: "/imgs/welder.jpg",
-    description: "Expert welding and metal fabrication services",
-  },
-  tailors: {
-    title: "Tailors",
-    image: "/imgs/tailor.jpg",
-    description: "Professional tailoring and clothing alteration services",
-  },
-  cooks: {
-    title: "Cooks",
-    image: "/imgs/cook.jpg",
-    description: "Professional cooking and catering services",
-  },
-  gardeners: {
-    title: "Gardeners",
-    image: "/imgs/gardner.jpg",
-    description: "Professional gardening and landscaping services",
-  },
-  housekeepers: {
-    title: "House Keepers",
-    image: "/imgs/housekeeper.jpg",
-    description: "Professional house cleaning and maintenance services",
-  },
-  barbers: {
-    title: "Barbers",
-    image: "/imgs/barber.jpg",
-    description: "Professional hair cutting and grooming services",
-  },
-  drivers: {
-    title: "Drivers",
-    image: "/imgs/driver.jpg",
-    description: "Professional driving and transportation services",
-  },
-  "dry-cleaners": {
-    title: "Dry Cleaners",
-    image: "/imgs/drycleaner.jpg",
-    description: "Professional dry cleaning and laundry services",
-  },
-  photographers: {
-    title: "Photographers",
-    image: "/imgs/Photographer.jpg",
-    description: "Professional photography and videography services",
-  },
-  astrologers: {
-    title: "Astrologers",
-    image: "/imgs/pandit.jpg",
-    description: "Professional astrology and spiritual consultation services",
-  },
-  "interior-designer": {
-    title: "Interior Designer",
-    image: "/imgs/interior designer.jpg",
-    description: "Professional interior design and decoration services",
-  },
-  "other-services": {
-    title: "Other Services",
-    image: "/imgs/4.png",
-    description: "Explore additional services we offer",
-  },
-}
-
-// Dummy providers to show if backend returns none
-const dummyProviders = [
-  {
-    id: "dummy1",
-    name: "Ramesh Kumar",
-    address: "Model Town, Kanpur",
-    experience: "5 years experienced",
-    rating: 4.5,
-    phone: "9876543210",
-    availability: "9:00 AM - 6:00 PM",
-    services: ["Plumbing", "Pipe Fitting"],
-    bio: "Expert plumber with 5 years of experience in residential and commercial projects.",
-  },
-  {
-    id: "dummy2",
-    name: "Suresh Singh",
-    address: "Civil Lines, Lucknow",
-    experience: "3 years experienced",
-    rating: 4.2,
-    phone: "9123456780",
-    availability: "10:00 AM - 8:00 PM",
-    services: ["Plumbing", "Leak Repair"],
-    bio: "Quick and reliable plumber for all your needs.",
-  },
-]
-
-// Provider Details Modal
-const ProviderModal = ({ provider, isOpen, onClose }) => {
-  if (!isOpen || !provider) return null
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: "#695aa6" }}
-              >
-                <User className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">{provider.name}</h2>
-                <div className="flex items-center space-x-2 mt-1">
-                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                  <span className="text-gray-600">{provider.rating || "N/A"}</span>
-                </div>
-              </div>
-            </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">
-              ×
-            </button>
-          </div>
-
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2">About</h3>
-            <p className="text-gray-600">{provider.bio || provider.description || "Professional service provider"}</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Contact Information</h3>
-              <div className="space-y-3">
-                <div className="flex items-start space-x-2">
-                  <MapPin className="w-5 h-5 text-gray-500 mt-0.5" />
-                  <span className="text-gray-600">{provider.address || "Address not provided"}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Clock className="w-5 h-5 text-gray-500" />
-                  <span className="text-gray-600">{provider.availability || "Contact for availability"}</span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Service Details</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Award className="w-5 h-5" style={{ color: "#695aa6" }} />
-                  <span className="text-gray-600">{provider.experience || "Experience not specified"}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">Services</h3>
-            <div className="flex flex-wrap gap-2">
-              {provider.services && provider.services.length > 0 ? (
-                provider.services.map((service, index) => (
-                  <span
-                    key={index}
-                    className="text-white px-3 py-1 rounded-full text-sm"
-                    style={{ backgroundColor: "#695aa6" }}
-                  >
-                    {service}
-                  </span>
-                ))
-              ) : (
-                <span className="text-white px-3 py-1 rounded-full text-sm" style={{ backgroundColor: "#695aa6" }}>
-                  {provider.service?.title || "Service Provider"}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="flex space-x-3">
-            <button
-              onClick={() => window.open(`sms:${provider.phone}`)}
-              className="flex-1 text-white border py-3 px-6 rounded-lg transition-colors duration-200 font-medium"
-              style={{ backgroundColor: "#695aa6" }}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = "#5a4a96")}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = "#695aa6")}
-            >
-              Send SMS
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+import axios from "axios"
+import Dialoguebox from "@/components/servicePage/Dialoguebox"
 
 // Main Service Page Component
-export default function ServicePage({ params }) {
-  const router = useRouter()
-  const { service } = React.use(params)
+export default function ServicePage() {
+  const params = useParams()
+  const service = params?.service
   const [providers, setProviders] = useState([])
   const [selectedProvider, setSelectedProvider] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [serviceData, setServiceData] = useState([])
+  const router = useRouter()
+  
+  const handleMoreDetails = (provider) => {
+    const service = serviceData.find(item => item.provider_id === provider.provider_id);
 
-  const serviceData = serviceMetadata[service]
-
-  useEffect(() => {
-    const fetchProviders = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
-
-        // First, try to get all providers since your backend doesn't have service-specific filtering
-        const allProvidersResponse = await fetch(`${apiUrl}/api/providers/`)
-
-        if (!allProvidersResponse.ok) {
-          throw new Error("Failed to fetch providers")
-        }
-
-        const providersResult = await allProvidersResponse.json()
-
-        // Handle the backend response format { success: true, providers: [...] }
-        const allProviders = providersResult.success ? providersResult.providers : []
-
-        // Since your backend doesn't have service filtering, we'll show all providers for now
-        // You can implement service-specific filtering later by adding service categories to providers
-        const transformedProviders = allProviders.map((provider) => ({
-          ...provider,
-          id: provider._id,
-          provider_name: provider.name,
-          address: `${provider.village || ""}, ${provider.tehsil || ""}, ${provider.district || ""}`.replace(
-            /^,\s*|,\s*$/g,
-            "",
-          ),
-          contact_number: provider.phone,
-          experience: provider.work_experience
-            ? `${provider.work_experience} years experienced`
-            : "Experience not specified",
-          availability: provider.availability
-            ? `${provider.availability.from || ""} - ${provider.availability.to || ""}`
-            : "Contact for availability",
-          rating: 4.0 + Math.random() * 1, // Temporary random rating since not in your model
-        }))
-
-        // If no providers, use dummy data
-        setProviders(transformedProviders.length > 0 ? transformedProviders : dummyProviders)
-      } catch (err) {
-        console.error("Error fetching providers:", err)
-        setError(err.message)
-        setProviders(dummyProviders) // Show dummy data on error as well
-      } finally {
-        setLoading(false)
-      }
+    console.log("Service data for provider:", service)
+    console.log("Selected provider:", provider)
+    const cardData = {
+      ...provider,
+      title: service?.description,
+      tags: service?.tags || [],
+      category: service?.category
     }
 
-    fetchProviders()
-  }, [service])
-
-  const handleMoreDetails = (provider) => {
-    setSelectedProvider(provider)
+    setSelectedProvider(cardData)
     setIsModalOpen(true)
   }
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      setLoading(true);
+      try {
+        const apiurl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+        const response = await axios.get(`${apiurl}/services/`);
+        console.log("Fetched services:", response.data);
+
+        if (!response.data.success) {
+          throw new Error("Failed to fetch services");
+        }
+
+        const services = response.data.data || [];
+
+        const fitteredServices = services.filter(item => item.category === service);
+        
+        console.log("Filtered services:", fitteredServices);
+        setServiceData(fitteredServices)
+
+        const providerIds = fitteredServices.map(item => item.provider_id);
+
+        const result = await axios.post(`${apiurl}/providers/multi-by-id`, { ids: providerIds });
+
+        if (!result.data.success) {
+          throw new Error("Failed to fetch providers");
+        }
+
+        const providersData = result.data.providers || [];
+        console.log("Fetched providers:", providersData);
+        const transformedData = providersData.map(provider => ({
+          name: provider.name,
+          provider_id: provider._id,
+          address: `${provider.village}, ${provider.panchayat_ward}, ${provider.tehsil}, ${provider.district}, ${provider.location}`,
+          rating: Math.floor(Math.random() * 5) + 1,
+          experience: `${provider.experience} years of experience`,
+          availability: `${provider.availability.from} - ${provider.availability.to}`,
+          phone: provider.phone || "Not provided"
+        }));
+
+        setProviders(transformedData);
+        console.log("transformed providers:", transformedData);
+        setError(null);
+      } catch (error) {
+        console.error("Error fetching providers:", error);
+        // setError("Failed to load providers. Please try again later.");
+        // setProviders(dummyProviders);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const closeModal = () => {
     setIsModalOpen(false)
@@ -497,7 +299,28 @@ export default function ServicePage({ params }) {
       </div>
 
       {/* Provider Details Modal */}
-      <ProviderModal provider={selectedProvider} isOpen={isModalOpen} onClose={closeModal} />
+      <Dialoguebox
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        data={selectedProvider}
+      />
     </div>
   )
 }
+
+const dummyProvider = {
+  name: "Raj Kumar",
+  provider_id: "68614578d78bcebc27e1edff",
+  address: "Nangloi, Ward 5, Najafgarh, South West, Delhi",
+  rating: 1,
+  experience: "3 years of experience",
+};
+
+const dummyService = {
+  title: "Carpenters Service 1",
+  description: "High quality carpenters services provided.",
+  category: "carpenters",
+  contact: "9876500000",
+  tags: ["carpenters", "professional", "local"],
+  images: ["/imgs/Car.jpg"],
+};
