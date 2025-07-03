@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
@@ -15,7 +17,8 @@ export default function ResetPassword() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const identifier = searchParams.get("identifier");
+  const phone = searchParams.get("phone");
+  const identifier = searchParams.get("identifier") || phone;
 
   const checkPasswordRules = (password) => {
     setPasswordRules({
@@ -31,7 +34,8 @@ export default function ResetPassword() {
     checkPasswordRules(value);
   };
 
-  const handleSubmit = async (e) => {
+
+  const handleSubmit = async (e)=>{
     e.preventDefault();
     setIsLoading(true);
     setError("");
@@ -50,28 +54,25 @@ export default function ResetPassword() {
     }
 
     try {
-      const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/resetpassword`;
-      const body = { newPassword, confirmPassword };
-      if (identifier) body.identifier = identifier;
-
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        router.push("/auth/login");
+      const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/resetPassword`;
+      const res = await axios.post(endpoint,{phone ,newPassword})
+      const data = res.data;
+      console.log('Reset password response:', data);
+      if (res.data.success) {
+        router.push("/login");
+        toast.success(" Password reset successfully. Please log in with your new password.");
       } else {
-        setError(data.message || "Failed to reset password");
+        setError(res.data.message || "Failed to reset password");
+        toast.error(res.data.message || " Failed to reset password");
       }
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (err) {
+      setError(err.response?.data?.message || "Network error. Please try again.");
+      toast.error(err.response?.data?.message || "Network error. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  };
+  }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-t from-white to-[rgba(105,90,166,0.99)]">

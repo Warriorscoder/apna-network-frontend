@@ -4,8 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
+import { toast } from "react-toastify";
+import { useSearchParams } from 'next/navigation';
 
 export default function ServiceTakerSignUp() {
+
+  const searchParams = useSearchParams();
+  const role = searchParams.get('role');
+  const phone = searchParams.get('phone');
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
@@ -13,6 +19,9 @@ export default function ServiceTakerSignUp() {
     address: "",
 
   });
+
+
+  
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,18 +55,15 @@ const handleSubmit = async (e) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   try {
-    console.log("API URL:", apiUrl);
-    console.log("Form Data being submitted:", formData);
+    
 
-    const res = await axios.post(`${apiUrl}/users/create`, formData);
-    console.log("Server Response:", res);
 
-    if (res.status === 201 || res.status === 200) {
-      console.log("Registration successful!");
-      router.push("/dashboard/user-dashboard");
-    } else {
-      console.log("Unexpected server response status:", res.status);
-      console.log("Server message:", res.data.message || "Registration failed");
+    const res = await axios.post(`${apiUrl}/users/complete`, {gender :formData.gender , address: formData.address, phone , role});
+    console.log(phone,role,formData)
+    const data = res.data;
+    if (data.success) {
+      toast.success("Registration successful!");
+      router.push("/");
     }
 
   } catch (err) {

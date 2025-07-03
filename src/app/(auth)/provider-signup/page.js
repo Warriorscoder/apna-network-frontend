@@ -1,8 +1,9 @@
 "use client";
-
+import axios from 'axios';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-
+import { toast } from 'react-toastify';
+import { useSearchParams } from 'next/navigation';
 const servicesList = [
   'Plumber', 'Electrician', 'Painter', 'Carpenter', 'Construction Worker',
   'Photographer', 'Welder', 'Tailor', 'Cook', 'Gardener',
@@ -27,6 +28,14 @@ const providerSteps = [
 ];
 
 export default function ServiceProviderSignUp({ onSuccess }) {
+
+
+
+   const searchParams = useSearchParams();
+
+
+   const phone = searchParams.get('phone') || '';
+   const role = searchParams.get('role') || '';
   const [formData, setFormData] = useState(providerInitial);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,7 +102,11 @@ export default function ServiceProviderSignUp({ onSuccess }) {
   const handleNext = () => {
     const newErrors = validate();
     setErrors(newErrors);
-    if (Object.keys(newErrors).length === 0) setStep(step + 1);
+    // if (Object.keys(newErrors).length === 0) setStep(step + 1);
+     if (Object.keys(newErrors).length === 0) {
+    console.log('Going to step:', step + 1);
+    setStep(step + 1);
+  }
   };
 
   const handleBack = () => {
@@ -101,48 +114,57 @@ export default function ServiceProviderSignUp({ onSuccess }) {
     setStep(step - 1);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const newErrors = validate();
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
-    setIsSubmitting(true);
-
-    
-    const needsAdminVerification = formData.services.includes('Other') && formData.servicesOther.trim();
-
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   
 
-    const res = await fetch(`${apiUrl}/providers/create`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-      ...formData,
-      needsAdminVerification,
-      }),
-    });
+  const handleSubmit  = async(e)=>{
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  if (res.ok) {
-    // Show admin review message if "Other" service is selected and custom service is entered
-    if (formData.services.includes('Other') && formData.servicesOther.trim()) {
-      alert('Registration successful! Your custom service will be reviewed by an admin.');
-    } else {
-      alert('Registration successful!');
+
+    try {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/providers/complete`, {
+  phone: phone,
+  role: role,
+  name: formData.name,
+  fatherName: formData.fatherName,
+  email: 'dhy@gmail.com', // if dynamic, use formData.email or ask user
+  location: `${formData.village}, ${formData.panchayat}, ${formData.tehsil}, ${formData.district}`,
+  skills: formData.services.includes("Other") && formData.servicesOther
+    ? [...formData.services.filter(s => s !== 'Other'), formData.servicesOther]
+    : formData.services,
+  experience: formData.experience,
+  availability: formData.updates === 'Yes', // or just formData.updates
+  aadhar: formData.aadhar,
+  village: formData.village,
+  panchayat: formData.panchayat,
+  tehsil: formData.tehsil,
+  district: formData.district,
+  dob: formData.dob,
+  gender: formData.gender,
+  education: formData.education === 'Other' ? formData.educationOther : formData.education,
+  referredBy: formData.referredBy,
+  declaration: formData.declaration,
+  password: formData.password,
+});
+
+
+    const data = res.data;
+    if (data.success) {
+    router.push('/dashboard/provider-dashboard');
+    toast.success('Registration successful! Your custom service will be reviewed by an admin.');
+    localStorage.setItem('token', data.token); // Store token in local storage
+    localStorage.setItem('provider', JSON.stringify(data.provider)); // Store user data in local
     }
-    // Redirect to dashboard after successful provider signup
-    if (onSuccess) onSuccess();
-    else router.push('/dashboard/provider-dashboard'); 
-  } else {
-    const data = await res.json();
-    alert(data.message || 'Registration failed');
-  }
-} catch {
-  alert('Error submitting form');
-} finally {
-  setIsSubmitting(false);
-}
+      
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Error submitting form. Please try again later.');
+      
+    }
+    finally{
+      setIsSubmitting(false);
+    }
+   
   }
 
   const renderError = (field) =>
@@ -177,7 +199,11 @@ export default function ServiceProviderSignUp({ onSuccess }) {
             </div>
           ))}
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        <form onSubmit={handleSubmit} 
+         onKeyDown={(e) => {
+                     if (e.key === 'Enter') e.preventDefault(); // prevents unintentional submit
+                 }}
+                       className="space-y-4" noValidate>
           {/* Step 1: Personal Details */}
           {step === 0 && (
             <>
@@ -461,17 +487,63 @@ export default function ServiceProviderSignUp({ onSuccess }) {
                 Next
               </button>
             ) : (
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="ml-auto px-4 py-2 rounded bg-[#695aa6] text-white font-semibold"
-              >
-                {isSubmitting ? 'Registering...' : 'Submit'}
-              </button>
-            )}
+
+
+              
+   
+    formData.declaration && (
+      <div className="text-right mt-4">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="ml-auto px-4 py-2 rounded bg-[#695aa6] text-white font-semibold"
+        >
+          Submit
+        </button>
+      </div>
+    )
+  )
+            //   <button
+            //     type="submit"
+            //     disabled={isSubmitting}
+            //      onClick={(e) => {
+            //                    // prevent accidental auto-clicking
+            //                  e.stopPropagation();
+            //              }}
+            //     className="ml-auto px-4 py-2 rounded bg-[#695aa6] text-white font-semibold"
+            //   >
+            //     {/* {isSubmitting ? 'Registering...' : 'Submit'} */}
+            //     Submit
+            //   </button>
+            // )}
+}
           </div>
         </form>
       </div>
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

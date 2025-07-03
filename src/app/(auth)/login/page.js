@@ -3,62 +3,60 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+
 
 export default function LoginPage() {
-  const [identifier, setIdentifier] = useState('');
+  const [phone, setPhone] = useState('');
   const [role, setRole] = useState('user');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setError('');
+  const handleSubmit = async(e)=>{
+    e.preventDefault();
+    setIsLoading(true)
+    setError('');
 
-  if (role === 'admin' && !password) {
-    setError('Password is required for admin');
-    setIsLoading(false);
-    return;
-  }
 
-  const isMobile = /^\d{10}$/.test(identifier);
-  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
-  if (!isMobile && !isEmail) {
-    setError('Please enter a valid 10-digit mobile number or email address');
-    setIsLoading(false);
-    return;
-  }
-
-  try {
-    const endpoint =
-      role === 'admin'
-        ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/admins/login`
-        : `${process.env.NEXT_PUBLIC_API_BASE_URL}/${role}s/create`;
-
-    const body = { identifier, isMobile };
-    if (role === 'admin') body.password = password;
-
-    const res = await axios.post(endpoint, body);
-
-    if (res.status === 200 || res.status === 201) {
-      router.push(`/auth/otp-verification?identifier=${identifier}&role=${role}`);
-    } else {
-      setError(res.data.message || 'Failed to login');
+    if(role === 'admin' && !password) {
+      setError('Password is required for admin');
+      setIsLoading(false);
+      return;
     }
-  } catch (err) {
-    if (err.response) {
-      setError(err.response.data.message || 'Server error occurred');
-    } else if (err.request) {
-      setError('No response from server. Please try again later.');
-    } else {
-      setError('Network error. Please try again.');
+
+    try {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/${role}/create`,{phone ,password})
+      const data = res.data;
+      console.log(data);
+      if(data.success){
+        toast.success(' Otp sent successfully');
+        sessionStorage.setItem('password', password); // Store password in session storage
+        router.push(`/otp-verification?phone=${phone}&role=${role}`);
+
+
+      }
+      else if(data.success === false){
+        toast.error(' Login failed');
+      }
+
+     
+      
+      
+    } catch (error) {
+      console.error('Error during login:', error);
+      toast.error(error.response?.data?.message || 'Something went wrong');
+     
+      
     }
-  } finally {
-    setIsLoading(false);
+    finally {
+    setIsLoading(false); 
   }
-};
+   
+
+
+  }
 
 
   return (
@@ -72,8 +70,8 @@ const handleSubmit = async (e) => {
             <label className="block mb-2 text-sm font-medium text-gray-700">Mobile Number or Email</label>
             <input
               type="text"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               className="w-full p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
               placeholder="Enter your mobile number or email"
               required
@@ -98,7 +96,7 @@ const handleSubmit = async (e) => {
             <div className="mb-6 text-center text-sm">
               <button
                 type="button"
-                onClick={() => router.push('/auth/forgot-password')}
+                onClick={() => router.push('/forgot-password')}
                 className="text-[#695aa6] hover:underline"
               >
                 Forgot Password?
@@ -109,7 +107,7 @@ const handleSubmit = async (e) => {
           <div className="mb-6">
             <label className="block mb-2 text-sm font-medium text-gray-700">Login as</label>
             <div className="flex gap-4 flex-wrap">
-              {['user', 'provider', 'admin'].map((r) => (
+              {['users', 'providers', 'admin'].map((r) => (
                 <label
                   key={r}
                   className={`flex items-center justify-center px-4 py-2 rounded-lg cursor-pointer transition-all border border-gray-200
