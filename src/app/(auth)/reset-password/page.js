@@ -73,47 +73,6 @@ export default function ResetPassword() {
     }
   }
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setIsLoading(true);
-  //   setError("");
-
-  //   if (newPassword !== confirmPassword) {
-  //     setError("Passwords do not match");
-  //     setIsLoading(false);
-  //     return;
-  //   }
-
-  //   const allRulesMet = Object.values(passwordRules).every(Boolean);
-  //   if (!allRulesMet) {
-  //     setError("Password does not meet all requirements");
-  //     setIsLoading(false);
-  //     return;
-  //   }
-
-  //   try {
-  //     const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/resetpassword`;
-  //     const body = { newPassword, confirmPassword };
-  //     if (identifier) body.identifier = identifier;
-
-  //     const res = await fetch(endpoint, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(body),
-  //     });
-  //     const data = await res.json();
-
-  //     if (res.ok) {
-  //       router.push("/auth/login");
-  //     } else {
-  //       setError(data.message || "Failed to reset password");
-  //     }
-  //   } catch {
-  //     setError("Network error. Please try again.");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-t from-white to-[rgba(105,90,166,0.99)]">

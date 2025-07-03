@@ -147,7 +147,7 @@ export default function ProviderDashboard() {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
       axios
-        .get(`${apiBaseUrl}/api/providers/services`, { headers })
+        .get(`${apiBaseUrl}/providers/services`, { headers })
         .then((res) => setServices(res.data.data))
         .catch((err) => {
           console.error("Failed to fetch services:", err);
@@ -164,13 +164,13 @@ export default function ProviderDashboard() {
     }
   }, [user, loading, router]);
 
-  if (loading || !user) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p>Loading Dashboard...</p>
-      </div>
-    );
-  }
+  // if (loading || !user) {
+  //   return (
+  //     <div className="flex justify-center items-center min-h-screen">
+  //       <p>Loading Dashboard...</p>
+  //     </div>
+  //   );
+  // }
 
   const renderContent = () => {
     if (error) {

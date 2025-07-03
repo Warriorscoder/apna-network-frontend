@@ -46,10 +46,15 @@ export default function Navbar({ showProfile = false, userName = "" }) {
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setProfileOpen(false);
-      }
-    }
+      // if (profileRef.current && !profileRef.current.contains(event.target)) {
+      //   setProfileOpen(false);
+      // }
+const token = localStorage.getItem("token");
+ if(token){
+  setProfileOpen(true)
+ }
+
+    } 
     if (profileOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
