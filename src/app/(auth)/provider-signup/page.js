@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 const servicesList = [
   'Plumber', 'Electrician', 'Painter', 'Carpenter', 'Construction Worker',
@@ -101,48 +102,67 @@ export default function ServiceProviderSignUp({ onSuccess }) {
     setStep(step - 1);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const newErrors = validate();
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
-    setIsSubmitting(true);
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const newErrors = validate();
+  //   setErrors(newErrors);
+  //   if (Object.keys(newErrors).length > 0) return;
+  //   setIsSubmitting(true);
 
     
-    const needsAdminVerification = formData.services.includes('Other') && formData.servicesOther.trim();
+  //   const needsAdminVerification = formData.services.includes('Other') && formData.servicesOther.trim();
 
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  //   router.push('/dashboard/provider-dashboard');
+  //   toast.success('Registration successful! Your custom service will be reviewed by an admin.');
+
+    // try {
+    //   router.push('/dashboard/provider-dashboard');
+    //   toast.success('Registration successful! Your custom service will be reviewed by an admin.');
+    // } catch (error) {
+
+    //   toast.error('Error submitting form. Please try again later.');
+      
+    // }
+
+//     try {
+//       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   
 
-    const res = await fetch(`${apiUrl}/providers/create`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-      ...formData,
-      needsAdminVerification,
-      }),
-    });
+//     const res = await fetch(`${apiUrl}/providers/create`, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({
+//       ...formData,
+//       needsAdminVerification,
+//       }),
+//     });
 
-  if (res.ok) {
-    // Show admin review message if "Other" service is selected and custom service is entered
-    if (formData.services.includes('Other') && formData.servicesOther.trim()) {
-      alert('Registration successful! Your custom service will be reviewed by an admin.');
-    } else {
-      alert('Registration successful!');
-    }
-    // Redirect to dashboard after successful provider signup
-    if (onSuccess) onSuccess();
-    else router.push('/dashboard/provider-dashboard'); 
-  } else {
-    const data = await res.json();
-    alert(data.message || 'Registration failed');
-  }
-} catch {
-  alert('Error submitting form');
-} finally {
-  setIsSubmitting(false);
-}
+//   if (res.ok) {
+//     // Show admin review message if "Other" service is selected and custom service is entered
+//     if (formData.services.includes('Other') && formData.servicesOther.trim()) {
+//       alert('Registration successful! Your custom service will be reviewed by an admin.');
+//     } else {
+//       alert('Registration successful!');
+//     }
+//     // Redirect to dashboard after successful provider signup
+//     if (onSuccess) onSuccess();
+//     else router.push('/dashboard/provider-dashboard'); 
+//   } else {
+//     const data = await res.json();
+//     alert(data.message || 'Registration failed');
+//   }
+// } catch {
+//   alert('Error submitting form');
+// } finally {
+//   setIsSubmitting(false);
+// }
+//   }
+  // }
+
+  const handleSubmit  = ()=>{
+    e.preventDefault();
+    router.push('/dashboard/provider-dashboard');
+    toast.success('Registration successful! Your custom service will be reviewed by an admin.');
   }
 
   const renderError = (field) =>
@@ -463,10 +483,11 @@ export default function ServiceProviderSignUp({ onSuccess }) {
             ) : (
               <button
                 type="submit"
-                disabled={isSubmitting}
+                // disabled={isSubmitting}
                 className="ml-auto px-4 py-2 rounded bg-[#695aa6] text-white font-semibold"
               >
-                {isSubmitting ? 'Registering...' : 'Submit'}
+                {/* {isSubmitting ? 'Registering...' : 'Submit'} */}
+                Submit
               </button>
             )}
           </div>

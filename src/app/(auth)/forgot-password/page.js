@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import axios from 'axios'
+import { toast } from 'react-toastify';
 
 export default function AdminForgot26Password() { // Remove '26' in your actual code
   const [identifier, setIdentifier] = useState('');
@@ -25,38 +27,80 @@ export default function AdminForgot26Password() { // Remove '26' in your actual 
     });
   }, [identifier]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setSuccess('');
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setIsLoading(true);
+  //   setError('');
+  //   setSuccess('');
 
-    if (!validation.isValid) {
-      setError('Please enter a valid 10-digit mobile number or email address');
-      setIsLoading(false);
-      return;
-    }
+  //   if (!validation.isValid) {
+  //     setError('Please enter a valid 10-digit mobile number or email address');
+  //     setIsLoading(false);
+  //     return;
+  //   }
 
-    try {
-      const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/forgotpassword`;
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier, isMobile: validation.isMobile }),
-      });
-      const data = await res.json();
+  //   try {
+  //     const endpoint = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/admin/forgotpassword`;
+  //     const res = await fetch(endpoint, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ identifier, isMobile: validation.isMobile }),
+  //     });
+  //     const data = await res.json();
 
-      if (res.ok) {
-        router.push(`/auth/otp-verification?identifier=${identifier}&role=admin`);
-      } else {
-        setError(data.message || 'Failed to request password reset');
-      }
-    } catch {
+  //     if (res.ok) {
+  //       router.push(`/auth/otp-verification?identifier=${identifier}&role=admin`);
+  //     } else {
+  //       setError(data.message || 'Failed to request password reset');
+  //     }
+  //   } catch {
+  //     setError('Network error. Please try again.');
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+
+  const handleSubmit= async (e) =>{
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
+  setSuccess('');
+  if (!validation.isValid) {
+    setError('Please enter a valid 10-digit mobile number or email address');
+    setIsLoading(false);
+    return ;
+  }
+
+
+  try {
+     const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/forgotpassword` ,{phone:identifier} );
+    const data = res.data;
+    console.log('Forgot password response:', data);
+    router.push(`/otp-verification?phone=${identifier}&role=adminReset`);
+    toast.success('OTP sent successfully')
+  } catch (error) {
+    console.error('Error requesting password reset:', error);
+    if (error.response) {
+      setError(error.response.data.message || 'Server error occurred');
+      toast.error(error.response.data.message || 'Server error occurred');
+    } else if (error.request) {
+      setError('No response from server.');
+    } else {
       setError('Network error. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
-  };
+    
+  }
+  finally{
+    setIsLoading(false)
+  }
+
+
+
+
+
+
+  }
 
   const { isMobile, isEmail, isValid } = validation;
 
@@ -100,7 +144,7 @@ export default function AdminForgot26Password() { // Remove '26' in your actual 
         <div className="mt-4 text-center text-sm">
           <button
             type="button"
-            onClick={() => router.push('/auth/login')}
+            onClick={() => router.push('/login')}
             className="text-[#695aa6] hover:underline"
           >
             Back to Login

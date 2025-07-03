@@ -10,12 +10,20 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
+
     const fetchUser = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
+
+    // Replace with your backend endpoint
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/me`, { credentials: "include" })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        setUser(data?.user || null);
+
         setLoading(false);
         return;
-      }
+      })
 
       try {
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -30,9 +38,11 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
       }
     };
+  }
 
     fetchUser();
   }, []);
+
 
   const login = async (email, password) => {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -46,16 +56,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     setUser(null);
   };
-  // useEffect(() => {
-  //   fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/me`, { credentials: "include" })
-  //     .then(res => res.ok ? res.json() : null)
-  //     .then(data => {
-  //       setUser(data?.user || null);
-  //       setLoading(false);
-  //     })
-  //     .catch(() => setLoading(false));
-  // }, []);
-
+  
   return (
     <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
