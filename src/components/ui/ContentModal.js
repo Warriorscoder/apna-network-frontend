@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useEffect, useState, useRef } from "react";
 
 const icons = {
@@ -19,12 +19,6 @@ const icons = {
   ),
 };
 
-const titles = {
-  blog: "Add New Blog",
-  story: "Add Success Story",
-  newsletter: "Add Newsletter",
-};
-
 const descriptions = {
   blog: "Share a new blog post with your users.",
   story: "Highlight a user's journey or achievement.",
@@ -32,19 +26,16 @@ const descriptions = {
 };
 
 export default function ContentModal({ open, onClose, onSubmit, type, initialData }) {
-  const [form, setForm] = useState({
-    // Newsletter
+  const defaultForm = {
     image_url: "",
     category: "",
     title: "",
     content: "",
     date: "",
     site_url: "",
-    // Blog
     author: "",
     tags: "",
     images: "",
-    // Success Story
     message: "",
     name: "",
     service: "",
@@ -52,89 +43,64 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
     city: "",
     user_id: "",
     provider_id: "",
-  });
+  };
+
+  const [form, setForm] = useState(defaultForm);
   const [added, setAdded] = useState(false);
   const inputRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
+    let data = { ...defaultForm };
+
     if (type === "newsletter") {
-      setForm({
-        image_url: initialData?.image_url ?? "",
-        category: initialData?.category ?? "",
-        title: initialData?.title ?? "",
-        content: initialData?.content ?? "",
-        date: initialData?.date
-          ? typeof initialData.date === "string"
-            ? initialData.date.slice(0, 10)
-            : new Date(initialData.date).toISOString().slice(0, 10)
-          : "",
-        site_url: initialData?.site_url ?? "",
-        author: "",
-        tags: "",
-        images: "",
-        message: "",
-        name: "",
-        service: "",
-        state: "",
-        city: "",
-        user_id: "",
-        provider_id: "",
-      });
+      data = {
+        ...data,
+        image_url: initialData?.image_url || "",
+        category: initialData?.category || "",
+        title: initialData?.title || "",
+        content: initialData?.content || "",
+        date: initialData?.date ? new Date(initialData.date).toISOString().slice(0, 10) : "",
+        site_url: initialData?.site_url || "",
+      };
     } else if (type === "blog") {
-      setForm({
-        title: initialData?.title ?? "",
-        content: initialData?.content ?? "",
-        author: initialData?.author ?? "",
-        date: initialData?.date
-          ? typeof initialData.date === "string"
-            ? initialData.date.slice(0, 10)
-            : new Date(initialData.date).toISOString().slice(0, 10)
-          : "",
-        tags: initialData?.tags ? initialData.tags.join(", ") : "",
-        images: initialData?.images ? initialData.images.join(", ") : "",
-        image_url: "",
-        category: "",
-        site_url: "",
-        message: "",
-        name: "",
-        service: "",
-        state: "",
-        city: "",
-        user_id: "",
-        provider_id: "",
-      });
+      data = {
+        ...data,
+        title: initialData?.title || "",
+        image_url: initialData?.image_url || "",
+        category: initialData?.category || "",
+        content: initialData?.content || "",
+        author: initialData?.author || "",
+        date: initialData?.date ? new Date(initialData.date).toISOString().slice(0, 10) : "",
+        tags: initialData?.tags?.join(", ") || "",
+        images: initialData?.images?.join(", ") || "",
+      };
     } else if (type === "story") {
-      setForm({
-        message: initialData?.message ?? "",
-        name: initialData?.name ?? "",
-        service: initialData?.service ?? "",
-        state: initialData?.state ?? "",
-        city: initialData?.city ?? "",
-        user_id: initialData?.user_id ?? "",
-        provider_id: initialData?.provider_id ?? "",
-        date: initialData?.date
-          ? typeof initialData.date === "string"
-            ? initialData.date.slice(0, 10)
-            : new Date(initialData.date).toISOString().slice(0, 10)
-          : "",
-        image_url: "",
-        category: "",
-        site_url: "",
-        title: "",
-        content: "",
-        author: "",
-        tags: "",
-        images: "",
-      });
+      data = {
+        ...data,
+        message: initialData?.content || "",
+        name: initialData?.title?.split(" - ")[0] || "",
+        service: initialData?.title?.split(" - ")[1] || "",
+        state: initialData?.state || "",
+        city: initialData?.city || "",
+        user_id: initialData?.user || "",
+        provider_id: initialData?.provider || "",
+        date: initialData?.date ? new Date(initialData.date).toISOString().slice(0, 10) : "",
+        tags: initialData?.tags?.join(", ") || "",
+        images: initialData?.images?.join(", ") || "",
+      };
     }
+
+    setForm(data);
     setAdded(false);
     setTimeout(() => inputRef.current?.focus(), 100);
   }, [open, initialData, type]);
 
   if (!open) return null;
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value ?? "" });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -152,30 +118,48 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
       } else if (type === "blog") {
         onSubmit({
           title: form.title,
+          image_url: form.image_url,
+          category: form.category,
           content: form.content,
-          author: form.author,
-          date: form.date ? new Date(form.date) : null,
-          tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
-          images: form.images.split(",").map(i => i.trim()).filter(Boolean),
+          author: form.author || "Admin",
+          date: form.date ? new Date(form.date) : new Date(),
+          tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+          images: form.images.split(",").map((i) => i.trim()).filter(Boolean),
         });
       } else if (type === "story") {
         onSubmit({
-          message: form.message,
-          name: form.name,
-          service: form.service,
-          state: form.state,
-          city: form.city,
-          user_id: form.user_id,
-          provider_id: form.provider_id,
+          title: `${form.name} - ${form.service}`,
+          content: form.message,
+          user: form.user_id,       
+          provider: form.provider_id, 
           date: form.date ? new Date(form.date) : null,
+          tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+          images: form.images.split(",").map((i) => i.trim()).filter(Boolean),
         });
       }
+
       setAdded(false);
       onClose();
     }, 900);
   };
 
   const fields = {
+    story: (
+      <>
+        <input ref={inputRef} name="name" placeholder="Name" value={form.name} onChange={handleChange} required className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg" />
+        <textarea name="message" placeholder="Message" value={form.message} onChange={handleChange} required className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg min-h-[100px]" />
+        <input name="service" placeholder="Service" value={form.service} onChange={handleChange} required className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg" />
+        <div className="grid grid-cols-2 gap-4">
+          <input name="state" placeholder="State" value={form.state} onChange={handleChange} required className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg" />
+          <input name="city" placeholder="City" value={form.city} onChange={handleChange} required className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg" />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <input name="user_id" placeholder="User ID" value={form.user_id} onChange={handleChange} required className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg" />
+          <input name="provider_id" placeholder="Provider ID" value={form.provider_id} onChange={handleChange} required className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg" />
+        </div>
+        <input name="date" type="date" value={form.date} onChange={handleChange} required className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg" />
+      </>
+    ),
     newsletter: (
       <>
         <input
@@ -241,6 +225,22 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
           required
           maxLength={60}
         />
+        <input
+          name="image_url"
+          placeholder="Image URL"
+          value={form.image_url}
+          onChange={handleChange}
+          className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] text-lg"
+          required
+        />
+        <input
+          name="category"
+          placeholder="Category"
+          value={form.category}
+          onChange={handleChange}
+          className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] text-lg"
+          required
+        />
         <textarea
           name="content"
           placeholder="Blog Content"
@@ -256,7 +256,6 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
           value={form.author}
           onChange={handleChange}
           className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] text-lg"
-          required
           maxLength={30}
         />
         <input
@@ -265,7 +264,6 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
           value={form.date}
           onChange={handleChange}
           className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] text-lg"
-          required
         />
         <input
           name="tags"
@@ -283,116 +281,47 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
         />
       </>
     ),
-    story: (
-      <>
-        <input
-          ref={inputRef}
-          name="name"
-          placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
-          required
-          className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
-        />
-        <textarea
-          name="message"
-          placeholder="Message"
-          value={form.message}
-          onChange={handleChange}
-          required
-          className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg min-h-[100px]"
-        />
-        <input
-          name="service"
-          placeholder="Service"
-          value={form.service}
-          onChange={handleChange}
-          required
-          className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
-        />
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            name="state"
-            placeholder="State"
-            value={form.state}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
-          />
-          <input
-            name="city"
-            placeholder="City"
-            value={form.city}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            name="user_id"
-            placeholder="User ID"
-            value={form.user_id}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
-          />
-          <input
-            name="provider_id"
-            placeholder="Provider ID"
-            value={form.provider_id}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
-          />
-        </div>
-        <input
-          name="date"
-          type="date"
-          value={form.date}
-          onChange={handleChange}
-          required
-          className="w-full px-4 py-3 border-2 border-yellow-400/30 rounded-lg outline-none focus:border-yellow-400 text-lg"
-        />
-      </>
-    ),
+   
+    
   };
 
-  return (
+ return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className={`
-        bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fadeIn
-        max-h-[90vh] overflow-y-auto
-      `}>
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fadeIn max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-[#695aa6] focus:outline-none text-2xl"
-          aria-label="Close"
-        >&times;</button>
+        >
+          &times;
+        </button>
         <div className="flex flex-col items-center mb-4">
           <div className="rounded-full p-4 mb-2 bg-gradient-to-tr from-white to-[#f3f0fa] shadow-inner">
             {icons[type]}
           </div>
-          <h2 className="text-2xl font-bold text-[#695aa6] mb-1">{titles[type]}</h2>
+          <h2 className="text-2xl font-bold text-[#695aa6] mb-1">
+            {type === "story"
+              ? initialData
+                ? "Edit Success Story"
+                : "Add Success Story"
+              : type === "blog"
+              ? "Add New Blog"
+              : "Add Newsletter"}
+          </h2>
           <p className="text-gray-500 text-sm">{descriptions[type]}</p>
         </div>
         {added ? (
           <div className="flex flex-col items-center py-8 animate-fadeIn">
-            <svg className="w-16 h-16 text-green-500 mb-2 animate-bounceIn" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
+            <svg className="w-16 h-16 text-green-500 mb-2 animate-bounceIn" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 13l3 3 7-7" />
             </svg>
-            <div className="text-green-600 font-semibold text-lg">Added!</div>
+            <div className="text-green-600 font-semibold text-lg">Updated!</div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             {fields[type]}
             <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
-              >
+              <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition">
                 Cancel
               </button>
               <button
@@ -410,14 +339,37 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
         )}
       </div>
       <style jsx>{`
-        .animate-fadeIn { animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(24px);} to { opacity: 1; transform: none;} }
-        .animate-bounceIn { animation: bounceIn 0.6s; }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(24px);
+          }
+          to {
+            opacity: 1;
+            transform: none;
+          }
+        }
+        .animate-bounceIn {
+          animation: bounceIn 0.6s;
+        }
         @keyframes bounceIn {
-          0% { transform: scale(0.3); opacity: 0;}
-          50% { transform: scale(1.05);}
-          70% { transform: scale(0.95);}
-          100% { transform: scale(1); opacity: 1;}
+          0% {
+            transform: scale(0.3);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.05);
+          }
+          70% {
+            transform: scale(0.95);
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
         }
       `}</style>
     </div>
