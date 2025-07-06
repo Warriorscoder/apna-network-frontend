@@ -1,90 +1,54 @@
 'use client';
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from 'react';
 
-export default function UserModal({ open, onClose, onSubmit, initialData }) {
-  const [form, setForm] = useState(initialData || { name: "", email: "", role: "Provider" });
-  const inputRef = useRef(null);
+function SingleStatCard({ icon, label, value }) {
+  return (
+    <div className="bg-white rounded-xl shadow p-6 flex items-center justify-between border border-gray-100 hover:shadow-md transition">
+      <div>
+        <div className="text-sm text-gray-500">{label}</div>
+        <div className="text-2xl font-bold text-[#695aa6]">{value}</div>
+      </div>
+      <div className="text-3xl">{icon}</div>
+    </div>
+  );
+}
+
+export default function StatCard() {
+  const [stats, setStats] = useState([]);
 
   useEffect(() => {
-    setForm(initialData || { name: "", email: "", role: "Provider" });
-    if (open) setTimeout(() => inputRef.current?.focus(), 100);
-  }, [open, initialData]);
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/stats");
+        const result = await res.json();
+        const data = result.data;
 
-  if (!open) return null;
+        setStats([
+          { label: "Total Users", value: data.totalUsers, icon: "👥" },
+          { label: "Total Service Providers", value: data.totalProviders, icon: "🛠️" },
+          { label: "Total Services", value: data.totalServices, icon: "📦" },
+          { label: "Pending Services", value: data.pendingServices, icon: "⏳" },
+          { label: "Total Complaints", value: data.totalComplaints, icon: "⚠️" },
+          { label: "Resolved Complaints", value: data.resolvedComplaints, icon: "✅" },
+          { label: "Total Testimonials", value: data.totalTestimonials, icon: "💬" },
+          { label: "Approved Success Stories", value: data.approvedStories, icon: "🌟" },
+          { label: "Pending Success Stories", value: data.pendingStories, icon: "🕒" },
+          { label: "Total Blogs", value: data.totalBlogs, icon: "📝" },
+          { label: "Total Newsletters", value: data.totalNewsletters, icon: "📬" },
+        ]);
+      } catch (err) {
+        console.error("Failed to fetch stats", err);
+      }
+    };
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(form);
-    onClose();
-  };
+    fetchStats();
+  }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fadeIn">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-[#695aa6] focus:outline-none text-2xl"
-          aria-label="Close"
-        >&times;</button>
-        <h2 className="text-2xl font-bold text-[#695aa6] mb-4">
-          {initialData ? "Edit" : "Add"} {form.role}
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <input
-            ref={inputRef}
-            name="name"
-            placeholder="Name"
-            value={form.name}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
-            required
-          />
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
-            required
-          />
-          <select
-            name="role"
-            value={form.role}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] text-lg"
-          >
-            <option value="Provider">Provider</option>
-            <option value="User">User</option>
-          </select>
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-[#695aa6] text-white rounded hover:bg-[#57468b] transition font-semibold shadow"
-            >
-              {initialData ? "Update" : "Add"}
-            </button>
-          </div>
-        </form>
-      </div>
-      <style jsx>{`
-        .animate-fadeIn {
-          animation: fadeIn 0.3s;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(24px);}
-          to { opacity: 1; transform: none;}
-        }
-      `}</style>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {stats.map((stat) => (
+        <SingleStatCard key={stat.label} {...stat} />
+      ))}
     </div>
   );
 }
