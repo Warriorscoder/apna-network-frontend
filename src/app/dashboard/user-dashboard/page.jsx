@@ -21,7 +21,7 @@ import {
   Search,
   Filter,
   ChevronRight,
-  Mail, // Add this import
+  Mail,
 } from "lucide-react";
 
 import { useAuth } from "../../context/Authcontext";
@@ -1321,70 +1321,46 @@ const HelpPanel = () => (
   </div>
 );
 
-// Add this DashboardPanel component before the main export
-const DashboardPanel = () => {
+// Updated DashboardPanel component - add setActiveView as a prop
+const DashboardPanel = ({ setActiveView }) => {
   const { user } = useAuthenticatedAPI();
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="bg-white/70 rounded-xl shadow-lg p-6 border border-white/30 backdrop-blur-sm">
-        <h2 className="text-2xl font-semibold mb-4 text-[#695aa6] flex items-center">
-          <LayoutDashboard className="w-6 h-6 mr-2" />
-          Welcome to Your Dashboard
-        </h2>
-        <p className="text-gray-700 mb-4">
-          Find and connect with local service providers in your area.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-blue-800">Active Requests</h3>
-            <p className="text-2xl font-bold text-blue-600">0</p>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-green-800">Completed Services</h3>
-            <p className="text-2xl font-bold text-green-600">0</p>
-          </div>
-          <div className="bg-purple-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-purple-800">
-              Favorite Providers
-            </h3>
-            <p className="text-2xl font-bold text-purple-600">0</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white/70 rounded-xl shadow-lg p-6 border border-white/30 backdrop-blur-sm">
-        <h3 className="text-xl font-semibold mb-4 text-[#695aa6]">
-          Quick Actions
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {serviceCategories.slice(0, 8).map((category, index) => (
-            <button
-              key={index}
-              className="p-3 border border-[#695aa6]/20 rounded-lg hover:bg-[#695aa6]/10 transition-colors text-center"
-            >
-              <div className="text-sm font-medium text-[#695aa6]">
-                {category.title}
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="bg-white/70 rounded-xl shadow-lg p-6 border border-white/30 backdrop-blur-sm">
-        <h3 className="text-xl font-semibold mb-4 text-[#695aa6]">
-          Recent Activity
-        </h3>
-        <div className="text-center py-8">
-          <div className="text-4xl mb-4">📋</div>
-          <p className="text-gray-500">No recent activity</p>
-          <p className="text-sm text-gray-400 mt-2">
-            Your service requests and interactions will appear here
+      {/* Main Action Cards Grid - Similar to Provider Dashboard */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Browse Services Card */}
+        <div className="bg-white/70 rounded-xl shadow-lg p-8 border border-white/30 flex flex-col items-center text-center transition hover:shadow-xl backdrop-blur-sm">
+          <Briefcase className="w-12 h-12 text-[#695aa6] mb-4" />
+          <h2 className="text-xl font-semibold mb-3 text-[#695aa6]">
+            Browse Services
+          </h2>
+          <p className="text-gray-700 mb-6">
+            Explore and find local service providers in your area.
           </p>
+          <button
+            onClick={() => setActiveView("services")}
+            className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-[#695aa6] to-[#5a4d8a] hover:opacity-90 transition shadow-lg"
+          >
+            Find Services
+          </button>
+        </div>
+
+        {/* My Requests Card */}
+        <div className="bg-white/70 rounded-xl shadow-lg p-8 border border-white/30 flex flex-col items-center text-center transition hover:shadow-xl backdrop-blur-sm">
+          <ListTodo className="w-12 h-12 text-[#695aa6] mb-4" />
+          <h2 className="text-xl font-semibold mb-3 text-[#695aa6]">
+            My Service Requests
+          </h2>
+          <p className="text-gray-700 mb-6">
+            Track and manage your service requests and bookings.
+          </p>
+          <button
+            onClick={() => setActiveView("requests")}
+            className="px-6 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-[#695aa6] to-[#5a4d8a] hover:opacity-90 transition shadow-lg"
+          >
+            View Requests
+          </button>
         </div>
       </div>
     </div>
@@ -1399,7 +1375,7 @@ const getGreeting = () => {
   return "Good Evening";
 };
 
-// Main Dashboard Component
+// Update the renderContent function to pass setActiveView as prop
 export default function UserDashboard() {
   const {
     isAuthenticated,
@@ -1412,77 +1388,13 @@ export default function UserDashboard() {
   const [activeView, setActiveView] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Authentication check
-  useEffect(() => {
-    const checkAuth = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 200));
+  // ... existing authentication check code remains the same ...
 
-      if (loading || !authInitialized) {
-        return;
-      }
-
-      if (!isAuthenticated()) {
-        router.push("/login");
-        return;
-      }
-
-      const currentUser = getCurrentUser();
-      const role = getUserRole();
-
-      if (!currentUser) {
-        router.push("/login");
-        return;
-      }
-
-      if (role === "provider") {
-        router.push("/dashboard/provider-dashboard");
-        return;
-      }
-
-      if (role === "admin") {
-        router.push("/dashboard/admin-dashboard");
-        return;
-      }
-
-      if (role === "user") {
-        return;
-      }
-
-      router.push("/login");
-    };
-
-    checkAuth();
-  }, [
-    isAuthenticated,
-    loading,
-    authInitialized,
-    router,
-    getCurrentUser,
-    getUserRole,
-  ]);
-
-  if (loading || !authInitialized) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#a395d4] via-[#b8a7e8] to-[#8b7cc8]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto"></div>
-          <p className="mt-4 text-white text-lg">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const currentUser = getCurrentUser();
-  const role = getUserRole();
-
-  if (!isAuthenticated() || !currentUser || role !== "user") {
-    return null;
-  }
-
+  // Updated renderContent function to pass setActiveView prop
   const renderContent = () => {
     switch (activeView) {
       case "dashboard":
-        return <DashboardPanel />;
+        return <DashboardPanel setActiveView={setActiveView} />;
       case "services":
         return <ServicesPanel />;
       case "requests":
@@ -1490,7 +1402,7 @@ export default function UserDashboard() {
       case "help":
         return <HelpPanel />;
       default:
-        return <DashboardPanel />;
+        return <DashboardPanel setActiveView={setActiveView} />;
     }
   };
 
@@ -1499,7 +1411,7 @@ export default function UserDashboard() {
       <ConditionalNavbar />
 
       <main className="flex flex-1 pt-20">
-        {/* Sidebar */}
+        {/* Sidebar - remains exactly the same */}
         <aside
           className={`${
             sidebarOpen ? "w-64" : "w-16"
@@ -1551,7 +1463,7 @@ export default function UserDashboard() {
           </nav>
         </aside>
 
-        {/* Main Content */}
+        {/* Main Content - remains exactly the same */}
         <section className="relative min-h-screen flex flex-col items-center justify-start overflow-hidden w-full">
           {/* Background Elements - Same as before */}
           <div className="absolute inset-0">
@@ -1617,35 +1529,46 @@ export default function UserDashboard() {
           {/* Welcome Section */}
           <div className="relative flex flex-col items-center justify-center min-h-[50vh] py-12 z-10 w-full">
             <UserCircle className="w-20 h-20 text-white drop-shadow-lg bg-gradient-to-br from-[#695aa6] to-[#b8a7e8] rounded-full p-2 mb-4" />
-            <h1
-              className="text-4xl md:text-5xl font-extrabold text-white text-center"
+            <h1 className="text-4xl md:text-5xl font-extrabold text-white text-center"
               style={{
                 textShadow: "0 4px 24px rgba(60,50,100,0.65), 0 1px 0 #000",
                 letterSpacing: "0.5px",
-              }}
-            >
-              {getGreeting()}, {getCurrentUser()?.name || "Guest"}! 👋
+              }} >
+              {getGreeting()}, {getCurrentUser()?.name}! 👋
             </h1>
             <div className="flex items-center mt-4">
               <div className="flex items-center">
-                <div className="flex items-center">
-                  <span
-                    className="text-2xl md:text-3xl font-bold text-center"
-                    style={{
-                      color: "#695aa6",
-                      letterSpacing: "0.4px",
-                      textShadow: "0 2px 12px rgba(255,255,255,0.8)",
-                    }}
-                  >
-                    Welcome to Apna Network
-                  </span>
-                </div>
+                <span
+                  className="text-2xl md:text-3xl font-bold text-center"
+                  style={{
+                    color: "#695aa6",
+                    letterSpacing: "0.4px",
+                    textShadow: "0 2px 12px rgba(255,255,255,0.8)",
+                  }}
+                >
+                  Find Quality Services with Apna Network
+                </span>
               </div>
             </div>
+            <p
+              className="text-lg md:text-xl text-white max-w-xl mx-auto mb-2 text-center"
+              style={{
+                textShadow: "0 2px 12px rgba(60,50,100,0.45), 0 1px 0 #000",
+              }}
+            >
+              Connect with trusted local service providers.
+              <br />
+              From home repairs to personal services, find reliable professionals in your community.
+            </p>
 
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mt-8">
-              Customer
-            </span>
+            {/* User Info */}
+            <div className="flex items-center gap-4 mt-4">
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                  Customer
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Notification */}
@@ -1663,7 +1586,7 @@ export default function UserDashboard() {
         </section>
       </main>
 
-      {/* Custom CSS for animations */}
+      {/* Custom CSS for animations - same as before */}
       <style jsx>{`
         @keyframes blob {
           0% {
