@@ -645,44 +645,52 @@ export default function ProviderDashboard() {
 
   // Authentication check
   useEffect(() => {
-    // Wait for auth to finish loading AND be initialized
-    if (loading || !authInitialized) {
-      return;
-    }
+    // Add a small delay to ensure auth state is properly set after redirects
+    const checkAuth = async () => {
+      // Wait a bit longer for auth to initialize after redirects
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
-    // Check if authenticated at all
-    if (!isAuthenticated()) {
+      // Wait for auth to finish loading AND be initialized
+      if (loading || !authInitialized) {
+        return;
+      }
+
+      // Check if authenticated at all
+      if (!isAuthenticated()) {
+        router.push("/login");
+        return;
+      }
+
+      // Get current user and role
+      const currentUser = getCurrentUser();
+      const role = getUserRole();
+
+      if (!currentUser) {
+        router.push("/login");
+        return;
+      }
+
+      // Role-based redirects
+      if (role === "user") {
+        router.push("/dashboard/user-dashboard");
+        return;
+      }
+
+      if (role === "admin") {
+        router.push("/dashboard/admin-dashboard");
+        return;
+      }
+
+      // Allow access for providers
+      if (role === "provider") {
+        return;
+      }
+
+      // If role is not recognized, redirect to login
       router.push("/login");
-      return;
-    }
+    };
 
-    // Get current user and role
-    const currentUser = getCurrentUser();
-    const role = getUserRole();
-
-    if (!currentUser) {
-      router.push("/login");
-      return;
-    }
-
-    // Role-based redirects
-    if (role === "user") {
-      router.push("/dashboard/user-dashboard");
-      return;
-    }
-
-    if (role === "admin") {
-      router.push("/dashboard/admin-dashboard");
-      return;
-    }
-
-    // Allow access for providers
-    if (role === "provider") {
-      return;
-    }
-
-    // If role is not recognized, redirect to login
-    router.push("/login");
+    checkAuth();
   }, [
     isAuthenticated,
     loading,

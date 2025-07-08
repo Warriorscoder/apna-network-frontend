@@ -208,12 +208,18 @@ export const AuthProvider = ({ children }) => {
     // Set user data based on response with immediate state updates
     if (responseData.user) {
       await updateUser(responseData.user);
+      // Additional delay to ensure state is fully updated
+      await new Promise(resolve => setTimeout(resolve, 50));
       return { success: true, role: 'user', user: responseData.user };
     } else if (responseData.provider) {
       await updateProvider(responseData.provider);
+      // Additional delay to ensure state is fully updated
+      await new Promise(resolve => setTimeout(resolve, 50));
       return { success: true, role: 'provider', provider: responseData.provider };
     } else if (responseData.admin) {
       await updateAdmin(responseData.admin);
+      // Additional delay to ensure state is fully updated
+      await new Promise(resolve => setTimeout(resolve, 50));
       return { success: true, role: 'admin', admin: responseData.admin };
     } else if (responseData.newUser) {
       return { success: true, newUser: true };

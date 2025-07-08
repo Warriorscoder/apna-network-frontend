@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useSearchParams } from 'next/navigation';
+import { useAuth } from '../../context/Authcontext'; // Import AuthContext
+
 const servicesList = [
   'Plumber', 'Electrician', 'Painter', 'Carpenter', 'Construction Worker',
   'Photographer', 'Welder', 'Tailor', 'Cook', 'Gardener',
@@ -28,19 +30,18 @@ const providerSteps = [
 ];
 
 export default function ServiceProviderSignUp({ onSuccess }) {
-
-
-
-   const searchParams = useSearchParams();
-
-
-   const phone = searchParams.get('phone') || '';
-   const role = searchParams.get('role') || '';
+  const searchParams = useSearchParams();
+  const phone = searchParams.get('phone') || '';
+  const role = searchParams.get('role') || '';
+  const router = useRouter();
+  
+  // Use AuthContext
+  const { loginWithResponse } = useAuth();
+  
   const [formData, setFormData] = useState(providerInitial);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(0);
-  const router = useRouter();
 
   const validate = () => {
     const newErrors = {};
@@ -102,11 +103,10 @@ export default function ServiceProviderSignUp({ onSuccess }) {
   const handleNext = () => {
     const newErrors = validate();
     setErrors(newErrors);
-    // if (Object.keys(newErrors).length === 0) setStep(step + 1);
-     if (Object.keys(newErrors).length === 0) {
-    console.log('Going to step:', step + 1);
-    setStep(step + 1);
-  }
+    if (Object.keys(newErrors).length === 0) {
+      console.log('Going to step:', step + 1);
+      setStep(step + 1);
+    }
   };
 
   const handleBack = () => {
@@ -114,58 +114,62 @@ export default function ServiceProviderSignUp({ onSuccess }) {
     setStep(step - 1);
   };
 
-  
-
-  const handleSubmit  = async(e)=>{
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-
     try {
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/providers/complete`, {
-  phone: phone,
-  role: role,
-  name: formData.name,
-  fatherName: formData.fatherName,
-  email: 'dhy@gmail.com', // if dynamic, use formData.email or ask user
-  location: `${formData.village}, ${formData.panchayat}, ${formData.tehsil}, ${formData.district}`,
-  skills: formData.services.includes("Other") && formData.servicesOther
-    ? [...formData.services.filter(s => s !== 'Other'), formData.servicesOther]
-    : formData.services,
-  experience: formData.experience,
-  availability: formData.updates === 'Yes', // or just formData.updates
-  aadhar: formData.aadhar,
-  village: formData.village,
-  panchayat: formData.panchayat,
-  tehsil: formData.tehsil,
-  district: formData.district,
-  dob: formData.dob,
-  gender: formData.gender,
-  education: formData.education === 'Other' ? formData.educationOther : formData.education,
-  referredBy: formData.referredBy,
-  declaration: formData.declaration,
-  password: formData.password,
-});
+        phone: phone,
+        role: role,
+        name: formData.name,
+        fatherName: formData.fatherName,
+        email: 'dhy@gmail.com', // if dynamic, use formData.email or ask user
+        location: `${formData.village}, ${formData.panchayat}, ${formData.tehsil}, ${formData.district}`,
+        skills: formData.services.includes("Other") && formData.servicesOther
+          ? [...formData.services.filter(s => s !== 'Other'), formData.servicesOther]
+          : formData.services,
+        experience: formData.experience,
+        availability: formData.updates === 'Yes', // or just formData.updates
+        aadhar: formData.aadhar,
+        village: formData.village,
+        panchayat: formData.panchayat,
+        tehsil: formData.tehsil,
+        district: formData.district,
+        dob: formData.dob,
+        gender: formData.gender,
+        education: formData.education === 'Other' ? formData.educationOther : formData.education,
+        referredBy: formData.referredBy,
+        declaration: formData.declaration,
+        password: formData.password,
+      });
 
-
-    const data = res.data;
-    if (data.success) {
-    router.push('/dashboard/provider-dashboard');
-    toast.success('Registration successful! Your custom service will be reviewed by an admin.');
-    localStorage.setItem('token', data.token); // Store token in local storage
-    localStorage.setItem('provider', JSON.stringify(data.provider)); // Store user data in local
-    }
+      const data = res.data;
+      if (data.success) {
+        // Use AuthContext to handle login and state management
+        const loginResult = await loginWithResponse(data);
+        
+        if (loginResult.success) {
+          toast.success('Registration successful! Your custom service will be reviewed by an admin.');
+          
+          // Navigate based on role
+          if (loginResult.role === 'provider') {
+            router.push('/dashboard/provider-dashboard');
+          } else {
+            router.push('/dashboard');
+          }
+        } else {
+          throw new Error('Failed to update authentication state');
+        }
+      }
       
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('Error submitting form. Please try again later.');
-      
-    }
-    finally{
+    } finally {
       setIsSubmitting(false);
     }
-   
-  }
+  };
 
   const renderError = (field) =>
     errors[field] ? (
@@ -180,9 +184,9 @@ export default function ServiceProviderSignUp({ onSuccess }) {
       <span className="block text-gray-500 font-normal">{hi}</span>
     </label>
   );
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4
-   bg-gradient-to-t from-white to-[rgba(105,90,166,0.99)]">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-t from-white to-[rgba(105,90,166,0.99)]">
       <div className="rounded-[16px] shadow-[0_6px_24px_rgba(90,74,138,0.18)] p-8 w-full max-w-2xl bg-gradient-to-r from-purple-50 to-gray-100">
         <h2 className="text-3xl font-bold text-center mb-8 text-[#695aa6]">
           Service Provider Signup
@@ -464,7 +468,6 @@ export default function ServiceProviderSignUp({ onSuccess }) {
                 </label>
                 {renderError('declaration')}
               </div>
-              
             </>
           )}
           {/* Navigation Buttons */}
@@ -487,36 +490,18 @@ export default function ServiceProviderSignUp({ onSuccess }) {
                 Next
               </button>
             ) : (
-
-
-              
-   
-    formData.declaration && (
-      <div className="text-right mt-4">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="ml-auto px-4 py-2 rounded bg-[#695aa6] text-white font-semibold"
-        >
-          Submit
-        </button>
-      </div>
-    )
-  )
-            //   <button
-            //     type="submit"
-            //     disabled={isSubmitting}
-            //      onClick={(e) => {
-            //                    // prevent accidental auto-clicking
-            //                  e.stopPropagation();
-            //              }}
-            //     className="ml-auto px-4 py-2 rounded bg-[#695aa6] text-white font-semibold"
-            //   >
-            //     {/* {isSubmitting ? 'Registering...' : 'Submit'} */}
-            //     Submit
-            //   </button>
-            // )}
-}
+              formData.declaration && (
+                <div className="text-right mt-4">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="ml-auto px-4 py-2 rounded bg-[#695aa6] text-white font-semibold"
+                  >
+                    {isSubmitting ? 'Registering...' : 'Submit'}
+                  </button>
+                </div>
+              )
+            )}
           </div>
         </form>
       </div>

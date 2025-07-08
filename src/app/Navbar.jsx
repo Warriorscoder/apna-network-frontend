@@ -117,8 +117,33 @@ export default function Navbar() {
 
   const getUserDisplayName = () => {
     const current = getCurrentUser();
+
+    // Debug log to see what we're getting
+    console.log("Current user in navbar:", current);
+
+    // Try different name fields that might be available
     if (current?.name) return current.name;
-    if (current?.phone) return current.phone;
+    if (current?.fullName) return current.fullName;
+    if (current?.firstName) {
+      return current.lastName
+        ? `${current.firstName} ${current.lastName}`
+        : current.firstName;
+    }
+
+    // For providers, they might have different field names
+    if (current?.provider_name) return current.provider_name;
+    if (current?.providerName) return current.providerName;
+
+    // Last resort - use phone but format it nicely
+    if (current?.phone) {
+      // Format phone number nicely (e.g., +91 98765 43210)
+      const phone = current.phone.toString();
+      if (phone.length === 10) {
+        return `+91 ${phone.slice(0, 5)} ${phone.slice(5)}`;
+      }
+      return phone;
+    }
+
     return "User";
   };
 
@@ -132,13 +157,19 @@ export default function Navbar() {
       admin: "bg-purple-100 text-purple-800",
     };
 
+    const roleLabels = {
+      user: "Customer",
+      provider: "Provider",
+      admin: "Admin",
+    };
+
     return (
       <span
         className={`px-2 py-1 text-xs rounded-full font-medium ${
           roleColors[role] || "bg-gray-100 text-gray-800"
         }`}
       >
-        {role.charAt(0).toUpperCase() + role.slice(1)}
+        {roleLabels[role] || role.charAt(0).toUpperCase() + role.slice(1)}
       </span>
     );
   };

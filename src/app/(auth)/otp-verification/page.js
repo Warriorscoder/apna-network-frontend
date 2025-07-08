@@ -100,7 +100,7 @@ export default function OtpPage() {
             toast.success('OTP verified successfully. Login Successful');
             setTimeout(() => {
               router.push('/dashboard/provider-dashboard');
-            }, 100);
+            }, 200); // Increased delay
           } else {
             throw new Error('Failed to process login');
           }
@@ -126,7 +126,7 @@ export default function OtpPage() {
             toast.success('OTP verified successfully. Login Successful');
             setTimeout(() => {
               router.push('/dashboard/user-dashboard');
-            }, 100);
+            }, 200); // Increased delay
           } else {
             throw new Error('Failed to process login');
           }
@@ -151,7 +151,7 @@ export default function OtpPage() {
             toast.success('OTP verified successfully');
             setTimeout(() => {
               router.push('/dashboard/admin-dashboard');
-            }, 100);
+            }, 200); // Increased delay
           } else {
             throw new Error('Failed to process admin login');
           }

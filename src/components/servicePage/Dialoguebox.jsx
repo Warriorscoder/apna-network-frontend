@@ -50,14 +50,12 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
                   <span className="text-gray-600">{data.availability}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Phone className="w-5 h-5 text-gray-500" />
-                  <span className="text-gray-600">{data?.phone || "Contact not available"}</span>
                 </div>
               </div>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-3">data Details</h3>
+              <h3 className="text-lg font-semibold mb-3">Experience Details</h3>
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
                   <Award className="w-5 h-5" style={{ color: "#695aa6" }} />
