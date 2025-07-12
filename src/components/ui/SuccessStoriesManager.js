@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from "react";
 import ContentModal from "./ContentModal";
 
-const API_BASE = "http://localhost:5000/api/success";
+
+const API_BASE = "http://localhost:8000/api/success";
 
 export default function SuccessStoriesManager() {
   const [stories, setStories] = useState([]);

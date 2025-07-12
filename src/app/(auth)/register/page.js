@@ -6,102 +6,82 @@ import Link from "next/link";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useSearchParams } from 'next/navigation';
-import { useAuth } from '../../context/Authcontext'; // Import AuthContext
 
 export default function ServiceTakerSignUp() {
+
   const searchParams = useSearchParams();
   const role = searchParams.get('role');
   const phone = searchParams.get('phone');
   const router = useRouter();
-  
-  // Use AuthContext
-  const { loginWithResponse } = useAuth();
-  
   const [formData, setFormData] = useState({
     name: "",
     gender: "",
-    address: "",
+    adress: "",
+
   });
 
+
+  
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.gender.trim()) newErrors.gender = "Gender is required";
-    if (!formData.address.trim()) newErrors.address = "Address is required";
-    return newErrors;
-  };
+  const newErrors = {};
+  if (!formData.name.trim()) newErrors.name = "Name is required";
+  if (!formData.gender.trim()) newErrors.gender = "Gender is required";
+  if (!formData.address.trim()) newErrors.address = "Address is required";
+  // Add validation for more fields if needed
+  return newErrors;
+};
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+const handleChange = (e) => {
+  setFormData({ ...formData, [e.target.name]: e.target.value });
+};
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log("Form submission started");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log("Form submission started");
 
-    const validationErrors = validate();
-    setErrors(validationErrors);
-    console.log("Validation Errors:", validationErrors);
+  const validationErrors = validate();
+  setErrors(validationErrors);
+  console.log("Validation Errors:", validationErrors);
 
-    if (Object.keys(validationErrors).length > 0) {
-      console.log("Form validation failed. Aborting submission.");
-      return;
+  if (Object.keys(validationErrors).length > 0) {
+    console.log("Form validation failed. Aborting submission.");
+    return;
+  }
+
+  setIsSubmitting(true);
+  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  try {
+    
+
+
+    const res = await axios.post(`${apiUrl}/users/complete`, {gender :formData.gender , address: formData.adress, phone , role});
+    console.log(phone,role,formData)
+    const data = res.data;
+    if (data.success) {
+      toast.success("Registration successful!");
+      router.push("/");
     }
 
-    setIsSubmitting(true);
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  } catch (err) {
+    console.error("Error occurred during form submission:", err);
 
-    try {
-      const res = await axios.post(`${apiUrl}/users/complete`, {
-        name: formData.name,
-        gender: formData.gender, 
-        address: formData.address, 
-        phone, 
-        role
-      });
-      
-      console.log(phone, role, formData);
-      const data = res.data;
-      
-      if (data.success) {
-        // Use AuthContext to handle login and state management
-        const loginResult = await loginWithResponse(data);
-        
-        if (loginResult.success) {
-          toast.success("Registration successful!");
-          
-          // Navigate based on role
-          if (loginResult.role === 'user') {
-            router.push('/dashboard/user-dashboard');
-          } else {
-            router.push('/dashboard');
-          }
-        } else {
-          throw new Error('Failed to update authentication state');
-        }
-      }
-
-    } catch (err) {
-      console.error("Error occurred during form submission:", err);
-
-      if (err.response) {
-        console.log("Server responded with error:", err.response.data.message);
-        toast.error(err.response.data.message || "Registration failed");
-      } else if (err.request) {
-        console.log("No response received from server. Possible network error.");
-        toast.error("Network error. Please check your connection.");
-      } else {
-        console.log("Client-side error:", err.message);
-        toast.error("An unexpected error occurred");
-      }
-    } finally {
-      setIsSubmitting(false);
-      console.log("Form submission ended");
+    if (err.response) {
+      console.log("Server responded with error:", err.response.data.message);
+    } else if (err.request) {
+      console.log("No response received from server. Possible network error.");
+    } else {
+      console.log("Client-side error:", err.message);
     }
-  };
+  } finally {
+    setIsSubmitting(false);
+    console.log("Form submission ended");
+  }
+};
+
 
   const renderError = (field) =>
     errors[field] ? (
@@ -175,13 +155,16 @@ export default function ServiceTakerSignUp() {
 
           <div className="mt-6 text-center text-sm text-gray-700">
             Already have an account?{' '}
-            <button className="text-[#695aa6] hover:underline font-medium">
-              <Link href={'/login'}>
+              <button
+                className="text-[#695aa6] hover:underline font-medium"
+              >
+            <Link href={'/login'}>
                 Click here to Login
-              </Link>
-            </button>
+            </Link>
+              </button>
           </div>
         </form>
+
       </div>
     </div>
   );

@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import ContentModal from "./ContentModal";
 import axios from "axios";
 
-const API_BASE = "http://localhost:5000/api/newsletter";
+const API_BASE = "http://localhost:8000/api/newsletter";
+
 
 export default function NewsletterManager() {
   const [newsletters, setNewsletters] = useState([]);

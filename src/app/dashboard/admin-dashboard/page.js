@@ -56,10 +56,12 @@ export default function AdminDashboard() {
       <div className="flex-1 flex flex-col">
         <Header />
         <main className="p-8 overflow-y-auto space-y-12">
+          {/* Dashboard */}
           <section ref={sectionRefs["Dashboard"]} className="scroll-mt-20">
             <StatCard />
           </section>
 
+          {/* Service Approvals */}
           <section ref={sectionRefs["Service Approvals"]} className="scroll-mt-20">
             <h2 className="text-xl font-semibold mb-4">Pending Service Approvals</h2>
             <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
@@ -67,6 +69,7 @@ export default function AdminDashboard() {
             </div>
           </section>
 
+          {/* Manage Users */}
           <section ref={sectionRefs["Manage Users"]} className="scroll-mt-20">
             <h2 className="text-xl font-semibold mb-4">Manage Users & Providers</h2>
             <div className="space-y-8">
@@ -100,6 +103,7 @@ export default function AdminDashboard() {
             </div>
           </section>
 
+          {/* Manage Services */}
           <section ref={sectionRefs["Manage Services"]} className="scroll-mt-20">
             <h2 className="text-xl font-semibold mb-4">Manage Services</h2>
             <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
@@ -107,6 +111,7 @@ export default function AdminDashboard() {
             </div>
           </section>
 
+          {/* Categories */}
           <section ref={sectionRefs["Categories"]} className="scroll-mt-20">
             <h2 className="text-xl font-semibold mb-4">Categories</h2>
             <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
@@ -114,6 +119,7 @@ export default function AdminDashboard() {
             </div>
           </section>
 
+          {/* Complaints */}
           <section ref={sectionRefs["Complaints"]} className="scroll-mt-20">
             <h2 className="text-xl font-semibold mb-4">Complaints</h2>
             <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
@@ -121,6 +127,7 @@ export default function AdminDashboard() {
             </div>
           </section>
 
+          {/* Testimonials */}
           <section ref={sectionRefs["Testimonials"]} className="scroll-mt-20">
             <h2 className="text-xl font-semibold mb-4">Testimonials</h2>
             <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
@@ -128,6 +135,7 @@ export default function AdminDashboard() {
             </div>
           </section>
 
+          {/* Activity Log */}
           <section ref={sectionRefs["Activity"]} className="scroll-mt-20">
             <h2 className="text-xl font-semibold mb-4">Activity Log</h2>
             <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
@@ -135,6 +143,7 @@ export default function AdminDashboard() {
             </div>
           </section>
 
+          {/* Blogs */}
           <section ref={sectionRefs["Blogs"]} className="scroll-mt-20">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Blogs</h2>
@@ -144,6 +153,7 @@ export default function AdminDashboard() {
             </div>
           </section>
 
+          {/* Success Stories */}
           <section ref={sectionRefs["Success Stories"]} className="scroll-mt-20">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Success Stories</h2>
@@ -153,6 +163,7 @@ export default function AdminDashboard() {
             </div>
           </section>
 
+          {/* Newsletter */}
           <section ref={sectionRefs["Newsletter"]} className="scroll-mt-20">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Newsletter</h2>
@@ -163,6 +174,7 @@ export default function AdminDashboard() {
           </section>
         </main>
 
+        {/* Modals */}
         {showAddServiceModal && (
           <AddServiceModal
             open={showAddServiceModal}

@@ -6,7 +6,7 @@ export default function ServiceTakersTable() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/users')
+    fetch('http://localhost:8000/api/users')
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setUsers(data.data || []);

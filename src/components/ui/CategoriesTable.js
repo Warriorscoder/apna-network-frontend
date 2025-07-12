@@ -11,7 +11,8 @@ export default function CategoriesTable() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/categories");
+        const response = await axios.get("http://localhost:8000/api/categories");
+
         setCategories(response.data);
       } catch (err) {
         console.error("Failed to fetch categories:", err);

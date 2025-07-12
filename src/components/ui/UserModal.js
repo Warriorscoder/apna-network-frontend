@@ -1,54 +1,146 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 
-function SingleStatCard({ icon, label, value }) {
-  return (
-    <div className="bg-white rounded-xl shadow p-6 flex items-center justify-between border border-gray-100 hover:shadow-md transition">
-      <div>
-        <div className="text-sm text-gray-500">{label}</div>
-        <div className="text-2xl font-bold text-[#695aa6]">{value}</div>
-      </div>
-      <div className="text-3xl">{icon}</div>
-    </div>
-  );
-}
-
-export default function StatCard() {
-  const [stats, setStats] = useState([]);
+export default function UserModal({ open, onClose, onSubmit, initialData }) {
+  const [form, setForm] = useState(initialData || { name: "", email: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const inputRef = useRef(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await fetch("http://localhost:8000/api/stats");
-        const result = await res.json();
-        const data = result.data;
+    setForm(initialData || { name: "", email: "" });
+    setError("");
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [open, initialData]);
 
-        setStats([
-          { label: "Total Users", value: data.totalUsers, icon: "👥" },
-          { label: "Total Service Providers", value: data.totalProviders, icon: "🛠️" },
-          { label: "Total Services", value: data.totalServices, icon: "📦" },
-          { label: "Pending Services", value: data.pendingServices, icon: "⏳" },
-          { label: "Total Complaints", value: data.totalComplaints, icon: "⚠️" },
-          { label: "Resolved Complaints", value: data.resolvedComplaints, icon: "✅" },
-          { label: "Total Testimonials", value: data.totalTestimonials, icon: "💬" },
-          { label: "Approved Success Stories", value: data.approvedStories, icon: "🌟" },
-          { label: "Pending Success Stories", value: data.pendingStories, icon: "🕒" },
-          { label: "Total Blogs", value: data.totalBlogs, icon: "📝" },
-          { label: "Total Newsletters", value: data.totalNewsletters, icon: "📬" },
-        ]);
-      } catch (err) {
-        console.error("Failed to fetch stats", err);
+  if (!open) return null;
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (role) => {
+    try {
+      setSubmitting(true);
+
+      const endpoint =
+        role === "Provider"
+          ? initialData
+            ? `http://localhost:8000/api/providers/update/${initialData._id}`
+            : "http://localhost:8000/api/providers/create"
+          : initialData
+            ? `http://localhost:8000/api/users/update/${initialData._id}`
+            : "http://localhost:8000/api/users/create";
+
+      const method = initialData ? "PUT" : "POST";
+
+      const res = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, role }),
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        onSubmit(result.data);
+        onClose();
+      } else {
+        setError(result.message || "Failed to save data");
       }
-    };
-
-    fetchStats();
-  }, []);
+    } catch (err) {
+      console.error(err);
+      setError("An error occurred while saving.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {stats.map((stat) => (
-        <SingleStatCard key={stat.label} {...stat} />
-      ))}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fadeIn">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-[#695aa6] focus:outline-none text-2xl"
+          aria-label="Close"
+        >
+          &times;
+        </button>
+
+        <h2 className="text-2xl font-bold text-[#695aa6] mb-4">
+          {initialData ? "Edit Entry" : "Add Entry"}
+        </h2>
+
+        {error && <div className="text-red-500 mb-2">{error}</div>}
+
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+          <input
+            ref={inputRef}
+            name="name"
+            placeholder="Name"
+            value={form.name}
+            onChange={handleChange}
+            className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
+            required
+          />
+          <input
+            name="email"
+            type="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
+            required
+          />
+
+          <div className="flex justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => handleSubmit("Provider")}
+              className="flex-1 px-4 py-2 bg-[#695aa6] text-white rounded hover:bg-[#57468b] transition font-semibold shadow disabled:opacity-50"
+              disabled={submitting}
+            >
+              {initialData ? "Update Provider" : "Add Provider"}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSubmit("User")}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold shadow disabled:opacity-50"
+              disabled={submitting}
+            >
+              {initialData ? "Update User" : "Add User"}
+            </button>
+          </div>
+
+          <div className="text-right mt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3 py-1 text-sm text-gray-500 hover:underline"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <style jsx>{`
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(24px);
+          }
+          to {
+            opacity: 1;
+            transform: none;
+          }
+        }
+      `}</style>
     </div>
   );
 }

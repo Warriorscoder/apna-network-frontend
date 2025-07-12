@@ -1368,11 +1368,17 @@ const DashboardPanel = ({ setActiveView }) => {
 };
 
 // Helper functions
-const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good Morning";
-  if (hour < 17) return "Good Afternoon";
-  return "Good Evening";
+const useClientGreeting = () => {
+  const [greeting, setGreeting] = useState("Welcome");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good Morning");
+    else if (hour < 17) setGreeting("Good Afternoon");
+    else setGreeting("Good Evening");
+  }, []);
+
+  return greeting;
 };
 
 // Update the renderContent function to pass setActiveView as prop
@@ -1388,8 +1394,85 @@ export default function UserDashboard() {
   const [activeView, setActiveView] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // ... existing authentication check code remains the same ...
+  // Add this for client-side greeting
+  const greeting = useClientGreeting();
 
+  // Authentication check - EXACTLY like provider dashboard
+  useEffect(() => {
+    // Add a small delay to ensure auth state is properly set after redirects
+    const checkAuth = async () => {
+      // Wait a bit longer for auth to initialize after redirects
+      await new Promise((resolve) => setTimeout(resolve, 200));
+  
+      // Wait for auth to finish loading AND be initialized
+      if (loading || !authInitialized) {
+        return;
+      }
+  
+      // Check if authenticated at all
+      if (!isAuthenticated()) {
+        router.push("/login");
+        return;
+      }
+  
+      // Get current user and role
+      const currentUser = getCurrentUser();
+      const role = getUserRole();
+  
+      if (!currentUser) {
+        router.push("/login");
+        return;
+      }
+  
+      // Role-based redirects
+      if (role === "provider") {
+        router.push("/dashboard/provider-dashboard");
+        return;
+      }
+  
+      if (role === "admin") {
+        router.push("/dashboard/admin-dashboard");
+        return;
+      }
+  
+      // Allow access for users
+      if (role === "user") {
+        return;
+      }
+  
+      // If role is not recognized, redirect to login
+      router.push("/login");
+    };
+  
+    checkAuth();
+  }, [
+    isAuthenticated,
+    loading,
+    authInitialized,
+    router,
+    getCurrentUser,
+    getUserRole,
+  ]);
+
+  // Show loading while auth is being determined
+  if (loading || !authInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#a395d4] via-[#b8a7e8] to-[#8b7cc8]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white mx-auto"></div>
+          <p className="mt-4 text-white text-lg">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated or wrong role
+  const currentUser = getCurrentUser();
+const role = getUserRole();
+
+if (!isAuthenticated() || !currentUser || role !== "user") {
+  return null;
+}
   // Updated renderContent function to pass setActiveView prop
   const renderContent = () => {
     switch (activeView) {
@@ -1532,9 +1615,8 @@ export default function UserDashboard() {
             <h1 className="text-4xl md:text-5xl font-extrabold text-white text-center"
               style={{
                 textShadow: "0 4px 24px rgba(60,50,100,0.65), 0 1px 0 #000",
-                letterSpacing: "0.5px",
-              }} >
-              {getGreeting()}, {getCurrentUser()?.name}! 👋
+                letterSpacing: "0.5px", }} suppressHydrationWarning={true}  >
+              {greeting}, {getCurrentUser()?.name}! 👋
             </h1>
             <div className="flex items-center mt-4">
               <div className="flex items-center">
@@ -1558,7 +1640,8 @@ export default function UserDashboard() {
             >
               Connect with trusted local service providers.
               <br />
-              From home repairs to personal services, find reliable professionals in your community.
+              From home repairs to personal services, find reliable
+              professionals in your community.
             </p>
 
             {/* User Info */}

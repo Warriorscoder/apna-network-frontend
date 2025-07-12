@@ -25,7 +25,9 @@ export default function AddServiceModal({ open, onClose, onAdd }) {
     setError(null);
 
     try {
-      const res = await fetch("http://localhost:5000/api/services/create", {
+
+      const res = await fetch("http://localhost:8000/api/services/create", {
+
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: serviceTitle }),

@@ -10,7 +10,9 @@ export default function ServicesApprovalTable() {
   const fetchPendingServices = async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:5000/api/services?status=pending');
+
+      const res = await fetch('http://localhost:8000/api/services?status=pending');
+
       const data = await res.json();
       if (data.success) {
         setServices(data.data);
@@ -30,7 +32,9 @@ export default function ServicesApprovalTable() {
 
   const handleApprove = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/services/approve/${id}`, {
+
+      const res = await fetch(`http://localhost:8000/api/services/approve/${id}`, {
+
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -47,7 +51,9 @@ export default function ServicesApprovalTable() {
 
   const handleReject = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/services/reject/${id}`, {
+
+      const res = await fetch(`http://localhost:8000/api/services/reject/${id}`, {
+
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
       });

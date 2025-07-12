@@ -7,7 +7,8 @@ export default function NotificationBadge() {
 
   useEffect(() => {
     
-    fetch('http://localhost:5000/api/notifications')
+    fetch('http://localhost:8000/api/notifications')
+
       .then(res => res.json())
       .then(data => setCount(data.count || 0))
       .catch(() => setCount(0));

@@ -10,7 +10,10 @@ export default function ActivityLog() {
   useEffect(() => {
     const fetchActivity = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/activity');
+
+
+        const res = await fetch('http://localhost:8000/api/activity');
+
         if (!res.ok) {
           throw new Error('Failed to fetch activity log');
         }

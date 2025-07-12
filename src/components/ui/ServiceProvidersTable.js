@@ -6,7 +6,9 @@ export default function ServiceProvidersTable() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/providers/provider')
+
+    fetch('http://localhost:8000/api/providers/provider')
+
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setProviders(data.data || []);
@@ -41,4 +43,7 @@ export default function ServiceProvidersTable() {
       </table>
     </div>
   );
+
+
 }
+
