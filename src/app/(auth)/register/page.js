@@ -16,7 +16,7 @@ export default function ServiceTakerSignUp() {
   const [formData, setFormData] = useState({
     name: "",
     gender: "",
-    address: "",
+    adress: "",
 
   });
 
@@ -58,7 +58,7 @@ const handleSubmit = async (e) => {
     
 
 
-    const res = await axios.post(`${apiUrl}/users/complete`, {gender :formData.gender , address: formData.address, phone , role});
+    const res = await axios.post(`${apiUrl}/users/complete`, {gender :formData.gender , address: formData.adress, phone , role});
     console.log(phone,role,formData)
     const data = res.data;
     if (data.success) {

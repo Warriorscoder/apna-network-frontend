@@ -96,38 +96,42 @@ const handleResendOTP = async () => {
 
     
     const data = res.data;
+    console.log(data);
+
+    console.log(data.success , data.message);
+    
     
  
 
-    if (data.success && data.message=== "Login successfull " && role === 'providers') {
+    if (data.success && data.existing && role === 'providers') {
       // Redirect or show success
       // router.push('/dashboard/user-dashboard');
        localStorage.setItem('token', data.token); // Store token in local storage
       localStorage.setItem('provider', JSON.stringify(data.provider)); // Store user data in local
-      router.push('/');
+      router.push('/dashboard/provider-dashboard');
       toast.success(' OTP verified successfully.Login Successful');
       
      }
      
-    if (data.newUser &&  role === 'providers') {
+    else if (data.newUser &&  role === 'providers') {
       // Redirect or show success
       // router.push('/dashboard/user-dashboard');
       router.push(`/provider-signup?phone=${phone}&role=${role}`);
       toast.success(' OTP verified successfully.Login Successful');
       
      }
-    else if (data.success && data.message === "Login successful" && role === 'users') {
+    else if (data.success && data.existing && role === 'users') {
       toast.success(' OTP verified successfully');
       localStorage.setItem('token', data.token); // Store token in local storage
       localStorage.setItem('user', JSON.stringify(data.user)); // Store user data in local
-      router.push('/')
+      router.push('/dashboard/user-dashboard');
     }
      else if (data.newUser && role === 'users') {
       toast.success(' OTP verified successfully. Please complete Signup');
       router.push(`/register?phone=${phone}&role=${role}`);
     }
     else if (data.success && role === 'admin') {
-      router.push('/');
+      router.push('/dashboard/admin-dashboard');
       toast.success(' OTP verified successfully');
       
 
