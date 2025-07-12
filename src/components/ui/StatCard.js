@@ -19,7 +19,7 @@ export default function StatCard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/stats");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/stats`);
         const result = await res.json();
         const data = result.data;
 

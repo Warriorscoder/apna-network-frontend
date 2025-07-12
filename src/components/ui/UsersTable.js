@@ -6,7 +6,7 @@ export default function ServiceTakersTable() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/users')
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setUsers(data.data || []);

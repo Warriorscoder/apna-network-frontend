@@ -11,7 +11,7 @@ export default function TestimonialsTable() {
     const fetchTestimonials = async () => {
       try {
 
-        const res = await fetch('http://localhost:8000/api/reviews');
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews`);
         const json = await res.json();
         if (json.success) {
           setTestimonials(json.data);
