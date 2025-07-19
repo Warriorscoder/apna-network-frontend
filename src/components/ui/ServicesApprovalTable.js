@@ -11,7 +11,7 @@ export default function ServicesApprovalTable() {
     try {
       setLoading(true);
 
-      const res = await fetch('http://localhost:8000/api/services?status=pending');
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/services?status=pending`);
 
       const data = await res.json();
       if (data.success) {
@@ -33,7 +33,7 @@ export default function ServicesApprovalTable() {
   const handleApprove = async (id) => {
     try {
 
-      const res = await fetch(`http://localhost:8000/api/services/approve/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/services/approve/${id}`, {
 
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -52,7 +52,7 @@ export default function ServicesApprovalTable() {
   const handleReject = async (id) => {
     try {
 
-      const res = await fetch(`http://localhost:8000/api/services/reject/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/services/reject/${id}`, {
 
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

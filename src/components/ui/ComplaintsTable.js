@@ -11,7 +11,7 @@ export default function ComplaintsTable() {
     const fetchComplaints = async () => {
       try {
 
-        const res = await fetch('http://localhost:8000/api/complaints');
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/complaints`);
 
         if (!res.ok) throw new Error('Failed to fetch complaints');
         const data = await res.json();

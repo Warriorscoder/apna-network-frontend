@@ -26,7 +26,7 @@ export default function AddServiceModal({ open, onClose, onAdd }) {
 
     try {
 
-      const res = await fetch("http://localhost:8000/api/services/create", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/services/create`, {
 
         method: "POST",
         headers: { "Content-Type": "application/json" },

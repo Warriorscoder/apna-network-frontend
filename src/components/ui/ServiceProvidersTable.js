@@ -7,7 +7,7 @@ export default function ServiceProvidersTable() {
 
   useEffect(() => {
 
-    fetch('http://localhost:8000/api/providers/provider')
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/providers/provider`)
 
       .then((res) => res.json())
       .then((data) => {

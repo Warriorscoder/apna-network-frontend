@@ -12,7 +12,7 @@ export default function ActivityLog() {
       try {
 
 
-        const res = await fetch('http://localhost:8000/api/activity');
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/activity`);
 
         if (!res.ok) {
           throw new Error('Failed to fetch activity log');

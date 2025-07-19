@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ContentModal from "./ContentModal";
 
-const API_BASE = "http://localhost:8000/api/blogs";
+const API_BASE = `${process.env.NEXT_PUBLIC_API_BASE_URL}/blogs`;
 export default function BlogsManager() {
   const [blogs, setBlogs] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
