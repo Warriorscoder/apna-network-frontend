@@ -133,7 +133,8 @@ const handleResendOTP = async () => {
     else if (data.success && role === 'admin') {
       router.push('/dashboard/admin-dashboard');
       toast.success(' OTP verified successfully');
-      
+      localStorage.setItem('admin', JSON.stringify(data.admin)); 
+      localStorage.setItem('token', data.token);
 
     }
     
