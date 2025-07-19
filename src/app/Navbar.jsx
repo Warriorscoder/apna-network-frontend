@@ -15,9 +15,9 @@ import { useAuth } from "@/app/context/Authcontext";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "#about", label: "About" },
-  { href: "#services", label: "Services" },
-  { href: "#contact", label: "Contact" },
+  { href: "/AboutPage", label: "About" },
+  { href: "/all-services", label: "Services" },
+  { href: "/Contact", label: "Contact" },
 ];
 
 const HamburgerIcon = ({ open }) => (
@@ -182,7 +182,7 @@ export default function Navbar() {
 
   if (loading || !authInitialized) {
     return (
-      <header className="border-b-1 fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-lg shadow border-b border-gray-200">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-lg shadow border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="text-4xl font-bold">
@@ -396,21 +396,6 @@ export default function Navbar() {
               <>
                 <Link
                   href="/login"
-                  className="text-base px-5 py-2 rounded-md font-semibold border transition-all hover:text-white"
-                  style={{ borderColor: "#695aa6", color: "#695aa6" }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = "#695aa6";
-                    e.target.style.color = "white";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = "transparent";
-                    e.target.style.color = "#695aa6";
-                  }}
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/register"
                   className="text-base px-5 py-2 rounded-md font-semibold text-white transition-all transform hover:scale-105"
                   style={{
                     background: "linear-gradient(to right, #695aa6, #5a4d8a)",
@@ -424,7 +409,7 @@ export default function Navbar() {
                       "linear-gradient(to right, #695aa6, #5a4d8a)";
                   }}
                 >
-                  Register
+                  Join Now
                 </Link>
               </>
             )}
@@ -544,37 +529,23 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <button
-                    onClick={() => handleNavigate("/login")}
-                    className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg transition"
-                    style={{ color: "#695aa6" }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor =
-                        "rgba(105, 90, 166, 0.1)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = "transparent";
-                    }}
-                  >
-                    Login
-                  </button>
-                  <button
-                    onClick={() => handleNavigate("/register")}
-                    className="w-full text-left px-4 py-2 rounded-md font-semibold text-lg text-white"
-                    style={{
-                      background: "linear-gradient(to right, #695aa6, #5a4d8a)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background =
-                        "linear-gradient(to right, #5a4d8a, #4a3f73)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background =
-                        "linear-gradient(to right, #695aa6, #5a4d8a)";
-                    }}
-                  >
-                    Register
-                  </button>
+                  <Link
+                  href="/login"
+                  className="text-base px-5 py-2 rounded-md font-semibold text-white transition-all transform hover:scale-105"
+                  style={{
+                    background: "linear-gradient(to right, #695aa6, #5a4d8a)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background =
+                      "linear-gradient(to right, #5a4d8a, #4a3f73)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background =
+                      "linear-gradient(to right, #695aa6, #5a4d8a)";
+                  }}
+                >
+                  Join Now
+                </Link>
                 </>
               )}
             </div>

@@ -40,14 +40,14 @@
   "main": "postcss.config.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NagamaniByki/apna-network-frontend.git"
+    "url": "git+https://github.com/priyanshu6729/apna-network-frontend.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/NagamaniByki/apna-network-frontend/issues"
+    "url": "https://github.com/priyanshu6729/apna-network-frontend/issues"
   },
-  "homepage": "https://github.com/NagamaniByki/apna-network-frontend#readme",
+  "homepage": "https://github.com/priyanshu6729/apna-network-frontend#readme",
 
   "keywords": [],
   "proxy": "http://localhost:8000"

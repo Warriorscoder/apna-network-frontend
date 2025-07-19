@@ -13,6 +13,7 @@ const CTA = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button 
+            onClick={() => window.location.href = '/login'}
             className="px-8 py-4 bg-white rounded-xl hover:shadow-lg transition-all font-semibold flex items-center justify-center gap-2 hover:opacity-90"
             style={{color: '#695aa6'}}
           >
@@ -20,6 +21,7 @@ const CTA = () => {
             Register as Provider
           </button>
           <button 
+            onClick={() => window.location.href = '/all-services'}
             className="px-8 py-4 border-2 text-white rounded-xl hover:bg-white transition-all font-semibold flex items-center justify-center gap-2"
             style={{borderColor: '#fff'}}
             onMouseEnter={(e) => e.target.style.color = '#695aa6'}

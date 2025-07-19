@@ -1,6 +1,19 @@
-'use client';
+"use client";
+
+import { useRouter } from "next/navigation";
 
 const HeroSection = () => {
+  const router = useRouter();
+
+  // Navigation handlers
+  const handleJoinUs = () => {
+    router.push("/login");
+  };
+
+  const handleFindServices = () => {
+    router.push("/all-services");
+  };
+
   return (
     <section
       className="relative min-h-screen flex items-center overflow-hidden"
@@ -10,20 +23,20 @@ const HeroSection = () => {
         `,
       }}
     >
-       {/* Animated Background */}
-       <div className="absolute inset-0">
+      {/* Animated Background */}
+      <div className="absolute inset-0">
         <div className="absolute inset-0 opacity-30">
-          <div 
+          <div
             className="absolute top-20 left-10 w-32 h-32 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"
-            style={{ backgroundColor: 'rgba(105, 90, 166, 0.6)' }}
+            style={{ backgroundColor: "rgba(105, 90, 166, 0.6)" }}
           ></div>
-          <div 
+          <div
             className="absolute top-40 right-20 w-40 h-40 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"
-            style={{ backgroundColor: 'rgba(105, 90, 166, 0.5)' }}
+            style={{ backgroundColor: "rgba(105, 90, 166, 0.5)" }}
           ></div>
-          <div 
+          <div
             className="absolute bottom-20 left-1/3 w-36 h-36 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"
-            style={{ backgroundColor: 'rgba(105, 90, 166, 0.7)' }}
+            style={{ backgroundColor: "rgba(105, 90, 166, 0.7)" }}
           ></div>
         </div>
 
@@ -43,8 +56,14 @@ const HeroSection = () => {
             />
 
             {/* Fields */}
-            <path d="M0,280 L1200,260 L1200,400 L0,400 Z" fill="rgba(105, 90, 166, 0.4)" />
-            <path d="M0,320 L1200,300 L1200,400 L0,400 Z" fill="rgba(105, 90, 166, 0.3)" />
+            <path
+              d="M0,280 L1200,260 L1200,400 L0,400 Z"
+              fill="rgba(105, 90, 166, 0.4)"
+            />
+            <path
+              d="M0,320 L1200,300 L1200,400 L0,400 Z"
+              fill="rgba(105, 90, 166, 0.3)"
+            />
 
             {/* House */}
             <rect x="800" y="240" width="60" height="40" fill="#8B4513" />
@@ -52,7 +71,11 @@ const HeroSection = () => {
 
             {/* Windmill */}
             <rect x="1020" y="200" width="4" height="80" fill="#8B4513" />
-            <g transform="translate(1022,210) rotate(45)" className="animate-spin" style={{ animationDuration: "3s" }}>
+            <g
+              transform="translate(1022,210) rotate(45)"
+              className="animate-spin"
+              style={{ animationDuration: "3s" }}
+            >
               <rect x="-20" y="-2" width="40" height="4" fill="#8B4513" />
               <rect x="-2" y="-20" width="4" height="40" fill="#8B4513" />
             </g>
@@ -73,10 +96,10 @@ const HeroSection = () => {
         <h1 className="text-5xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight animate-fade-in">
           <span
             style={{
-              background: 'linear-gradient(to right, #695aa6, #5a4d8a)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              background: "linear-gradient(to right, #695aa6, #5a4d8a)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
             }}
           >
             Welcome to
@@ -84,47 +107,52 @@ const HeroSection = () => {
           <br />
           <span
             style={{
-              background: 'linear-gradient(to right, #5a4d8a, #4a3f73)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              background: "linear-gradient(to right, #5a4d8a, #4a3f73)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
             }}
           >
             Apna Network
           </span>
         </h1>
         <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-          Apna Network bridges the gap between skilled service providers and those seeking services in rural areas,
-          fostering economic growth and community development.
+          Apna Network bridges the gap between skilled service providers and
+          those seeking services in rural areas, fostering economic growth and
+          community development.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
-            className="px-8 py-4 text-white rounded-lg hover:shadow-xl transition-all transform hover:scale-105 text-lg font-medium shadow-lg"
+            onClick={handleJoinUs}
+            className="px-8 py-4 text-white rounded-lg hover:shadow-xl transition-all transform hover:scale-105 text-lg font-medium shadow-lg cursor-pointer"
             style={{
-              background: 'linear-gradient(to right, #695aa6, #5a4d8a)',
+              background: "linear-gradient(to right, #695aa6, #5a4d8a)",
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'linear-gradient(to right, #5a4d8a, #4a3f73)';
+              e.target.style.background =
+                "linear-gradient(to right, #5a4d8a, #4a3f73)";
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'linear-gradient(to right, #695aa6, #5a4d8a)';
+              e.target.style.background =
+                "linear-gradient(to right, #695aa6, #5a4d8a)";
             }}
           >
             Feel Free to join us
           </button>
           <button
-            className="px-8 py-4 bg-white border-2 rounded-lg transition-all transform hover:scale-105 text-lg font-medium shadow-lg"
+            onClick={handleFindServices}
+            className="px-8 py-4 bg-white border-2 rounded-lg transition-all transform hover:scale-105 text-lg font-medium shadow-lg cursor-pointer"
             style={{
-              color: '#695aa6',
-              borderColor: '#695aa6',
+              color: "#695aa6",
+              borderColor: "#695aa6",
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#695aa6';
-              e.target.style.color = 'white';
+              e.target.style.backgroundColor = "#695aa6";
+              e.target.style.color = "white";
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'white';
-              e.target.style.color = '#695aa6';
+              e.target.style.backgroundColor = "white";
+              e.target.style.color = "#695aa6";
             }}
           >
             Find Services
@@ -134,7 +162,8 @@ const HeroSection = () => {
 
       <style jsx>{`
         @keyframes pulse {
-          0%, 100% {
+          0%,
+          100% {
             opacity: 0.6;
             transform: scale(1);
           }
