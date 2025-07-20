@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from "@/components/ui/Sidebar";
 import Header from "@/components/ui/Header";
 import StatCard from "@/components/ui/StatCard";
@@ -18,10 +18,27 @@ import AddServiceModal from "@/components/ui/AddServiceModal";
 import ContentModal from "@/components/ui/ContentModal";
 
 export default function AdminDashboard() {
+  const [collapsed, setCollapsed] = useState(false);
+  const [selectedSection, setSelectedSection] = useState("Dashboard");
   const [showAddServiceModal, setShowAddServiceModal] = useState(false);
   const [contentModalOpen, setContentModalOpen] = useState(false);
   const [contentType, setContentType] = useState("");
   const [contentInitialData, setContentInitialData] = useState(null);
+
+  const toggleCollapse = () => {
+    setCollapsed((prev) => {
+      const newState = !prev;
+      localStorage.setItem("sidebarCollapsed", newState);
+      return newState;
+    });
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem("sidebarCollapsed");
+    if (saved === "true") {
+      setCollapsed(true);
+    }
+  }, []);
 
   const handleOpenModal = (type, data = null) => {
     setContentType(type);
@@ -29,52 +46,38 @@ export default function AdminDashboard() {
     setContentModalOpen(true);
   };
 
-  const sectionRefs = {
-    Dashboard: useRef(null),
-    "Service Approvals": useRef(null),
-    "Manage Users": useRef(null),
-    "Manage Services": useRef(null),
-    Categories: useRef(null),
-    Complaints: useRef(null),
-    Testimonials: useRef(null),
-    Activity: useRef(null),
-    Blogs: useRef(null),
-    "Success Stories": useRef(null),
-    Newsletter: useRef(null),
-  };
-
-  const handleNavigate = (section) => {
-    const ref = sectionRefs[section];
-    if (ref?.current) {
-      ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
   return (
-    <div className="flex min-h-screen bg-gradient-to-tr from-white to-[#695aa6]/10">
-      <Sidebar onNavigate={handleNavigate} onAddServiceClick={() => setShowAddServiceModal(true)} />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <main className="p-8 overflow-y-auto space-y-12">
-          {/* Dashboard */}
-          <section ref={sectionRefs["Dashboard"]} className="scroll-mt-20">
+    <div className="min-h-screen bg-gradient-to-tr from-white to-[#695aa6]/10 flex">
+      {/* Sidebar */}
+      <Sidebar
+        onNavigate={(section) => setSelectedSection(section)}
+        onAddServiceClick={() => setShowAddServiceModal(true)}
+        collapsed={collapsed}
+        toggleCollapse={toggleCollapse}
+      />
+
+      {/* Main content */}
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${collapsed ? 'ml-20' : 'ml-64'}`}>
+        <Header onToggleSidebar={toggleCollapse} />
+
+        <main className="p-8 overflow-y-auto space-y-8">
+          {/* Render only the selected section */}
+          {selectedSection === "Dashboard" && (
             <StatCard />
-          </section>
+          )}
 
-          {/* Service Approvals */}
-          <section ref={sectionRefs["Service Approvals"]} className="scroll-mt-20">
-            <h2 className="text-xl font-semibold mb-4">Pending Service Approvals</h2>
-            <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
-              <ServicesApprovalTable />
-            </div>
-          </section>
+          {selectedSection === "Service Approvals" && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4">Pending Service Approvals</h2>
+              <div className="bg-white rounded-xl p-4 shadow">
+                <ServicesApprovalTable />
+              </div>
+            </section>
+          )}
 
-          {/* Manage Users */}
-          <section ref={sectionRefs["Manage Users"]} className="scroll-mt-20">
-            <h2 className="text-xl font-semibold mb-4">Manage Users & Providers</h2>
-            <div className="space-y-8">
-              {/* Users */}
-              <div className="bg-white rounded-xl p-4 shadow max-h-[300px] overflow-y-auto">
+          {selectedSection === "Manage Users" && (
+            <section className="space-y-8">
+              <div className="bg-white rounded-xl p-4 shadow">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-lg font-semibold text-blue-600">Service Takers (Users)</h3>
                   <button
@@ -87,8 +90,7 @@ export default function AdminDashboard() {
                 <UsersTable />
               </div>
 
-              {/* Providers */}
-              <div className="bg-white rounded-xl p-4 shadow max-h-[300px] overflow-y-auto">
+              <div className="bg-white rounded-xl p-4 shadow">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-lg font-semibold text-[#695aa6]">Service Providers</h3>
                   <button
@@ -100,78 +102,80 @@ export default function AdminDashboard() {
                 </div>
                 <ServiceProvidersTable />
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
-          {/* Manage Services */}
-          <section ref={sectionRefs["Manage Services"]} className="scroll-mt-20">
-            <h2 className="text-xl font-semibold mb-4">Manage Services</h2>
-            <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
-              <ServicesTable />
-            </div>
-          </section>
+          {selectedSection === "Manage Services" && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4">Manage Services</h2>
+              <div className="bg-white rounded-xl p-4 shadow">
+                <ServicesTable />
+              </div>
+            </section>
+          )}
 
-          {/* Categories */}
-          <section ref={sectionRefs["Categories"]} className="scroll-mt-20">
-            <h2 className="text-xl font-semibold mb-4">Categories</h2>
-            <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
-              <CategoriesTable />
-            </div>
-          </section>
+          {selectedSection === "Categories" && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4">Categories</h2>
+              <div className="bg-white rounded-xl p-4 shadow">
+                <CategoriesTable />
+              </div>
+            </section>
+          )}
 
-          {/* Complaints */}
-          <section ref={sectionRefs["Complaints"]} className="scroll-mt-20">
-            <h2 className="text-xl font-semibold mb-4">Complaints</h2>
-            <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
-              <ComplaintsTable />
-            </div>
-          </section>
+          {selectedSection === "Complaints" && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4">Complaints</h2>
+              <div className="bg-white rounded-xl p-4 shadow">
+                <ComplaintsTable />
+              </div>
+            </section>
+          )}
 
-          {/* Testimonials */}
-          <section ref={sectionRefs["Testimonials"]} className="scroll-mt-20">
-            <h2 className="text-xl font-semibold mb-4">Testimonials</h2>
-            <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
-              <TestimonialsTable />
-            </div>
-          </section>
+          {selectedSection === "Testimonials" && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4">Testimonials</h2>
+              <div className="bg-white rounded-xl p-4 shadow">
+                <TestimonialsTable />
+              </div>
+            </section>
+          )}
 
-          {/* Activity Log */}
-          <section ref={sectionRefs["Activity"]} className="scroll-mt-20">
-            <h2 className="text-xl font-semibold mb-4">Activity Log</h2>
-            <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
-              <ActivityLog />
-            </div>
-          </section>
+          {selectedSection === "Activity" && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4">Activity Log</h2>
+              <div className="bg-white rounded-xl p-4 shadow">
+                <ActivityLog />
+              </div>
+            </section>
+          )}
 
-          {/* Blogs */}
-          <section ref={sectionRefs["Blogs"]} className="scroll-mt-20">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Blogs</h2>
-            </div>
-            <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
-              <BlogsManager />
-            </div>
-          </section>
+          {selectedSection === "Blogs" && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4">Blogs</h2>
+              <div className="bg-white rounded-xl p-4 shadow">
+                <BlogsManager />
+              </div>
+            </section>
+          )}
 
-          {/* Success Stories */}
-          <section ref={sectionRefs["Success Stories"]} className="scroll-mt-20">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Success Stories</h2>
-            </div>
-            <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
-              <SuccessStoriesManager />
-            </div>
-          </section>
+          {selectedSection === "Success Stories" && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4">Success Stories</h2>
+              <div className="bg-white rounded-xl p-4 shadow">
+                <SuccessStoriesManager />
+              </div>
+            </section>
+          )}
 
-          {/* Newsletter */}
-          <section ref={sectionRefs["Newsletter"]} className="scroll-mt-20">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Newsletter</h2>
-            </div>
-            <div className="bg-white rounded-xl p-4 shadow max-h-[500px] overflow-y-auto">
-              <NewletterManager />
-            </div>
-          </section>
+          {selectedSection === "Newsletter" && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4">Newsletter</h2>
+              <div className="bg-white rounded-xl p-4 shadow">
+                <NewletterManager />
+              </div>
+            </section>
+          )}
         </main>
 
         {/* Modals */}
