@@ -1,4 +1,4 @@
-import React from "react";
+"use client"
 
 const logos = [
   { src: "/imgs/SF.png", name: "Swabhiman Foundation" },
@@ -9,101 +9,86 @@ const logos = [
   { src: "/imgs/PSA.jpeg", name: "TPSDM" },
   { src: "/imgs/MSME.png", name: "MSME" },
   { src: "/imgs/MII.png", name: "Make In India" },
-];
+]
+
+const LogoItem = ({ logo, keyPrefix }) => {
+  const handleImageError = (e) => {
+    const initials = logo.name
+      .split(" ")
+      .map((w) => w[0])
+      .join("")
+
+    // Create a fallback div element
+    const fallbackDiv = document.createElement("div")
+    fallbackDiv.className = "w-full h-full flex items-center justify-center"
+    fallbackDiv.innerHTML = `
+      <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-white font-bold text-lg sm:text-xl bg-gradient-to-br from-purple-600 to-purple-800">
+        ${initials}
+      </div>
+    `
+
+    // Replace the image with the fallback
+    e.target.parentNode.replaceChild(fallbackDiv, e.target)
+  }
+
+  return (
+    <div className="flex-shrink-0 mx-5 sm:mx-8">
+      <div className="flex items-center justify-center w-34 h-34 sm:w-32 sm:h-32">
+        <img
+          src={logo.src || "/placeholder.svg"}
+          alt={logo.name}
+          className="max-w-full max-h-full object-contain filter hover:scale-135 transition-transform duration-300 opacity-80 hover:opacity-100"
+          style={{
+            maxWidth: "90px",
+            maxHeight: "90px",
+          }}
+          onError={handleImageError}
+        />
+      </div>
+    </div>
+  )
+}
 
 const MarqueeSlider = () => {
   return (
-    <div className="relative overflow-hidden py-8 bg-white">
+    <div className="relative overflow-hidden py-6 sm:py-8 bg-white">
       {/* Left blur gradient */}
-      <div className="absolute left-0 top-0 w-24 h-full bg-gradient-to-r from-white via-white/90 to-transparent z-10 pointer-events-none"></div>
+      <div className="absolute left-0 top-0 w-16 sm:w-24 h-full bg-gradient-to-r from-white via-white/90 to-transparent z-10 pointer-events-none"></div>
 
       {/* Right blur gradient */}
-      <div className="absolute right-0 top-0 w-24 h-full bg-gradient-to-l from-white via-white/90 to-transparent z-10 pointer-events-none"></div>
+      <div className="absolute right-0 top-0 w-16 sm:w-24 h-full bg-gradient-to-l from-white via-white/90 to-transparent z-10 pointer-events-none"></div>
 
-      <div
-        className="flex animate-marquee"
-        style={{
-          animation: "marquee 25s linear infinite",
-          width: "calc(200% + 2rem)",
-        }}
-      >
+      <div className="flex animate-marquee">
         {/* First set of logos */}
         {logos.map((logo, i) => (
-          <div key={`first-${i}`} className="flex-shrink-0 mx-4">
-            <div
-              className="bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 p-4 hover:border-[#695aa6]/40 group"
-              style={{ width: "120px", height: "120px" }}
-            >
-              <div className="w-full h-full flex items-center justify-center">
-                <img
-                  src={logo.src}
-                  alt={logo.name}
-                  className="max-w-full max-h-full object-contain filter group-hover:scale-105 transition-transform duration-300"
-                  style={{ maxWidth: "80px", maxHeight: "80px" }}
-                  onError={(e) => {
-                    console.log(`Failed to load image: ${logo.src}`);
-                    // Create fallback with company initials
-                    const initials = logo.name
-                      .split(" ")
-                      .map((w) => w[0])
-                      .join("");
-                    e.target.outerHTML = `
-                      <div class="w-full h-full flex items-center justify-center">
-                        <div class="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-lg" style="background: linear-gradient(135deg, #695aa6, #5a4d8a);">
-                          ${initials}
-                        </div>
-                      </div>
-                    `;
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+          <LogoItem key={`first-${i}`} logo={logo} keyPrefix="first" />
         ))}
 
         {/* Second set of logos for seamless loop */}
         {logos.map((logo, i) => (
-          <div key={`second-${i}`} className="flex-shrink-0 mx-4">
-            <div
-              className="bg-white rounded-full shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 p-4 hover:border-[#695aa6]/40 group"
-              style={{ width: "120px", height: "120px" }}
-            >
-              <div className="w-full h-full flex items-center justify-center">
-                <img
-                  src={logo.src}
-                  alt={logo.name}
-                  className="max-w-full max-h-full object-contain filter group-hover:scale-105 transition-transform duration-300"
-                  style={{ maxWidth: "80px", maxHeight: "80px" }}
-                  onError={(e) => {
-                    console.log(`Failed to load image: ${logo.src}`);
-                    // Create fallback with company initials
-                    const initials = logo.name
-                      .split(" ")
-                      .map((w) => w[0])
-                      .join("");
-                    e.target.outerHTML = `
-                      <div class="w-full h-full flex items-center justify-center">
-                        <div class="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-lg" style="background: linear-gradient(135deg, #695aa6, #5a4d8a);">
-                          ${initials}
-                        </div>
-                      </div>
-                    `;
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+          <LogoItem key={`second-${i}`} logo={logo} keyPrefix="second" />
+        ))}
+
+        {/* Third set for extra smoothness */}
+        {logos.map((logo, i) => (
+          <LogoItem key={`third-${i}`} logo={logo} keyPrefix="third" />
         ))}
       </div>
 
       {/* Enhanced animations and styles */}
-      <style>{`
+      <style jsx>{`
+        .animate-marquee {
+          display: flex;
+          animation: marquee 15s linear infinite;
+          width: max-content;
+        }
+
         @keyframes marquee {
           0% { 
             transform: translateX(0); 
           }
           100% { 
-            transform: translateX(-50%); 
+            transform: translateX(calc(-100% / 3)); 
           }
         }
         
@@ -111,31 +96,10 @@ const MarqueeSlider = () => {
           animation-play-state: paused;
         }
 
-        /* Additional blur for better edge effect */
-        .animate-marquee::before {
-          content: '';
-          position: absolute;
-          left: -30px;
-          top: 0;
-          width: 60px;
-          height: 100%;
-          background: linear-gradient(to right, rgba(255,255,255,1), rgba(255,255,255,0));
-          z-index: 2;
-        }
-
-        .animate-marquee::after {
-          content: '';
-          position: absolute;
-          right: -30px;
-          top: 0;
-          width: 60px;
-          height: 100%;
-          background: linear-gradient(to left, rgba(255,255,255,1), rgba(255,255,255,0));
-          z-index: 2;
-        }
+        /* Remove the pseudo-elements that were causing issues */
       `}</style>
     </div>
-  );
-};
+  )
+}
 
-export default MarqueeSlider;
+export default MarqueeSlider
