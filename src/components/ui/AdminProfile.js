@@ -1,34 +1,63 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 export default function AdminProfile() {
-  const [admin, setAdmin] = useState(null);
-
-  useEffect(() => {
-    const stored = localStorage.getItem('admin');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setAdmin(parsed);
-      } catch (err) {
-        console.error("Failed to parse admin data", err);
-      }
-    }
-  }, []);
-
-  if (!admin) {
-    return (
-      <div className="p-6 text-center text-gray-500">Loading profile...</div>
-    );
-  }
+  const admin = {
+    name: "Raj Kumar",
+    email: "admin@example.com",
+    phone: "+91 9999999999",
+    role: "Administrator",
+    joined: "01 Jan 2024",
+    location: "Hyderabad, India",
+  };
 
   return (
-    <div className="max-w-xl mx-auto bg-white shadow-md rounded-xl p-6 mt-10">
-      <h2 className="text-2xl font-bold text-[#695aa6] mb-4">Admin Profile</h2>
-      <div className="space-y-4 text-gray-800">
-        <div><strong>Name:</strong> {admin.name}</div>
-        <div><strong>Email:</strong> {admin.email}</div>
-        {/* Add more fields as per your admin object */}
+    <div className="min-h-screen bg-[#f9f9f9] py-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg border border-gray-200 p-10">
+        <header className="mb-8">
+          <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight">
+            Admin Profile
+          </h1>
+          <p className="text-gray-500 mt-2">View and manage your account information</p>
+        </header>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-8 text-gray-800">
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-gray-700">Personal Details</h2>
+            <div>
+              <span className="block text-sm font-medium text-gray-500">Full Name</span>
+              <p className="text-base">{admin.name}</p>
+            </div>
+            <div>
+              <span className="block text-sm font-medium text-gray-500">Email</span>
+              <p className="text-base">{admin.email}</p>
+            </div>
+            <div>
+              <span className="block text-sm font-medium text-gray-500">Phone</span>
+              <p className="text-base">{admin.phone}</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-gray-700">Professional Info</h2>
+            <div>
+              <span className="block text-sm font-medium text-gray-500">Role</span>
+              <p className="text-base">{admin.role}</p>
+            </div>
+            <div>
+              <span className="block text-sm font-medium text-gray-500">Joined On</span>
+              <p className="text-base">{admin.joined}</p>
+            </div>
+            <div>
+              <span className="block text-sm font-medium text-gray-500">Location</span>
+              <p className="text-base">{admin.location}</p>
+            </div>
+          </div>
+        </section>
+
+        <footer className="mt-10 border-t pt-4 text-sm text-gray-400 text-right">
+          Last updated on 20 July 2025
+        </footer>
       </div>
     </div>
   );
