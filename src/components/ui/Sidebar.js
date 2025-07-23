@@ -48,7 +48,7 @@ export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, togg
             onClick={onAddServiceClick}
             className="w-full bg-white text-[#695aa6] font-semibold px-4 py-2 rounded hover:bg-[#f3f0fa] border border-[#695aa6] transition text-sm"
           >
-            {!collapsed ? "+ Add Service" : "+"}
+            {!collapsed ? "+ Add Category" : "+"}
           </button>
         </div>
       )}
