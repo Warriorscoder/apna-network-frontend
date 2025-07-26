@@ -13,12 +13,18 @@ import {
   ArrowLeft,
   X,
 } from "lucide-react";
+import { toast } from 'react-toastify';
+import axios from 'axios';
+import { useAuth } from "@/app/context/Authcontext";
 
 const Dialoguebox = ({ data, isOpen, onClose }) => {
   const [showReviews, setShowReviews] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [isSending, setIsSending] = useState(false);
+  const { user } = useAuth();
+  // console.log("user ",user)
+  // console.log("data from dialoguebox ",data)
   // Sample reviews data (you can replace this with API call)
   const sampleReviews = [
     {
@@ -89,9 +95,9 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
   const averageRating =
     reviews.length > 0
       ? (
-          reviews.reduce((sum, review) => sum + review.rating, 0) /
-          reviews.length
-        ).toFixed(1)
+        reviews.reduce((sum, review) => sum + review.rating, 0) /
+        reviews.length
+      ).toFixed(1)
       : data?.rating || "N/A";
 
   const totalReviews = reviews.length;
@@ -103,8 +109,8 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
     percentage:
       reviews.length > 0
         ? (reviews.filter((review) => review.rating === rating).length /
-            reviews.length) *
-          100
+          reviews.length) *
+        100
         : 0,
   }));
 
@@ -115,11 +121,10 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            className={`${size} ${
-              star <= rating
-                ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-300"
-            }`}
+            className={`${size} ${star <= rating
+              ? "fill-yellow-400 text-yellow-400"
+              : "text-gray-300"
+              }`}
           />
         ))}
       </div>
@@ -140,6 +145,41 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
   const handleBackToProfile = () => {
     setShowReviews(false);
   };
+
+  // email code 
+
+  const sendEmailNotification = async ({ name, phone, email, userEmail, category, now }) => {
+    console.log("name", name, " email ", email, " phone ", phone, " category ", category, " now ", now, " userEmail ", userEmail)
+
+    if (!name || !phone || !email || !userEmail || !category || !now || !validateEmail(email) || !validateEmail(userEmail)) {
+      toast.error('Missing or invalid input fields');
+      return;
+    }
+
+    try {
+      setIsSending(true);
+
+      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/notify`, {
+        name,
+        phone,
+        email,       // provider email
+        userEmail,   // client email
+        category,
+        now,
+      });
+
+      toast.success('Email sent successfully!');
+    } catch (error) {
+      console.error('Email send failed:', error?.response?.data || error.message);
+      toast.error('Failed to send email');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
 
   if (!isOpen || !data) return null;
 
@@ -455,21 +495,32 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
               {/* Mobile-Optimized Contact Buttons */}
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                 <button
-                  onClick={() =>
-                    window.open(`sms:${data?.phone || data?.contact}`)
-                  }
-                  className="flex-1 text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 font-medium text-sm sm:text-base"
+                  onClick={() => {
+                    sendEmailNotification({
+                      name: user?.name,
+                      phone: user?.phone,
+                      email: data?.email || "gammingab752@gmail.com",
+                      userEmail: user?.email || "codeaniket123@gmail.com",
+                      category: data?.category,
+                      now: new Date().toISOString(),
+                    });
+                  }}
+
+                  disabled={isSending}
+                  className={`flex-1 text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 font-medium text-sm sm:text-base ${isSending ? 'opacity-60 cursor-not-allowed' : ''
+                    }`}
                   style={{ backgroundColor: "#695aa6" }}
-                  onMouseEnter={(e) =>
-                    (e.target.style.backgroundColor = "#5a4a96")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.target.style.backgroundColor = "#695aa6")
-                  }
+                  onMouseEnter={(e) => {
+                    if (!isSending) e.target.style.backgroundColor = "#5a4a96";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSending) e.target.style.backgroundColor = "#695aa6";
+                  }}
                 >
-                  Send SMS
+                  {isSending ? 'Loading...' : 'Send Email'}
                 </button>
               </div>
+
             </>
           )}
         </div>
