@@ -5,9 +5,6 @@ import Navbar from "../app/Navbar";
 
 export default function ConditionalNavbar() {
   const {
-    user,
-    provider,
-    admin,
     isAuthenticated,
     loading,
     getCurrentUser,

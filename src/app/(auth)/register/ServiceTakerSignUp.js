@@ -16,12 +16,10 @@ export default function ServiceTakerSignUp() {
   const [formData, setFormData] = useState({
     name: "",
     gender: "",
-    adress: "",
+    address: "",
 
   });
 
-
-  
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -55,10 +53,7 @@ const handleSubmit = async (e) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   try {
-    
-
-
-    const res = await axios.post(`${apiUrl}/users/complete`, {gender :formData.gender , address: formData.adress, phone , role});
+    const res = await axios.post(`${apiUrl}/users/complete`, {gender :formData.gender , address: formData.address, phone , role});
     console.log(phone,role,formData)
     const data = res.data;
     if (data.success) {
@@ -152,17 +147,6 @@ const handleSubmit = async (e) => {
           >
             {isSubmitting ? "Registering..." : "Register"}
           </button>
-
-          <div className="mt-6 text-center text-sm text-gray-700">
-            Already have an account?{' '}
-              <button
-                className="text-[#695aa6] hover:underline font-medium"
-              >
-            <Link href={'/login'}>
-                Click here to Login
-            </Link>
-              </button>
-          </div>
         </form>
 
       </div>

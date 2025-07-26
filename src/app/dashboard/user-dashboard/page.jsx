@@ -16,6 +16,7 @@ import ServicesPanel from "./ServicesPanel";
 import RequestsPanel from "./RequestsPanel";
 import HelpPanel from "./HelpPanel";
 import { useDummyAPI } from "@/app/hooks/useDummyAPI";
+import Navbar from "@/app/Navbar";
 
 const useClientGreeting = () => {
   const [greeting, setGreeting] = useState("Welcome");
@@ -60,7 +61,7 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#a395d4] via-[#b8a7e8] to-[#8b7cc8] flex flex-col">
-      <ConditionalNavbar />
+      <Navbar />
       <main className="flex flex-1 pt-20">
         {/* Sidebar */}
         <aside

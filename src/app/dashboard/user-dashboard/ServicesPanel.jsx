@@ -1,5 +1,7 @@
 import { useDummyAPI } from '@/app/hooks/useDummyAPI';
-import { Briefcase, Search } from 'lucide-react';
+import Dialoguebox from '@/components/servicePage/Dialoguebox';
+import axios from 'axios';
+import { Briefcase, ChevronRight, Clock, Filter, MapPin, Search, Star } from 'lucide-react';
 import React, { useState } from 'react'
 
 const ServiceCategoryCard = ({ service, onClick }) => {
@@ -627,7 +629,7 @@ const [viewMode, setViewMode] = useState("categories"); // "categories" or "prov
               </div>
             ) : (
               <>
-                {/* Mock Data Indicator */}
+                {/* Mock Data Indicator
                 {processedServices.some((service) =>
                   service._id.startsWith("mock-")
                 ) && (
@@ -640,7 +642,7 @@ const [viewMode, setViewMode] = useState("categories"); // "categories" or "prov
                       </span>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 {/* Providers Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
