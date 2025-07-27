@@ -40,7 +40,7 @@ export default function Header() {
   // Handle Logout
   const handleLogout = () => {
     localStorage.removeItem("admin");
-    router.push("/login");
+    router.push("/");
   };
 
   // Handle View Profile

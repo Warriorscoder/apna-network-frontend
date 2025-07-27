@@ -20,7 +20,7 @@ const providerInitial = {
   village: '', panchayat: '', tehsil: '', district: '',
   education: '', educationOther: '',
   availability: { from: '', to: '' },
-  declaration: false, password: '',
+  declaration: false
 };
 
 
@@ -84,9 +84,9 @@ export default function ServiceProviderSignUp({ onSuccess }) {
     }
     if (step === 3) {
       if (!formData.declaration) newErrors.declaration = 'You must accept the declaration';
-      if (!trimmed.password) newErrors.password = 'Password is required';
-      else if (trimmed.password.length < 6)
-        newErrors.password = 'Password must be at least 6 characters';
+      // if (!trimmed.password) newErrors.password = 'Password is required';
+      // else if (trimmed.password.length < 6)
+      //   newErrors.password = 'Password must be at least 6 characters';
     }
     return newErrors;
   };
@@ -171,7 +171,7 @@ export default function ServiceProviderSignUp({ onSuccess }) {
         education: formData.education === 'Other' ? formData.educationOther : formData.education,
         // referredBy: formData.referredBy,
         declaration: formData.declaration,
-        password: formData.password,
+        // password: formData.password,
       });
 
 
