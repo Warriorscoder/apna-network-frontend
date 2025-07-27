@@ -21,12 +21,6 @@ export default function ConditionalNavbar() {
   const userRole = getUserRole();
   const isAuth = isAuthenticated();
 
-  // console.log("🧭 ConditionalNavbar state:", {
-  //   authenticatedUser,
-  //   userRole,
-  //   isAuth,
-  // });
-
   return (
     <Navbar
       user={authenticatedUser}
