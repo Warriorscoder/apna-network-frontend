@@ -52,7 +52,7 @@ export default function HelpPanel() {
             </ul>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-1 gap-3 pt-2">
             <button className="flex items-center justify-center gap-2 bg-[#695aa6] hover:bg-[#5a4d8a] rounded-lg p-2.5 sm:p-3 text-white transition">
               <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
               <span className="font-medium text-sm sm:text-base">Email Support</span>

@@ -1,5 +1,4 @@
 "use client";
-
 import {
   LayoutDashboard,
   ListTodo,
@@ -7,11 +6,11 @@ import {
   HelpCircle,
   Menu,
   X,
+  UserCircle,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const Sidebar = ({ activeView, setActiveView }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+const Sidebar = ({ activeView, setActiveView, sidebarOpen, setSidebarOpen, isMobile }) => {
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
@@ -29,34 +28,59 @@ const Sidebar = ({ activeView, setActiveView }) => {
 
   return (
     <aside
-      className={`${
-        sidebarOpen ? "w-64" : "w-16"
-      } min-h-screen p-2 flex flex-col text-white sticky top-20 transition-all duration-300 bg-[rgba(60,50,100,0.92)] z-20 backdrop-blur-sm`}
+      className={`
+        fixed lg:sticky top-16 lg:top-20 left-0 h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)]
+        ${sidebarOpen ? "translate-x-0 w-64" : "-translate-x-full lg:translate-x-0 lg:w-20"}
+        bg-[rgba(60,50,100,0.95)] backdrop-blur-md text-white
+        transition-all duration-300 ease-in-out z-40 lg:z-30
+        flex flex-col border-r border-white/10
+      `}
     >
-      <button
-        className="flex items-center justify-center mb-4 mt-2 w-10 h-10 rounded hover:bg-white/10 transition self-end"
-        onClick={() => setSidebarOpen((v) => !v)}
-        aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-      >
-        {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </button>
+      {/* Sidebar header */}
+      <div className="p-4 border-b border-white/10 flex items-center justify-between lg:justify-center">
+        <div className={`${sidebarOpen ? "opacity-100" : "opacity-0 lg:hidden"}`}>
+          <span className="font-bold text-lg">Provider Menu</span>
+        </div>
+        {sidebarOpen && (
+          <button
+            className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-white/10 transition-colors lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        )}
+        {!isMobile && (
+          <button
+            className="hidden lg:flex items-center justify-center w-10 h-10 rounded-lg hover:bg-white/10 transition-colors"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        )}
+      </div>
 
-      <nav className="flex-1">
+      {/* Navigation */}
+      <nav className="flex-1 p-4">
         <ul className="space-y-2">
           {menuItems.map(({ key, icon: Icon, label }) => (
             <li key={key}>
               <button
                 onClick={() => setActiveView(key)}
-                className={`w-full flex items-center gap-2 p-3 rounded-lg transition min-w-0 ${
+                className={`w-full flex items-center gap-4 p-3 rounded-lg transition-all duration-200 group ${
                   activeView === key
-                    ? "bg-white/20 font-bold"
-                    : "hover:bg-white/10"
-                }`}
+                    ? "bg-white/20 text-white shadow-lg"
+                    : "hover:bg-white/10 text-white/80 hover:text-white"
+                } ${!sidebarOpen ? "lg:justify-center" : ""}`}
+                title={!sidebarOpen ? label : ''}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
+                <Icon className={`w-6 h-6 flex-shrink-0 ${
+                  activeView === key ? "text-white" : "text-white/80 group-hover:text-white"
+                }`} />
                 <span
-                  className={`truncate flex-1 text-left transition-all duration-200 ${
-                    !sidebarOpen ? "opacity-0 w-0" : "opacity-100 w-auto ml-2"
+                  className={`font-medium transition-opacity duration-300 ${
+                    sidebarOpen ? "opacity-100" : "lg:opacity-0 lg:sr-only"
                   }`}
                 >
                   {label}
@@ -66,6 +90,19 @@ const Sidebar = ({ activeView, setActiveView }) => {
           ))}
         </ul>
       </nav>
+
+      {/* User info */}
+      <div className={`p-4 border-t border-white/10 ${sidebarOpen ? "" : "lg:hidden"}`}>
+        <div className="flex items-center gap-3">
+          <UserCircle className="w-8 h-8 text-white/80 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white truncate">
+              Provider Account
+            </p>
+            <p className="text-xs text-white/60">Service Provider</p>
+          </div>
+        </div>
+      </div>
     </aside>
   );
 };

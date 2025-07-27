@@ -693,7 +693,8 @@
 
 
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Menu } from "lucide-react";
 import ConditionalNavbar from "@/components/ConditionalNavbar";
 import Sidebar from "./Sidebar";
 import DashboardHeader from "./DashboardHeader";
@@ -706,7 +707,43 @@ import { useAuthenticatedAPI } from "@/app/hooks/useAuthenticatedAPI";
 
 export default function ProviderDashboardPage() {
   const [activeView, setActiveView] = useState("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showFloatingMenu, setShowFloatingMenu] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const { provider } = useAuthenticatedAPI();
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      setSidebarOpen(!mobile);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  // Auto-hide floating menu on scroll
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setShowFloatingMenu(false);
+      } else {
+        setShowFloatingMenu(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY, isMobile]);
 
   const renderContent = () => {
     switch (activeView) {
@@ -721,15 +758,88 @@ export default function ProviderDashboardPage() {
     }
   };
 
+  const handleSidebarToggle = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleNavItemClick = (key) => {
+    setActiveView(key);
+    if (isMobile) {
+      setSidebarOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#a395d4] via-[#b8a7e8] to-[#8b7cc8] flex flex-col">
       <ConditionalNavbar />
-      <main className="flex flex-1 pt-20">
-        <Sidebar activeView={activeView} setActiveView={setActiveView} />
-        <section className="relative min-h-screen flex flex-col items-center justify-start overflow-hidden w-full">
-          <DashboardHeader provider={provider} />
-          <NotificationsBar pendingRequests={2} />
-          <div className="w-full z-10 px-4 md:px-10 pb-10">{renderContent()}</div>
+      
+      {/* Floating menu button for mobile */}
+      {isMobile && !sidebarOpen && (
+        <button
+          onClick={handleSidebarToggle}
+          className="lg:hidden"
+          style={{
+            position: 'fixed',
+            top: '80px',
+            left: '12px',
+            zIndex: 40,
+            opacity: showFloatingMenu ? 0.8 : 0,
+            pointerEvents: showFloatingMenu ? 'auto' : 'none',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            color: 'white',
+            padding: '10px',
+            borderRadius: '8px',
+            border: 'none',
+            boxShadow: 'none',
+            backdropFilter: 'none',
+            transition: 'opacity 0.3s ease',
+          }}
+          aria-label="Open sidebar"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      )}
+      
+      {/* Mobile overlay */}
+      {isMobile && sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 35
+          }}
+        />
+      )}
+
+      <main className="flex flex-1 pt-16 lg:pt-20">
+        <Sidebar 
+          activeView={activeView} 
+          setActiveView={handleNavItemClick}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          isMobile={isMobile}
+        />
+        <section className={`relative min-h-screen flex flex-col items-center justify-start overflow-hidden w-full transition-all duration-300 ${
+          isMobile ? 'w-full' : ''
+        }`}>
+          {/* Dashboard Header - only show on dashboard */}
+          {activeView === "dashboard" && (
+            <DashboardHeader provider={provider} />
+          )}
+          
+          {/* Notifications Bar - only show on dashboard */}
+          {activeView === "dashboard" && (
+            <NotificationsBar pendingRequests={2} />
+          )}
+          
+          <div className={`w-full z-10 px-4 sm:px-6 lg:px-10 pb-10 ${activeView !== "dashboard" ? "pt-8" : ""}`}>
+            {renderContent()}
+          </div>
         </section>
       </main>
     </div>
