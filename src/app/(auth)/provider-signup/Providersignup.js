@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useSearchParams } from 'next/navigation';
+import { useAuth } from '@/app/context/Authcontext';
 const servicesList = [
   'Plumber', 'Electrician', 'Painter', 'Carpenter', 'Construction Worker',
   'Photographer', 'Welder', 'Tailor', 'Cook', 'Gardener',
@@ -42,6 +43,7 @@ export default function ServiceProviderSignUp({ onSuccess }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(0);
   const router = useRouter();
+  const { loginWithToken } = useAuth();
 
   const validate = () => {
     const newErrors = {};
@@ -176,11 +178,13 @@ export default function ServiceProviderSignUp({ onSuccess }) {
 
 
       const data = res.data;
-      if (data.success) {
+      const result = loginWithToken(data.token);
+      if (result.success) {
         router.push('/dashboard/provider-dashboard');
         toast.success('Registration successful! Your custom service will be reviewed by an admin.');
-        localStorage.setItem('token', data.token); // Store token in local storage
-        localStorage.setItem('provider', JSON.stringify(data.provider)); // Store user data in local
+      }
+      else {
+        toast.error(result.message || "Login failed");
       }
 
     } catch (error) {

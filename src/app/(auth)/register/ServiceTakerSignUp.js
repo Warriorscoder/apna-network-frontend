@@ -6,6 +6,7 @@ import Link from "next/link";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useSearchParams } from 'next/navigation';
+import { useAuth } from "@/app/context/Authcontext";
 
 export default function ServiceTakerSignUp() {
 
@@ -22,7 +23,7 @@ export default function ServiceTakerSignUp() {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const { loginWithToken } = useAuth();
   const validate = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = "Name is required";
@@ -55,11 +56,14 @@ export default function ServiceTakerSignUp() {
 
     try {
       const res = await axios.post(`${apiUrl}/users/complete`, { gender: formData.gender, address: formData.address, phone, name: formData.name, email: formData.email });
-      console.log(phone, role, formData)  
+      console.log(phone, role, formData)
       const data = res.data;
-      if (data.success) {
-        toast.success("Registration successful!");
-        router.push("/");
+      const result = loginWithToken(data.token);
+      if (result.success) {
+        toast.success("OTP verified. Login successful");
+        router.push("/dashboard/user-dashboard");
+      } else {
+        toast.error(result.message || "Login failed");
       }
 
     } catch (err) {
