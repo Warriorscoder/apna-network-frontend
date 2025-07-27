@@ -1,5 +1,5 @@
 import { Briefcase, Search, Star, MapPin, Clock, Award, Filter, ChevronRight, ArrowLeft } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Dialoguebox from '@/components/servicePage/Dialoguebox';
 
@@ -15,9 +15,8 @@ const ServiceCategoryCard = ({ service, onClick }) => {
       style={{ borderColor: "#a99fd4" }}
     >
       <div
-        className={`transition-all duration-300 ease-in-out flex flex-col items-center ${
-          hovered ? "translate-y-[-25%] sm:translate-y-[-30%]" : "translate-y-0"
-        }`}
+        className={`transition-all duration-300 ease-in-out flex flex-col items-center ${hovered ? "translate-y-[-25%] sm:translate-y-[-30%]" : "translate-y-0"
+          }`}
       >
         <img
           src={service.image || "/placeholder.svg?height=64&width=64"}
@@ -29,11 +28,10 @@ const ServiceCategoryCard = ({ service, onClick }) => {
         </h3>
       </div>
       <div
-        className={`absolute bottom-2 sm:bottom-4 px-2 text-xs text-gray-600 text-center transition-all duration-300 ease-in-out ${
-          hovered
+        className={`absolute bottom-2 sm:bottom-4 px-2 text-xs text-gray-600 text-center transition-all duration-300 ease-in-out ${hovered
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-2 pointer-events-none"
-        }`}
+          }`}
       >
         <p className="mb-1 text-xs sm:text-sm leading-tight">
           {service.subtitle}
@@ -71,12 +69,12 @@ const EnhancedServiceCard = ({ service, onMoreDetails, index }) => (
           {service.address}
         </span>
       </div>
-      <div className="flex items-center space-x-2">
+      {/* <div className="flex items-center space-x-2">
         <Award className="w-4 h-4 text-[#695aa6] flex-shrink-0" />
         <span className="text-gray-600">
           {service.experience}
         </span>
-      </div>
+      </div> */}
       <div className="flex items-center space-x-2">
         <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" />
         <span className="text-gray-600">
@@ -84,7 +82,7 @@ const EnhancedServiceCard = ({ service, onMoreDetails, index }) => (
         </span>
       </div>
     </div>
-    
+
     <button
       onClick={() => onMoreDetails(service)}
       className="w-full py-2.5 px-4 bg-[#695aa6] text-white rounded-lg text-sm hover:bg-[#5a4d8a] transition-colors font-medium"
@@ -105,8 +103,37 @@ function ServicesPanel() {
   const [categorySearchTerm, setCategorySearchTerm] = useState("");
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [allcategories, setAllcategories] = useState([])
 
-  const filteredServiceCategories = serviceCategories.filter(
+  useEffect(() => {
+
+    const fetchallcategories = async () => {
+      try {
+        setLoading(true)
+
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/categories/`)
+
+        if (!response.data.success) {
+          console.log("error in fetching categories")
+        }
+
+        setAllcategories(response.data.data)
+      }
+      catch (error) {
+        console.log("Internal server error")
+        throw new Error
+      }
+      finally {
+        setLoading(false);
+      }
+    }
+
+    fetchallcategories();
+  }, [])
+
+  // console.log("all categories ", allcategories)
+
+  const filteredServiceCategories = allcategories.filter(
     (category) =>
       category.title.toLowerCase().includes(categorySearchTerm.toLowerCase())
   );
@@ -114,7 +141,7 @@ function ServicesPanel() {
   const handleCategorySelect = async (service) => {
     setSelectedService(service);
     setViewMode("providers");
-    fetchServiceProviders(service.serviceKey);
+    fetchServiceProviders(service.key);
   };
 
   const fetchServiceProviders = async (serviceKey) => {
@@ -123,23 +150,25 @@ function ServicesPanel() {
       const apiurl = process.env.NEXT_PUBLIC_API_BASE_URL;
       const response = await axios.get(`${apiurl}/services/`);
       if (!response.data.success) throw new Error("Failed to fetch services");
-      
+
       const services = response.data.data || [];
       const filteredServices = services.filter((item) => item.category === serviceKey);
       setServiceData(filteredServices);
-
+      // console.log("service data ",filteredServices)
       if (filteredServices.length > 0) {
         const providerIds = filteredServices.map((item) => item.provider_id);
         const result = await axios.post(`${apiurl}/providers/multi-by-id`, { ids: providerIds });
         if (!result.data.success) throw new Error("Failed to fetch providers");
 
         const providersData = result.data.providers || [];
+        // console.log("providerdata", providersData)
         const transformedData = providersData.map((provider) => ({
           name: provider.name,
+          email: provider.email,
           provider_id: provider._id,
-          address: `${provider.village}, ${provider.panchayat_ward}, ${provider.tehsil}, ${provider.district}`,
+          address: provider.location,
           rating: Math.floor(Math.random() * 5) + 1,
-          experience: `${provider.experience} years`,
+          // experience: `${provider.experience} years`,
           availability: `${provider.availability?.from || "9 AM"} - ${provider.availability?.to || "6 PM"}`,
           phone: provider.phone || "Not provided",
         }));
@@ -159,12 +188,16 @@ function ServicesPanel() {
 
   const handleMoreDetails = (provider) => {
     const serviceInfo = serviceData.find((item) => item.provider_id === provider.provider_id);
+    console.log("serviceInfo ", serviceInfo)
     const cardData = {
       ...provider,
       title: serviceInfo?.description || `${selectedService?.title} Service`,
       tags: serviceInfo?.tags || [selectedService?.title?.toLowerCase()],
       category: serviceInfo?.category || selectedService?.serviceKey,
+      experience: serviceInfo?.experience_level,
+      serviceId: serviceInfo._id
     };
+    // console.log("cardinfo ", cardData)
     setSelectedProvider(cardData);
     setIsDialogOpen(true);
   };
@@ -188,14 +221,14 @@ function ServicesPanel() {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2" 
-            style={{ textShadow: "0 4px 24px rgba(60,50,100,0.65), 0 2px 4px rgba(0,0,0,0.3)" }}>
+        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2"
+          style={{ textShadow: "0 4px 24px rgba(60,50,100,0.65), 0 2px 4px rgba(0,0,0,0.3)" }}>
           {viewMode === "categories" ? "Browse Services" : `${selectedService?.title || "Service"} Providers`}
         </h1>
-        <p className="text-white/90 text-lg" 
-           style={{ textShadow: "0 2px 12px rgba(60,50,100,0.45), 0 1px 2px rgba(0,0,0,0.3)" }}>
-          {viewMode === "categories" 
-            ? "Find trusted professionals for all your needs" 
+        <p className="text-white/90 text-lg"
+          style={{ textShadow: "0 2px 12px rgba(60,50,100,0.45), 0 1px 2px rgba(0,0,0,0.3)" }}>
+          {viewMode === "categories"
+            ? "Find trusted professionals for all your needs"
             : `Connect with verified ${selectedService?.title?.toLowerCase()} in your area`
           }
         </p>
@@ -242,7 +275,7 @@ function ServicesPanel() {
                 {filteredServiceCategories.length > 0 ? (
                   filteredServiceCategories.map((category, index) => (
                     <ServiceCategoryCard
-                      key={category.serviceKey || index}
+                      key={category.key || index}
                       service={category}
                       onClick={() => handleCategorySelect(category)}
                     />
@@ -274,17 +307,17 @@ function ServicesPanel() {
                   </button>
                 </div>
               </div>
-              
+
               {loading ? (
                 <div className="flex flex-col items-center justify-center text-center py-10">
-                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#695aa6] mx-auto mb-4"></div>
-                   <p className="text-gray-600">Loading {selectedService?.title?.toLowerCase()}...</p>
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#695aa6] mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading {selectedService?.title?.toLowerCase()}...</p>
                 </div>
               ) : error ? (
-                 <div className="flex flex-col items-center justify-center text-center py-10">
-                    <div className="text-4xl mb-4">⚠️</div>
-                    <p className="text-red-600">{error}</p>
-                 </div>
+                <div className="flex flex-col items-center justify-center text-center py-10">
+                  <div className="text-4xl mb-4">⚠️</div>
+                  <p className="text-red-600">{error}</p>
+                </div>
               ) : filteredAndSearchedProviders.length === 0 ? (
                 <div className="flex flex-col items-center justify-center text-center py-10">
                   <div className="text-4xl mb-4">🔍</div>
@@ -296,7 +329,7 @@ function ServicesPanel() {
                   <div className="mb-4 text-sm text-gray-600 lg:hidden">
                     Found {filteredAndSearchedProviders.length} {selectedService?.title?.toLowerCase()}
                   </div>
-                  
+
                   <div className="hidden lg:block overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
@@ -304,7 +337,7 @@ function ServicesPanel() {
                           <th className="py-3 px-4 text-left font-semibold text-gray-800">#</th>
                           <th className="py-3 px-4 text-left font-semibold text-gray-800">Name</th>
                           <th className="py-3 px-4 text-left font-semibold text-gray-800">Address</th>
-                          <th className="py-3 px-4 text-left font-semibold text-gray-800">Experience</th>
+                          {/* <th className="py-3 px-4 text-left font-semibold text-gray-800">Experience</th> */}
                           <th className="py-3 px-4 text-left font-semibold text-gray-800">Rating</th>
                           <th className="py-3 px-4 text-left font-semibold text-gray-800">Actions</th>
                         </tr>
@@ -315,7 +348,7 @@ function ServicesPanel() {
                             <td className="py-3 px-4">{index + 1}</td>
                             <td className="py-3 px-4 font-medium text-gray-800">{provider.name}</td>
                             <td className="py-3 px-4 text-gray-700 max-w-xs truncate">{provider.address}</td>
-                            <td className="py-3 px-4 text-gray-700">{provider.experience}</td>
+                            {/* <td className="py-3 px-4 text-gray-700">{provider.experience}</td> */}
                             <td className="py-3 px-4"><div className="flex items-center gap-1"><Star className="w-4 h-4 fill-yellow-400 text-yellow-400" /><span>{provider.rating}</span></div></td>
                             <td className="py-3 px-4"><button onClick={() => handleMoreDetails(provider)} className="px-3 py-1.5 bg-[#695aa6] text-white rounded text-xs hover:bg-[#5a4d8a] transition">View Details</button></td>
                           </tr>
@@ -326,7 +359,7 @@ function ServicesPanel() {
 
                   <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {filteredAndSearchedProviders.map((provider, index) => (
-                      <EnhancedServiceCard key={provider.provider_id || index} service={provider} onMoreDetails={handleMoreDetails} index={index}/>
+                      <EnhancedServiceCard key={provider.provider_id || index} service={provider} onMoreDetails={handleMoreDetails} index={index} />
                     ))}
                   </div>
                 </div>
@@ -347,26 +380,4 @@ function ServicesPanel() {
     </div>
   );
 }
-
-
-// Static Data
-const serviceCategories = [
-  { image: "/imgs/Car.jpg", title: "Carpenters", subtitle: "All kind of wooden works", serviceKey: "carpenters" },
-  { image: "/imgs/plumber 2.jpg", title: "Plumbers", subtitle: "Pipeline and fitting works", serviceKey: "plumbers" },
-  { image: "/imgs/mason.jpg", title: "Construction", subtitle: "Build your dreams", serviceKey: "construction-workers" },
-  { image: "/imgs/electrician.jpg", title: "Electricians", subtitle: "Get your wirings fixed", serviceKey: "electricians" },
-  { image: "/imgs/painter.jpg", title: "Painters", subtitle: "Get your walls painted", serviceKey: "painters" },
-  { image: "/imgs/welder.jpg", title: "Welders", subtitle: "Welders of your area", serviceKey: "welders" },
-  { image: "/imgs/tailor.jpg", title: "Tailors", subtitle: "Get your outfit done", serviceKey: "tailors" },
-  { image: "/imgs/cook.jpg", title: "Cooks", subtitle: "Taste delicious food", serviceKey: "cooks" },
-  { image: "/imgs/gardner.jpg", title: "Gardeners", subtitle: "Keep gardens green", serviceKey: "gardeners" },
-  { image: "/imgs/housekeeper.jpg", title: "House Keepers", subtitle: "Keep your house clean", serviceKey: "housekeepers" },
-  { image: "/imgs/barber.jpg", title: "Barbers", subtitle: "Get your hair styled", serviceKey: "barbers" },
-  { image: "/imgs/driver.jpg", title: "Drivers", subtitle: "Go on a long drive", serviceKey: "drivers" },
-  { image: "/imgs/drycleaner.jpg", title: "Dry Cleaners", subtitle: "Keep clothes neat", serviceKey: "dry-cleaners" },
-  { image: "/imgs/Photographer.jpg", title: "Photographers", subtitle: "Click special moments", serviceKey: "photographers" },
-  { image: "/imgs/pandit.jpg", title: "Astrologers", subtitle: "Talk to an astrologer", serviceKey: "astrologers" },
-  { image: "/imgs/interior designer.jpg", title: "Interior Designer", subtitle: "Design your space", serviceKey: "interior-designer" },
-];
-
 export default ServicesPanel;

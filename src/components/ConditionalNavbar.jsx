@@ -5,9 +5,6 @@ import Navbar from "../app/Navbar";
 
 export default function ConditionalNavbar() {
   const {
-    user,
-    provider,
-    admin,
     isAuthenticated,
     loading,
     getCurrentUser,
@@ -24,11 +21,11 @@ export default function ConditionalNavbar() {
   const userRole = getUserRole();
   const isAuth = isAuthenticated();
 
-  console.log("🧭 ConditionalNavbar state:", {
-    authenticatedUser,
-    userRole,
-    isAuth,
-  });
+  // console.log("🧭 ConditionalNavbar state:", {
+  //   authenticatedUser,
+  //   userRole,
+  //   isAuth,
+  // });
 
   return (
     <Navbar

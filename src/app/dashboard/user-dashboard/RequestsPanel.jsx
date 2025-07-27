@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { useDummyAPI } from "@/app/hooks/useDummyAPI";
+import { useAuth } from "@/app/context/Authcontext";
 
 // Card component for mobile view
 const RequestCard = ({ req }) => {
@@ -55,14 +56,14 @@ export default function RequestsPanel() {
   const [loading, setLoading] = useState(true);
   const { makeRequest, userId } = useDummyAPI();
   const [error, setError] = useState("");
-
+  const {user} = useAuth()
   useEffect(() => {
     const fetchRequests = async () => {
       try {
         setLoading(true);
         setError(null);
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/user/68729032f38380c95c04f615`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/user/${user.id}`
         );
         if (!response.data.success) throw new Error("Error in fetching requests");
         setRequests(response.data.data);

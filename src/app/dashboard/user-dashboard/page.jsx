@@ -16,6 +16,7 @@ import ServicesPanel from "./ServicesPanel";
 import RequestsPanel from "./RequestsPanel";
 import HelpPanel from "./HelpPanel";
 import { useDummyAPI } from "@/app/hooks/useDummyAPI";
+import { useAuth } from "@/app/context/Authcontext";
 
 const useClientGreeting = () => {
   const [greeting, setGreeting] = useState("Welcome");
@@ -31,7 +32,7 @@ const useClientGreeting = () => {
 };
 
 export default function UserDashboard() {
-  const { user } = useDummyAPI();
+  const { user } = useAuth();
   const [activeView, setActiveView] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
