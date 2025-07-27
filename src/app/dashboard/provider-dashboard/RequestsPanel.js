@@ -206,7 +206,7 @@ const RequestsPanel = () => {
             <ListTodo className="w-12 h-12 text-gray-400 mx-auto mb-3" />
             <p className="text-gray-500 mb-2">No customer requests yet</p>
             <p className="text-sm text-gray-400">
-              When customers request your services, they'll appear here!
+              When customers request your services, they&aposll appear here!
             </p>
           </div>
         ) : (
