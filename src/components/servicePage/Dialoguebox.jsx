@@ -183,24 +183,38 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
   // request code
 
   const createServiceRequest = async ({ user_id, provider_id, service_id }) => {
-  if (!user_id || !provider_id || !service_id) {
-    toast.error('Missing user or service information');
-    return;
-  }
+    if (!user_id || !provider_id || !service_id) {
+      toast.error('Missing user or service information');
+      return;
+    }
 
-  try {
-    await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/`, {
-      user_id,
-      provider_id,
-      service_id,
-    });
+    try {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/`, {
+        user_id,
+        provider_id,
+        service_id,
+      });
 
-    toast.success('Service request submitted successfully!');
-  } catch (error) {
-    console.error('Service request failed:', error?.response?.data || error.message);
-    toast.error('Failed to submit service request');
-  }
-};
+      if (response.data.message) {
+        toast.warn(response.data.message);
+      }
+      else {
+        toast.success("Sercvice request made successfully!!")
+        sendEmailNotification({
+          name: user?.name,
+          phone: user?.phone,
+          email: data?.email || "gammingab752@gmail.com",
+          userEmail: user?.email || "codeaniket123@gmail.com",
+          category: data?.category,
+          now: new Date().toISOString(),
+        });
+      }
+
+    } catch (error) {
+      console.error('Service request failed:', error?.response?.data || error.message);
+      toast.error('Failed to submit service request');
+    }
+  };
 
 
 
@@ -519,15 +533,6 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                 <button
                   onClick={() => {
-                    sendEmailNotification({
-                      name: user?.name,
-                      phone: user?.phone,
-                      email: data?.email || "gammingab752@gmail.com",
-                      userEmail: user?.email || "codeaniket123@gmail.com",
-                      category: data?.category,
-                      now: new Date().toISOString(),
-                    });
-
                     createServiceRequest({
                       user_id: user.id,
                       provider_id: data.provider_id,

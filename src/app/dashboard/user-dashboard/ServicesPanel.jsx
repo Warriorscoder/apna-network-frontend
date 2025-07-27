@@ -154,7 +154,7 @@ function ServicesPanel() {
       const services = response.data.data || [];
       const filteredServices = services.filter((item) => item.category === serviceKey);
       setServiceData(filteredServices);
-
+      // console.log("service data ",filteredServices)
       if (filteredServices.length > 0) {
         const providerIds = filteredServices.map((item) => item.provider_id);
         const result = await axios.post(`${apiurl}/providers/multi-by-id`, { ids: providerIds });
@@ -188,7 +188,7 @@ function ServicesPanel() {
 
   const handleMoreDetails = (provider) => {
     const serviceInfo = serviceData.find((item) => item.provider_id === provider.provider_id);
-    // console.log("serviceInfo ", serviceInfo)
+    console.log("serviceInfo ", serviceInfo)
     const cardData = {
       ...provider,
       title: serviceInfo?.description || `${selectedService?.title} Service`,
