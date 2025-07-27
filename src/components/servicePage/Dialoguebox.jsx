@@ -180,6 +180,29 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+  // request code
+
+  const createServiceRequest = async ({ user_id, provider_id, service_id }) => {
+  if (!user_id || !provider_id || !service_id) {
+    toast.error('Missing user or service information');
+    return;
+  }
+
+  try {
+    await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/`, {
+      user_id,
+      provider_id,
+      service_id,
+    });
+
+    toast.success('Service request submitted successfully!');
+  } catch (error) {
+    console.error('Service request failed:', error?.response?.data || error.message);
+    toast.error('Failed to submit service request');
+  }
+};
+
+
 
   if (!isOpen || !data) return null;
 
@@ -456,7 +479,7 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
                         style={{ color: "#695aa6" }}
                       />
                       <span className="text-gray-600 text-sm sm:text-base">
-                        {data.experience || "Experience not specified"}
+                        {`${data.experience} years` || "Experience not specified"}
                       </span>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -504,6 +527,12 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
                       category: data?.category,
                       now: new Date().toISOString(),
                     });
+
+                    createServiceRequest({
+                      user_id: user.id,
+                      provider_id: data.provider_id,
+                      service_id: data.serviceId
+                    })
                   }}
 
                   disabled={isSending}

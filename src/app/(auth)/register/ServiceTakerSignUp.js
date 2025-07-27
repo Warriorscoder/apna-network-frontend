@@ -17,65 +17,66 @@ export default function ServiceTakerSignUp() {
     name: "",
     gender: "",
     address: "",
-
+    email: ""
   });
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = () => {
-  const newErrors = {};
-  if (!formData.name.trim()) newErrors.name = "Name is required";
-  if (!formData.gender.trim()) newErrors.gender = "Gender is required";
-  if (!formData.address.trim()) newErrors.address = "Address is required";
-  // Add validation for more fields if needed
-  return newErrors;
-};
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.email.trim()) newErrors.name = "Email is required";
+    if (!formData.gender.trim()) newErrors.gender = "Gender is required";
+    if (!formData.address.trim()) newErrors.address = "Address is required";
+    // Add validation for more fields if needed
+    return newErrors;
+  };
 
-const handleChange = (e) => {
-  setFormData({ ...formData, [e.target.name]: e.target.value });
-};
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  console.log("Form submission started");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Form submission started");
 
-  const validationErrors = validate();
-  setErrors(validationErrors);
-  console.log("Validation Errors:", validationErrors);
+    const validationErrors = validate();
+    setErrors(validationErrors);
+    console.log("Validation Errors:", validationErrors);
 
-  if (Object.keys(validationErrors).length > 0) {
-    console.log("Form validation failed. Aborting submission.");
-    return;
-  }
-
-  setIsSubmitting(true);
-  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-  try {
-    const res = await axios.post(`${apiUrl}/users/complete`, {gender :formData.gender , address: formData.address, phone , role});
-    console.log(phone,role,formData)
-    const data = res.data;
-    if (data.success) {
-      toast.success("Registration successful!");
-      router.push("/");
+    if (Object.keys(validationErrors).length > 0) {
+      console.log("Form validation failed. Aborting submission.");
+      return;
     }
 
-  } catch (err) {
-    console.error("Error occurred during form submission:", err);
+    setIsSubmitting(true);
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-    if (err.response) {
-      console.log("Server responded with error:", err.response.data.message);
-    } else if (err.request) {
-      console.log("No response received from server. Possible network error.");
-    } else {
-      console.log("Client-side error:", err.message);
+    try {
+      const res = await axios.post(`${apiUrl}/users/complete`, { gender: formData.gender, address: formData.address, phone, name: formData.name, email: formData.email });
+      console.log(phone, role, formData)  
+      const data = res.data;
+      if (data.success) {
+        toast.success("Registration successful!");
+        router.push("/");
+      }
+
+    } catch (err) {
+      console.error("Error occurred during form submission:", err);
+
+      if (err.response) {
+        console.log("Server responded with error:", err.response.data.message);
+      } else if (err.request) {
+        console.log("No response received from server. Possible network error.");
+      } else {
+        console.log("Client-side error:", err.message);
+      }
+    } finally {
+      setIsSubmitting(false);
+      console.log("Form submission ended");
     }
-  } finally {
-    setIsSubmitting(false);
-    console.log("Form submission ended");
-  }
-};
+  };
 
 
   const renderError = (field) =>
@@ -99,6 +100,20 @@ const handleSubmit = async (e) => {
               name="name"
               required
               value={formData.name}
+              onChange={handleChange}
+              className="w-full p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+            />
+            {renderError("name")}
+          </div>
+          <div>
+            <label className="block text-sm font-semibold mb-1 text-gray-700">
+              Email
+            </label>
+            <input
+              type="text"
+              name="email"
+              required
+              value={formData.email}
               onChange={handleChange}
               className="w-full p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
             />
