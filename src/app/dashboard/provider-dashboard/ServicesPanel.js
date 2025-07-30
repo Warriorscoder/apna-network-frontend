@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { useAuth } from "@/app/context/Authcontext";
 
 // Mobile-responsive modal component for both Add and Edit
 const ServiceModal = ({
@@ -193,7 +194,8 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, serviceName }) =>
 };
 
 const ServicesPanel = () => {
-  const providerId = "669f9e8ba7a99a16a1314348";
+  const { user } = useAuth();
+  const providerId = user?.id;
 
   const [services, setServices] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
@@ -203,6 +205,7 @@ const ServicesPanel = () => {
   const [editingServiceId, setEditingServiceId] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [serviceToDelete, setServiceToDelete] = useState(null);
+
   const [serviceData, setServiceData] = useState({
     category: "",
     description: "",
@@ -231,10 +234,11 @@ const ServicesPanel = () => {
 
       try {
         const servicesRes = await axios.get(`${API_BASE_URL}/services/by_provider_id/${providerId}`);
-        if (servicesRes.data.success) {
-          const formattedServices = servicesRes.data.data.map(s => ({...s, isActive: s.active}));
-          setServices(formattedServices);
+        if (!servicesRes.data.success) {
+          toast.error("Could not load your existing services.");
         }
+        setServices(servicesRes.data.data);
+       
       } catch (error) {
         if (error.response && error.response.status === 404) {
           setServices([]);
@@ -248,28 +252,28 @@ const ServicesPanel = () => {
     };
 
     fetchInitialData();
-  }, [providerId]);
-
-  const toggleServiceStatus = async (serviceId, currentStatus) => {
-    try {
-        const response = await axios.put(`${API_BASE_URL}/services/update/${serviceId}`, {
-            active: !currentStatus
-        });
-        if(response.data.success){
-            setServices((prev) =>
-              prev.map((s) =>
-                s._id === serviceId ? { ...s, isActive: !s.isActive } : s
-              )
-            );
-            toast.success("Service status updated!");
-        } else {
-            toast.error(response.data.message || "Couldn't update status.");
-        }
-    } catch(error){
-        toast.error("Failed to update service status.");
-        console.error("Error updating service status:", error);
-    }
-  };
+  }, [providerId,API_BASE_URL]);
+  // console.log("Services:", services);
+  // const toggleServiceStatus = async (serviceId, currentStatus) => {
+  //   try {
+  //       const response = await axios.put(`${API_BASE_URL}/services/update/${serviceId}`, {
+  //           active: !currentStatus
+  //       });
+  //       if(response.data.success){
+  //           setServices((prev) =>
+  //             prev.map((s) =>
+  //               s._id === serviceId ? { ...s, isActive: !s.isActive } : s
+  //             )
+  //           );
+  //           toast.success("Service status updated!");
+  //       } else {
+  //           toast.error(response.data.message || "Couldn't update status.");
+  //       }
+  //   } catch(error){
+  //       toast.error("Failed to update service status.");
+  //       console.error("Error updating service status:", error);
+  //   }
+  // };
 
   const handleEditService = (service) => {
     setIsEditing(true);
@@ -469,7 +473,7 @@ const ServicesPanel = () => {
                       </h3>
                       
                       {/* Status Badge */}
-                      <span
+                      {/* <span
                         className={`self-start px-2.5 py-1 text-xs rounded-full font-semibold flex-shrink-0 ${
                           service.isActive
                             ? "bg-green-100 text-green-700"
@@ -477,7 +481,7 @@ const ServicesPanel = () => {
                         }`}
                       >
                         {service.isActive ? "Active" : "Inactive"}
-                      </span>
+                      </span> */}
                     </div>
 
                     {/* Description */}
@@ -487,12 +491,12 @@ const ServicesPanel = () => {
 
                     {/* Service Details */}
                     <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-3">
-                      {service.location && (
+                      {/* {service.location && (
                         <span className="flex items-center gap-1">
                           <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                           <span className="truncate">{service.location}</span>
                         </span>
-                      )}
+                      )} */}
                       {service.experience_level && (
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -502,7 +506,7 @@ const ServicesPanel = () => {
                       {service.rating && (
                         <span className="flex items-center gap-1">
                           <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500 flex-shrink-0" />
-                          <span>{service.rating}</span>
+                          <span>{`5`}</span>
                         </span>
                       )}
                     </div>
@@ -517,13 +521,13 @@ const ServicesPanel = () => {
 
                   {/* Action Buttons */}
                   <div className="flex sm:flex-col gap-2 justify-end sm:items-end flex-shrink-0">
-                    <button
+                    {/* <button
                       onClick={() => toggleServiceStatus(service._id, service.isActive)}
                       className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                       title="Toggle Status"
                     >
                       <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => handleEditService(service)}
                       className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"

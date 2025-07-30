@@ -10,11 +10,12 @@ import {
   Briefcase,
   Calendar,
 } from "lucide-react";
-import { useAuthenticatedAPI } from "@/app/hooks/useAuthenticatedAPI";
+// import { useAuthenticatedAPI } from "@/app/hooks/useAuthenticatedAPI";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from "@/app/context/Authcontext";
 
 // Card component for mobile view
 const RequestCard = ({ req, onStatusChange }) => {
@@ -68,10 +69,12 @@ const RequestCard = ({ req, onStatusChange }) => {
 };
 
 const RequestsPanel = () => {
-  const { makeRequest, providerId } = useAuthenticatedAPI();
+  // const { makeRequest, providerId } = useAuthenticatedAPI();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const {user} = useAuth();
+  // console.log("User in RequestsPanel:", user); 
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -80,7 +83,7 @@ const RequestsPanel = () => {
         setError(null);
 
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/provider/6867b31c38d37b494e1e86c0`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/provider/${user.id}`
         );
 
         if (!response.data.success) {
@@ -103,7 +106,7 @@ const RequestsPanel = () => {
     };
 
     fetchRequests();
-  }, [makeRequest, providerId]);
+  }, [user]);
 
   const handleStatusChange = async (requestId, newStatus) => {
     try {
