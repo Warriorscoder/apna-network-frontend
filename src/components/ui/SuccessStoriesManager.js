@@ -1,7 +1,6 @@
-"use client";
+'use client';
 import React, { useState, useEffect } from "react";
 import ContentModal from "./ContentModal";
-
 
 const API_BASE = `${process.env.NEXT_PUBLIC_API_BASE_URL}/success`;
 
@@ -89,13 +88,14 @@ export default function SuccessStoriesManager() {
   };
 
   return (
-    <div>
-      <div className="flex gap-2 mb-4">
+    <div className="w-full">
+      {/* Filter Buttons */}
+      <div className="flex flex-wrap gap-2 mb-4">
         {["all", "pending", "approved", "rejected"].map((status) => (
           <button
             key={status}
             onClick={() => setStatusFilter(status)}
-            className={`px-3 py-1 rounded ${
+            className={`px-3 py-1 rounded text-sm ${
               statusFilter === status
                 ? "bg-yellow-500 text-white font-semibold"
                 : "bg-gray-100 text-gray-600"
@@ -106,17 +106,18 @@ export default function SuccessStoriesManager() {
         ))}
       </div>
 
-      <div className="overflow-x-auto max-h-[500px] border rounded-xl border-yellow-400/20 shadow">
-        <table className="min-w-full text-left bg-white">
-          <thead className="sticky top-0 bg-yellow-50 z-10 border-b">
+      {/* Table Section */}
+      <div className="overflow-x-auto border rounded-xl border-yellow-400/20 shadow max-h-[500px]">
+        <table className="min-w-full text-left bg-white text-sm">
+          <thead className="sticky top-0 bg-yellow-50 z-10 border-b text-yellow-600">
             <tr>
-              <th className="py-2 px-3 font-semibold text-yellow-600">Title</th>
-              <th className="py-2 px-3 font-semibold text-yellow-600">User</th>
-              <th className="py-2 px-3 font-semibold text-yellow-600">Provider</th>
-              <th className="py-2 px-3 font-semibold text-yellow-600">Date</th>
-              <th className="py-2 px-3 font-semibold text-yellow-600">Status</th>
-              <th className="py-2 px-3 font-semibold text-yellow-600">Featured</th>
-              <th className="py-2 px-3 font-semibold text-yellow-600">Actions</th>
+              <th className="py-2 px-3 font-semibold">Title</th>
+              <th className="py-2 px-3 font-semibold">User</th>
+              <th className="py-2 px-3 font-semibold">Provider</th>
+              <th className="py-2 px-3 font-semibold">Date</th>
+              <th className="py-2 px-3 font-semibold">Status</th>
+              <th className="py-2 px-3 font-semibold">Featured</th>
+              <th className="py-2 px-3 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -164,13 +165,13 @@ export default function SuccessStoriesManager() {
                   <td className="py-2 px-3 flex flex-wrap gap-2">
                     <button
                       onClick={() => handleEdit(s)}
-                      className="px-2 py-1 bg-blue-500 text-white rounded"
+                      className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(s._id)}
-                      className="px-2 py-1 bg-red-500 text-white rounded"
+                      className="px-2 py-1 bg-red-500 text-white rounded text-xs"
                     >
                       Delete
                     </button>
@@ -178,13 +179,13 @@ export default function SuccessStoriesManager() {
                       <>
                         <button
                           onClick={() => handleApprove(s._id)}
-                          className="px-2 py-1 bg-green-500 text-white rounded"
+                          className="px-2 py-1 bg-green-500 text-white rounded text-xs"
                         >
                           Approve
                         </button>
                         <button
                           onClick={() => handleReject(s._id)}
-                          className="px-2 py-1 bg-yellow-500 text-white rounded"
+                          className="px-2 py-1 bg-yellow-500 text-white rounded text-xs"
                         >
                           Reject
                         </button>
@@ -198,6 +199,7 @@ export default function SuccessStoriesManager() {
         </table>
       </div>
 
+      {/* Edit Modal */}
       <ContentModal
         open={modalOpen}
         onClose={() => {

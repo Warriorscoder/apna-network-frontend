@@ -16,19 +16,21 @@ export default function ServiceTakersTable() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-center text-gray-500 py-4">Loading users...</p>;
-  if (!users.length) return <p className="text-center text-gray-400 py-4">No service takers found.</p>;
+  if (loading)
+    return <p className="text-center text-gray-500 py-4">Loading users...</p>;
+  if (!users.length)
+    return <p className="text-center text-gray-400 py-4">No service takers found.</p>;
 
   return (
-    <div>
-      <h3 className="font-semibold text-lg mb-2 text-blue-600">Service Takers</h3>
-      <div className="overflow-x-auto bg-white shadow rounded-xl border border-gray-200 mb-6">
-        <table className="min-w-full text-left">
-          <thead>
-            <tr className="bg-gray-100 text-gray-700">
-              <th className="py-2 px-4">Name</th>
-              <th className="py-2 px-4">Email</th>
-              <th className="py-2 px-4">Phone</th>
+    <div className="w-full">
+      <h3 className="font-semibold text-lg mb-3 text-blue-600">Service Takers</h3>
+      <div className="overflow-x-auto bg-white shadow-md rounded-xl border border-gray-200">
+        <table className="min-w-full text-left text-sm sm:text-base">
+          <thead className="bg-gray-100 text-gray-700">
+            <tr>
+              <th className="py-3 px-4 whitespace-nowrap">Name</th>
+              <th className="py-3 px-4 whitespace-nowrap">Email</th>
+              <th className="py-3 px-4 whitespace-nowrap">Phone</th>
             </tr>
           </thead>
           <tbody>

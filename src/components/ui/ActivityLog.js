@@ -10,13 +10,12 @@ export default function ActivityLog() {
   useEffect(() => {
     const fetchActivity = async () => {
       try {
-
-
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/activity`);
 
         if (!res.ok) {
           throw new Error('Failed to fetch activity log');
         }
+
         const data = await res.json();
         setActivity(data);
       } catch (err) {
@@ -44,9 +43,9 @@ export default function ActivityLog() {
   return (
     <ul className="divide-y divide-gray-200">
       {activity.map((a, i) => (
-        <li key={i} className="py-2 flex items-center justify-between">
-          <span className="text-gray-700">{a.message}</span>
-          <span className="text-xs text-gray-400">{new Date(a.date).toLocaleString()}</span>
+        <li key={i} className="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+          <span className="text-gray-700 text-sm">{a.message}</span>
+          <span className="text-xs text-gray-500 sm:text-right">{new Date(a.date).toLocaleString()}</span>
         </li>
       ))}
     </ul>

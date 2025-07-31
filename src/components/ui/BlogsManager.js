@@ -4,6 +4,7 @@ import axios from "axios";
 import ContentModal from "./ContentModal";
 
 const API_BASE = `${process.env.NEXT_PUBLIC_API_BASE_URL}/blogs`;
+
 export default function BlogsManager() {
   const [blogs, setBlogs] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -93,8 +94,8 @@ export default function BlogsManager() {
   );
 
   return (
-    <div>
-      <div className="flex gap-2 mb-4">
+    <div className="w-full">
+      <div className="flex flex-wrap gap-2 mb-4">
         {["all", "pending", "approved", "rejected"].map((status) => (
           <button
             key={status}
@@ -110,17 +111,17 @@ export default function BlogsManager() {
         ))}
       </div>
 
-     
-      <button
-        onClick={handleAdd}
-        className="mb-4 bg-[#695aa6] text-white px-4 py-2 rounded font-semibold shadow hover:bg-[#57468b] transition"
-      >
-        + Add Blog
-      </button>
+      <div className="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+        <button
+          onClick={handleAdd}
+          className="bg-[#695aa6] text-white px-4 py-2 rounded font-semibold shadow hover:bg-[#57468b] transition w-full sm:w-fit"
+        >
+          + Add Blog
+        </button>
+      </div>
 
-     
-      <div className="overflow-x-auto rounded-xl shadow border border-[#695aa6]/20">
-        <table className="min-w-full text-left bg-white rounded-xl overflow-hidden">
+      <div className="overflow-auto rounded-xl shadow border border-[#695aa6]/20">
+        <table className="min-w-[600px] w-full text-left bg-white rounded-xl overflow-hidden">
           <thead className="sticky top-0 z-10 bg-[#f3f0fa] border-b border-[#695aa6]/20">
             <tr className="text-[#695aa6]">
               <th className="py-2 px-3 font-semibold">Title</th>
@@ -147,7 +148,7 @@ export default function BlogsManager() {
                   <td className="py-2 px-3">
                     {b.date ? new Date(b.date).toLocaleDateString() : "N/A"}
                   </td>
-                  <td className="py-2 px-3">{b.tags?.join(", ") || "-"}</td>
+                  <td className="py-2 px-3 break-all">{b.tags?.join(", ") || "-"}</td>
                   <td className="py-2 px-3">
                     <span
                       className={`px-2 py-1 rounded text-xs font-bold ${
@@ -211,7 +212,6 @@ export default function BlogsManager() {
         </table>
       </div>
 
-     
       <ContentModal
         open={modalOpen}
         onClose={() => {
