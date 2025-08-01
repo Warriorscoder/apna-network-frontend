@@ -1,7 +1,8 @@
-import { Briefcase, Search, Star, MapPin, Clock, Award, Filter, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Briefcase, Search, Star, MapPin, Clock, Award, Filter, ChevronRight, ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Dialoguebox from '@/components/servicePage/Dialoguebox';
+import LocationSelector from '@/components/LocationSelector';
 
 const ServiceCategoryCard = ({ service, onClick }) => {
   const [hovered, setHovered] = useState(false);
@@ -69,12 +70,6 @@ const EnhancedServiceCard = ({ service, onMoreDetails, index }) => (
           {service.address}
         </span>
       </div>
-      {/* <div className="flex items-center space-x-2">
-        <Award className="w-4 h-4 text-[#695aa6] flex-shrink-0" />
-        <span className="text-gray-600">
-          {service.experience}
-        </span>
-      </div> */}
       <div className="flex items-center space-x-2">
         <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" />
         <span className="text-gray-600">
@@ -83,12 +78,22 @@ const EnhancedServiceCard = ({ service, onMoreDetails, index }) => (
       </div>
     </div>
 
-    <button
-      onClick={() => onMoreDetails(service)}
-      className="w-full py-2.5 px-4 bg-[#695aa6] text-white rounded-lg text-sm hover:bg-[#5a4d8a] transition-colors font-medium"
-    >
-      View Details
-    </button>
+    <div className="flex space-x-2">
+      <button
+        onClick={() => onMoreDetails(service)}
+        className="flex-1 py-2.5 px-4 bg-[#695aa6] text-white rounded-lg text-sm hover:bg-[#5a4d8a] transition-colors font-medium"
+      >
+        View Details
+      </button>
+      {service.phone && service.phone !== "Not provided" && (
+        <a
+          href={`tel:${service.phone}`}
+          className="py-2.5 px-4 border border-[#695aa6] text-[#695aa6] rounded-lg text-sm hover:bg-[#695aa6] hover:text-white transition-colors font-medium"
+        >
+          Call
+        </a>
+      )}
+    </div>
   </div>
 );
 
@@ -103,10 +108,14 @@ function ServicesPanel() {
   const [categorySearchTerm, setCategorySearchTerm] = useState("");
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [allcategories, setAllcategories] = useState([])
+  const [allcategories, setAllcategories] = useState([]);
+  
+  // New filter states matching page.jsx
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
 
   useEffect(() => {
-
     const fetchallcategories = async () => {
       try {
         setLoading(true)
@@ -131,8 +140,6 @@ function ServicesPanel() {
     fetchallcategories();
   }, [])
 
-  // console.log("all categories ", allcategories)
-
   const filteredServiceCategories = allcategories.filter(
     (category) =>
       category.title.toLowerCase().includes(categorySearchTerm.toLowerCase())
@@ -154,21 +161,26 @@ function ServicesPanel() {
       const services = response.data.data || [];
       const filteredServices = services.filter((item) => item.category === serviceKey);
       setServiceData(filteredServices);
-      // console.log("service data ",filteredServices)
+
       if (filteredServices.length > 0) {
         const providerIds = filteredServices.map((item) => item.provider_id);
         const result = await axios.post(`${apiurl}/providers/multi-by-id`, { ids: providerIds });
         if (!result.data.success) throw new Error("Failed to fetch providers");
 
         const providersData = result.data.providers || [];
-        // console.log("providerdata", providersData)
+        
+        // Enhanced provider data transformation to match page.jsx structure
         const transformedData = providersData.map((provider) => ({
           name: provider.name,
           email: provider.email,
           provider_id: provider._id,
-          address: provider.location,
+          village: provider.village,
+          panchayat_ward: provider.panchayat_ward,
+          tehsil: provider.tehsil,
+          district: provider.district,
+          location: provider.location,
+          address: `${provider.village}, ${provider.panchayat_ward}, ${provider.tehsil}, ${provider.district}, ${provider.location}`,
           rating: Math.floor(Math.random() * 5) + 1,
-          // experience: `${provider.experience} years`,
           availability: `${provider.availability?.from || "9 AM"} - ${provider.availability?.to || "6 PM"}`,
           phone: provider.phone || "Not provided",
         }));
@@ -188,7 +200,6 @@ function ServicesPanel() {
 
   const handleMoreDetails = (provider) => {
     const serviceInfo = serviceData.find((item) => item.provider_id === provider.provider_id);
-    console.log("serviceInfo ", serviceInfo)
     const cardData = {
       ...provider,
       title: serviceInfo?.description || `${selectedService?.title} Service`,
@@ -197,7 +208,6 @@ function ServicesPanel() {
       experience: serviceInfo?.experience_level,
       serviceId: serviceInfo._id
     };
-    // console.log("cardinfo ", cardData)
     setSelectedProvider(cardData);
     setIsDialogOpen(true);
   };
@@ -209,12 +219,57 @@ function ServicesPanel() {
     setSearchTerm("");
     setServiceData([]);
     setCategorySearchTerm("");
+    // Reset filters
+    setSelectedState("");
+    setSelectedCity("");
+    setShowFilters(false);
   };
 
+  // Clear all filters function
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setSelectedState("");
+    setSelectedCity("");
+  };
+
+  // Enhanced filter providers based on search term and selected filters (matching page.jsx)
   const filteredAndSearchedProviders = filteredProviders.filter((provider) => {
-    if (!searchTerm) return true;
-    const searchLower = searchTerm.toLowerCase();
-    return provider.name?.toLowerCase().includes(searchLower) || provider.address?.toLowerCase().includes(searchLower);
+    const address = provider.address?.toLowerCase() || "";
+    const name = provider.name?.toLowerCase() || "";
+    const village = provider.village?.toLowerCase() || "";
+    const tehsil = provider.tehsil?.toLowerCase() || "";
+    const district = provider.district?.toLowerCase() || "";
+    const location = provider.location?.toLowerCase() || "";
+
+    // Search term filtering - check multiple fields
+    const matchesSearchTerm = !searchTerm ||
+                              name.includes(searchTerm.toLowerCase()) ||
+                              address.includes(searchTerm.toLowerCase()) ||
+                              village.includes(searchTerm.toLowerCase()) ||
+                              tehsil.includes(searchTerm.toLowerCase()) ||
+                              district.includes(searchTerm.toLowerCase()) ||
+                              location.includes(searchTerm.toLowerCase());
+
+    // State filtering - check against Indian states
+    let matchesState = true;
+    if (selectedState) {
+      const selectedStateLower = selectedState.toLowerCase();
+      matchesState = location.includes(selectedStateLower) ||
+                     district.includes(selectedStateLower) ||
+                     address.includes(selectedStateLower);
+    }
+
+    // City filtering - enhanced matching
+    let matchesCity = true;
+    if (selectedCity) {
+      const selectedCityLower = selectedCity.toLowerCase();
+      matchesCity = district.includes(selectedCityLower) ||
+                    location.includes(selectedCityLower) ||
+                    address.includes(selectedCityLower) ||
+                    village.includes(selectedCityLower);
+    }
+
+    return matchesSearchTerm && matchesState && matchesCity;
   });
 
   return (
@@ -290,22 +345,63 @@ function ServicesPanel() {
             </>
           ) : (
             <>
-              <div className="mb-6">
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              {/* Enhanced Search and Filter Section matching page.jsx */}
+              <div className="mb-6 bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+                {/* Search Bar */}
+                <div className="mb-4">
+                  <div className="relative">
                     <input
                       type="text"
-                      placeholder={`Search in ${selectedService?.title?.toLowerCase()}...`}
+                      placeholder="Search by name, location, village, or tehsil..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#695aa6] focus:border-transparent text-sm sm:text-base"
+                      className="w-full pl-10 pr-4 py-3 sm:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#695aa6] focus:border-transparent text-sm sm:text-lg"
                     />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="w-5 h-5 text-gray-400" />
+                    </div>
                   </div>
-                  <button className="px-6 py-2.5 bg-[#695aa6] text-white rounded-lg hover:bg-[#5a4d8a] transition-colors font-semibold text-sm sm:text-base">
-                    Search
-                  </button>
                 </div>
+
+                {/* Toggle Button for Filters */}
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors mb-2"
+                >
+                  <span className="font-medium text-[#695aa6]">Location Filters</span>
+                  <div className="flex items-center space-x-2">
+                    {(selectedState || selectedCity) && (
+                      <span className="bg-[#695aa6] text-white text-xs px-2 py-1 rounded-full">
+                        {[selectedState, selectedCity].filter(Boolean).length} selected
+                      </span>
+                    )}
+                    {showFilters ? <ChevronUp /> : <ChevronDown />}
+                  </div>
+                </button>
+
+                {/* Collapsible Filter Section - Using LocationSelector */}
+                {showFilters && (
+                  <div className="border-t border-gray-200 pt-4">
+                    <LocationSelector
+                      selectedState={selectedState}
+                      selectedCity={selectedCity}
+                      onStateChange={setSelectedState}
+                      onCityChange={setSelectedCity}
+                    />
+
+                    {/* Clear Filters Button */}
+                    {(selectedState || selectedCity) && (
+                      <div className="mt-3 flex justify-end">
+                        <button
+                          onClick={clearAllFilters}
+                          className="px-4 py-2 text-sm text-[#695aa6] hover:text-[#5a4d8a] transition-colors"
+                        >
+                          Clear All Filters
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {loading ? (
@@ -322,35 +418,67 @@ function ServicesPanel() {
                 <div className="flex flex-col items-center justify-center text-center py-10">
                   <div className="text-4xl mb-4">🔍</div>
                   <h3 className="text-xl font-bold text-gray-800 mb-2">No {selectedService?.title} Found</h3>
-                  <p className="text-gray-600 text-sm">{searchTerm ? `No providers found for "${searchTerm}".` : "Check back soon!"}</p>
+                  <p className="text-gray-600 text-sm mb-4">
+                    No providers found matching your search and filters. Try different keywords or filters.
+                  </p>
+                  <button
+                    onClick={clearAllFilters}
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-[#695aa6] text-white rounded-lg hover:bg-[#5a4d8a] transition-colors text-sm sm:text-base"
+                  >
+                    Clear All Filters
+                  </button>
                 </div>
               ) : (
                 <div>
-                  <div className="mb-4 text-sm text-gray-600 lg:hidden">
-                    Found {filteredAndSearchedProviders.length} {selectedService?.title?.toLowerCase()}
+                  {/* Results Count */}
+                  <div className="mb-4 text-center">
+                    <p className="text-sm text-gray-600">
+                      Found {filteredAndSearchedProviders.length}{" "}
+                      {selectedService?.title?.toLowerCase()} provider{filteredAndSearchedProviders.length !== 1 ? 's' : ''}
+                      {(selectedState || selectedCity || searchTerm) && (
+                        <span className="text-[#695aa6] font-medium">
+                          {" "}matching your criteria
+                        </span>
+                      )}
+                    </p>
                   </div>
 
                   <div className="hidden lg:block overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-sm bg-white rounded-lg shadow-sm">
                       <thead>
                         <tr className="border-b-2 border-gray-200">
-                          <th className="py-3 px-4 text-left font-semibold text-gray-800">#</th>
-                          <th className="py-3 px-4 text-left font-semibold text-gray-800">Name</th>
-                          <th className="py-3 px-4 text-left font-semibold text-gray-800">Address</th>
-                          {/* <th className="py-3 px-4 text-left font-semibold text-gray-800">Experience</th> */}
-                          <th className="py-3 px-4 text-left font-semibold text-gray-800">Rating</th>
-                          <th className="py-3 px-4 text-left font-semibold text-gray-800">Actions</th>
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">#</th>
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">Provider</th>
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">Location</th>
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">Rating</th>
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredAndSearchedProviders.map((provider, index) => (
-                          <tr key={provider.provider_id || index} className="border-b border-gray-100 hover:bg-gray-50">
-                            <td className="py-3 px-4">{index + 1}</td>
-                            <td className="py-3 px-4 font-medium text-gray-800">{provider.name}</td>
-                            <td className="py-3 px-4 text-gray-700 max-w-xs truncate">{provider.address}</td>
-                            {/* <td className="py-3 px-4 text-gray-700">{provider.experience}</td> */}
-                            <td className="py-3 px-4"><div className="flex items-center gap-1"><Star className="w-4 h-4 fill-yellow-400 text-yellow-400" /><span>{provider.rating}</span></div></td>
-                            <td className="py-3 px-4"><button onClick={() => handleMoreDetails(provider)} className="px-3 py-1.5 bg-[#695aa6] text-white rounded text-xs hover:bg-[#5a4d8a] transition">View Details</button></td>
+                          <tr key={provider.provider_id || index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td className="py-4 px-4 text-gray-700">{index + 1}</td>
+                            <td className="py-4 px-4">
+                              <div className="font-medium text-gray-800">{provider.name}</div>
+                              <div className="text-sm text-gray-600">{provider.phone}</div>
+                            </td>
+                            <td className="py-4 px-4 text-gray-700 max-w-xs">
+                              <div className="break-words">{provider.address}</div>
+                            </td>
+                            <td className="py-4 px-4 text-gray-700">
+                              <div className="flex items-center gap-1">
+                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                <span>{provider.rating}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <button
+                                onClick={() => handleMoreDetails(provider)}
+                                className="px-4 py-2 bg-[#695aa6] text-white rounded text-sm hover:bg-[#5a4d8a] transition-colors"
+                              >
+                                View Details
+                              </button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
