@@ -1,20 +1,31 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import Navbar from "@/app/Navbar";
-import { useAuth } from "@/app/context/Authcontext";
+import { useAuth } from "../app/context/Authcontext";
+import Navbar from "../app/Navbar";
 
 export default function ConditionalNavbar() {
-  const { user } = useAuth();
-  const pathname = usePathname();
+  const {
+    isAuthenticated,
+    loading,
+    getCurrentUser,
+    getUserRole,
+  } = useAuth();
 
-  const isServicePage = pathname.startsWith("/service/");
-  const isAuthPage = pathname.startsWith("/auth/");
-
-  // Don't render navbar on service or auth pages
-  if (isServicePage || isAuthPage) {
+  // Show nothing while loading
+  if (loading) {
     return null;
   }
 
-  return <Navbar showProfile={!!user} userName={user?.name || ""} />;
+  // Get current user data
+  const authenticatedUser = getCurrentUser();
+  const userRole = getUserRole();
+  const isAuth = isAuthenticated();
+
+  return (
+    <Navbar
+      user={authenticatedUser}
+      isAuthenticated={isAuth}
+      userRole={userRole}
+    />
+  );
 }
