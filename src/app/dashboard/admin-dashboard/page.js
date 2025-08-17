@@ -24,6 +24,33 @@ export default function AdminDashboard() {
   const [contentModalOpen, setContentModalOpen] = useState(false);
   const [contentType, setContentType] = useState("");
   const [contentInitialData, setContentInitialData] = useState(null);
+ const [authError, setAuthError] = useState(false);
+
+  
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/stats`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}` // send token
+          }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          setAuthError(true);
+          return;
+        }
+
+        const result = await res.json();
+        console.log("Fetched stats:", result);
+      } catch (err) {
+        console.error("Failed to fetch stats", err);
+        setAuthError(true);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const toggleCollapse = () => {
     setCollapsed((prev) => {
@@ -45,6 +72,16 @@ export default function AdminDashboard() {
     setContentInitialData(data);
     setContentModalOpen(true);
   };
+   if (authError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-red-50">
+        <div className="text-center p-8 bg-white shadow-lg rounded-xl">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Unauthorized Access</h1>
+          <p className="text-gray-600">You are not allowed to view this page.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-white to-[#695aa6]/10 flex">

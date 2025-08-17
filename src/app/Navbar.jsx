@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { User, LogOut, ChevronDown, Menu, X } from "lucide-react"
 import { useAuth } from "@/app/context/Authcontext"
+import { userAgentFromString } from "next/server"
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -29,7 +30,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
-  const profileRef = useRef(null)
+  const profileRef = useRef(null) 
 
   const {
     user,
@@ -41,7 +42,8 @@ export default function Navbar() {
     authInitialized,
   } = useAuth()
 
-  const isLoggedIn = authInitialized && isAuthenticated()
+   const isLoggedIn = authInitialized && isAuthenticated()
+
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10)
@@ -65,6 +67,7 @@ export default function Navbar() {
     setIsMobileMenuOpen(false)
   }, [pathname])
 
+   
   const handleNavigate = (href) => {
     setIsMobileMenuOpen(false)
     setProfileOpen(false)
@@ -84,6 +87,7 @@ export default function Navbar() {
   const getDashboardLink = () => {
     if (!authInitialized) return "/dashboard/user-dashboard"
     const role = getUserRole()
+ 
     switch (role) {
       case "user":
         return "/dashboard/user-dashboard"
@@ -95,10 +99,12 @@ export default function Navbar() {
         return "/dashboard/user-dashboard"
     }
   }
+  
 
   const getUserDisplayName = () => {
     const current = getCurrentUser()
-    if (current?.name) return current.name
+    console.log("current" , current)
+    if (current?.name) return current.name.split(" ")[0]
     if (current?.fullName) return current.fullName
     if (current?.firstName) return current.lastName ? `${current.firstName} ${current.lastName}` : current.firstName
     if (current?.provider_name) return current.provider_name
@@ -110,6 +116,8 @@ export default function Navbar() {
     }
     return "User"
   }
+
+  
 
   const getRoleBadge = () => {
     const role = getUserRole()

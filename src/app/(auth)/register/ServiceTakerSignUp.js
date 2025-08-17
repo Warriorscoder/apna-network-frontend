@@ -6,6 +6,7 @@ import Link from "next/link";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useSearchParams } from 'next/navigation';
+import { useAuth } from "@/app/context/Authcontext"
 
 export default function ServiceTakerSignUp() {
 
@@ -19,6 +20,11 @@ export default function ServiceTakerSignUp() {
     address: "",
 
   });
+  
+  const {
+    loginWithToken,
+  } = useAuth()
+
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,12 +59,14 @@ const handleSubmit = async (e) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   try {
-    const res = await axios.post(`${apiUrl}/users/complete`, {gender :formData.gender , address: formData.address, phone , role});
+    const res = await axios.post(`${apiUrl}/users/complete`, {gender :formData.gender ,name:formData.name, address: formData.address, phone , role});
     console.log(phone,role,formData)
     const data = res.data;
+    console.log("Response data:", data);
     if (data.success) {
       toast.success("Registration successful!");
-      router.push("/");
+      loginWithToken(data.token)
+      router.push("/dashboard/user-dashboard");
     }
 
   } catch (err) {

@@ -19,8 +19,13 @@ export default function StatCard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/stats`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/stats`, {
+          headers:{
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          }
+        });
         const result = await res.json();
+        console.log("Fetched stats:", result);
         const data = result.data;
 
         setStats([
