@@ -10,7 +10,7 @@ export default function Header() {
   const menuRef = useRef(null);
   const router = useRouter();
 
-  // Toggle menu
+  // Toggle dropdown
   const toggleDropdown = () => setShowMenu((prev) => !prev);
 
   // Load admin name from localStorage
@@ -40,7 +40,7 @@ export default function Header() {
   // Handle Logout
   const handleLogout = () => {
     localStorage.removeItem("admin");
-    router.push("/login");
+    router.push("/");
   };
 
   // Handle View Profile
@@ -49,40 +49,44 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow flex items-center justify-between px-8 py-4 border-b">
-      <h1 className="text-2xl font-bold text-[#695aa6] tracking-tight">
-        Admin Dashboard
-      </h1>
+    <header className="bg-white shadow border-b px-4 sm:px-6 md:px-8 py-3 sm:py-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-[#695aa6] tracking-tight">
+          Admin Dashboard
+        </h1>
 
-      <div className="flex items-center gap-6 relative" ref={menuRef}>
-        <NotificationBadge />
+        <div className="flex items-center gap-4 sm:gap-6 relative" ref={menuRef}>
+          <NotificationBadge />
 
-        <div
-          onClick={toggleDropdown}
-          className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded transition"
-        >
-          <span className="text-xl">👤</span>
-          <span className="text-[#695aa6] font-medium">{adminName}</span>
-        </div>
-
-        {showMenu && (
-          <div className="absolute right-0 top-16 bg-white border border-gray-200 rounded shadow-md z-50 w-40">
-            <ul className="flex flex-col py-2 text-sm text-gray-700">
-              <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={handleViewProfile}
-              >
-                View Profile
-              </li>
-              <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={handleLogout}
-              >
-                Logout
-              </li>
-            </ul>
+          <div
+            onClick={toggleDropdown}
+            className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded transition"
+          >
+            <span className="text-xl">👤</span>
+            <span className="text-[#695aa6] font-medium text-sm sm:text-base">
+              {adminName}
+            </span>
           </div>
-        )}
+
+          {showMenu && (
+            <div className="absolute right-0 top-14 bg-white border border-gray-200 rounded shadow-md z-50 w-40 sm:w-44">
+              <ul className="flex flex-col py-2 text-sm text-gray-700">
+                <li
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={handleViewProfile}
+                >
+                  View Profile
+                </li>
+                <li
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </li>
+              </ul>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

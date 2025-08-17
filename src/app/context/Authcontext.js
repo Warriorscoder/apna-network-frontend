@@ -289,6 +289,7 @@ export const AuthProvider = ({ children }) => {
               name: decoded.name,
               email: decoded.email || '',
               role: decoded.role,
+              phone:decoded.phone
             });
           } else {
             console.warn("Token found but missing required fields.");
@@ -320,6 +321,7 @@ export const AuthProvider = ({ children }) => {
           name: decoded.name,
           email: decoded.email || "",
           role: decoded.role,
+          phone:decoded.phone
         };
         setUser(userData);
         return { success: true, user: userData };

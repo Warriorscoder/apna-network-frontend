@@ -286,8 +286,9 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
   };
 
  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fadeIn max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 px-2 sm:px-4">
+       <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 w-[95%] max-w-lg sm:max-w-xl md:max-w-2xl relative animate-fadeIn max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent transition-transform duration-300 ease-in-out transform scale-95 sm:scale-100">
+
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-[#695aa6] focus:outline-none text-2xl"
@@ -320,7 +321,7 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             {fields[type]}
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col sm:flex-row justify-end gap-2">
               <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition">
                 Cancel
               </button>

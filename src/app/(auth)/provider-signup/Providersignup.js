@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { useSearchParams } from 'next/navigation';
+import { useAuth } from '@/app/context/Authcontext';
 const servicesList = [
   'Plumber', 'Electrician', 'Painter', 'Carpenter', 'Construction Worker',
   'Photographer', 'Welder', 'Tailor', 'Cook', 'Gardener',
@@ -16,12 +17,13 @@ const educationOptions = [
 ];
 
 const providerInitial = {
-  name: '', fatherName: '', dob: '', gender: '', aadhar: '',
+  name: '', fatherName: '', email: '', dob: '', gender: '', aadhar: '',
   village: '', panchayat: '', tehsil: '', district: '',
-  education: '', educationOther: '', services: [],
-  servicesOther: '', experience: '', updates: '',
-  referredBy: '', declaration: false, password: '',
+  education: '', educationOther: '',
+  availability: { from: '', to: '' },
+  declaration: false
 };
+
 
 const providerSteps = [
   'Personal Details', 'Address', 'Education & Services', 'Confirmation'
@@ -31,16 +33,17 @@ export default function ServiceProviderSignUp({ onSuccess }) {
 
 
 
-   const searchParams = useSearchParams();
+  const searchParams = useSearchParams();
 
 
-   const phone = searchParams.get('phone') || '';
-   const role = searchParams.get('role') || '';
+  const phone = searchParams.get('phone') || '';
+  const role = searchParams.get('role') || '';
   const [formData, setFormData] = useState(providerInitial);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(0);
   const router = useRouter();
+  const { loginWithToken } = useAuth();
 
   const validate = () => {
     const newErrors = {};
@@ -52,6 +55,7 @@ export default function ServiceProviderSignUp({ onSuccess }) {
     if (step === 0) {
       if (!trimmed.name) newErrors.name = 'Name is required';
       if (!trimmed.fatherName) newErrors.fatherName = "Father's Name is required";
+      if (!trimmed.email) newErrors.email = "Email is required";
       if (!trimmed.dob) newErrors.dob = 'Date of Birth is required';
       if (!trimmed.gender) newErrors.gender = 'Gender is required';
       if (!/^\d{12}$/.test(trimmed.aadhar)) newErrors.aadhar = 'Enter a valid 12-digit Aadhar number';
@@ -65,48 +69,70 @@ export default function ServiceProviderSignUp({ onSuccess }) {
     if (step === 2) {
       if (!trimmed.education) newErrors.education = 'Select educational qualification';
       if (trimmed.education === 'Other' && !trimmed.educationOther) newErrors.educationOther = 'Please specify your education';
-      if (!formData.services.length) newErrors.services = 'Select at least one service';
-      if (formData.services.includes('Other') && !trimmed.servicesOther) newErrors.servicesOther = 'Please specify your service';
-      if (!trimmed.experience) newErrors.experience = 'Experience is required';
-      else if (isNaN(Number(trimmed.experience)) || Number(trimmed.experience) < 0 || Number(trimmed.experience) > 50)
-        newErrors.experience = 'Experience must be between 0 and 50 years';
-      if (!trimmed.updates) newErrors.updates = 'Please select updates preference';
+      // if (!formData.services.length) newErrors.services = 'Select at least one service';
+      // if (formData.services.includes('Other') && !trimmed.servicesOther) newErrors.servicesOther = 'Please specify your service';
+      // if (!trimmed.experience) newErrors.experience = 'Experience is required';
+      // else if (isNaN(Number(trimmed.experience)) || Number(trimmed.experience) < 0 || Number(trimmed.experience) > 50)
+      //   newErrors.experience = 'Experience must be between 0 and 50 years';
+      if (!trimmed.availability?.from) {
+        newErrors['availability.from'] = 'Please select availability (from)';
+      }
+      if (!trimmed.availability?.to) {
+        newErrors['availability.to'] = 'Please select availability (to)';
+      }
+
+
+
     }
     if (step === 3) {
       if (!formData.declaration) newErrors.declaration = 'You must accept the declaration';
-      if (!trimmed.password) newErrors.password = 'Password is required';
-      else if (trimmed.password.length < 6)
-        newErrors.password = 'Password must be at least 6 characters';
+      // if (!trimmed.password) newErrors.password = 'Password is required';
+      // else if (trimmed.password.length < 6)
+      //   newErrors.password = 'Password must be at least 6 characters';
     }
     return newErrors;
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     if (type === 'checkbox' && name === 'declaration') {
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      // Handle nested fields like "availability.from"
+      if (name.includes('.')) {
+        const [parent, child] = name.split('.');
+        setFormData(prev => ({
+          ...prev,
+          [parent]: {
+            ...prev[parent],
+            [child]: value
+          }
+        }));
+      } else {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
     }
   };
 
-  const handleServiceClick = (service) => {
-    setFormData(prev => {
-      const selected = prev.services.includes(service)
-        ? prev.services.filter(s => s !== service)
-        : [...prev.services, service];
-      return { ...prev, services: selected };
-    });
-  };
+
+  // const handleServiceClick = (service) => {
+  //   setFormData(prev => {
+  //     const selected = prev.services.includes(service)
+  //       ? prev.services.filter(s => s !== service)
+  //       : [...prev.services, service];
+  //     return { ...prev, services: selected };
+  //   });
+  // };
 
   const handleNext = () => {
     const newErrors = validate();
     setErrors(newErrors);
     // if (Object.keys(newErrors).length === 0) setStep(step + 1);
-     if (Object.keys(newErrors).length === 0) {
-    console.log('Going to step:', step + 1);
-    setStep(step + 1);
-  }
+    if (Object.keys(newErrors).length === 0) {
+      console.log('Going to step:', step + 1);
+      setStep(step + 1);
+    }
   };
 
   const handleBack = () => {
@@ -114,57 +140,62 @@ export default function ServiceProviderSignUp({ onSuccess }) {
     setStep(step - 1);
   };
 
-  
 
-  const handleSubmit  = async(e)=>{
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
 
     try {
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/providers/complete`, {
-  phone: phone,
-  role: role,
-  name: formData.name,
-  fatherName: formData.fatherName,
-  email: 'dhy@gmail.com', // if dynamic, use formData.email or ask user
-  location: `${formData.village}, ${formData.panchayat}, ${formData.tehsil}, ${formData.district}`,
-  skills: formData.services.includes("Other") && formData.servicesOther
-    ? [...formData.services.filter(s => s !== 'Other'), formData.servicesOther]
-    : formData.services,
-  experience: formData.experience,
-  availability: formData.updates === 'Yes', // or just formData.updates
-  aadhar: formData.aadhar,
-  village: formData.village,
-  panchayat: formData.panchayat,
-  tehsil: formData.tehsil,
-  district: formData.district,
-  dob: formData.dob,
-  gender: formData.gender,
-  education: formData.education === 'Other' ? formData.educationOther : formData.education,
-  referredBy: formData.referredBy,
-  declaration: formData.declaration,
-  password: formData.password,
-});
+        phone: phone,
+        role: role,
+        name: formData.name,
+        fatherName: formData.fatherName,
+        email: formData.email,
+        location: `${formData.village}, ${formData.panchayat}, ${formData.tehsil}, ${formData.district}`,
+        // skills: formData.services.includes("Other") && formData.servicesOther
+        //   ? [...formData.services.filter(s => s !== 'Other'), formData.servicesOther]
+        //   : formData.services,
+        // experience: formData.experience,
+        availability: {
+          from: formData.availability.from,
+          to: formData.availability.to
+        },
+        aadhar: formData.aadhar,
+        village: formData.village,
+        panchayat: formData.panchayat,
+        tehsil: formData.tehsil,
+        district: formData.district,
+        dob: formData.dob,
+        gender: formData.gender,
+        education: formData.education === 'Other' ? formData.educationOther : formData.education,
+        // referredBy: formData.referredBy,
+        declaration: formData.declaration,
+        // password: formData.password,
+      });
 
 
-    const data = res.data;
-    if (data.success) {
-    router.push('/dashboard/provider-dashboard');
-    toast.success('Registration successful! Your custom service will be reviewed by an admin.');
-    localStorage.setItem('token', data.token); // Store token in local storage
-    localStorage.setItem('provider', JSON.stringify(data.provider)); // Store user data in local
-    }
-      
+      const data = res.data;
+      const result = loginWithToken(data.token);
+      if (result.success) {
+        router.push('/dashboard/provider-dashboard');
+        toast.success('Registration successful! Your custom service will be reviewed by an admin.');
+      }
+      else {
+        toast.error(result.message || "Login failed");
+      }
+
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('Error submitting form. Please try again later.');
-      
+
     }
-    finally{
+    finally {
       setIsSubmitting(false);
     }
-   
+
   }
 
   const renderError = (field) =>
@@ -199,11 +230,11 @@ export default function ServiceProviderSignUp({ onSuccess }) {
             </div>
           ))}
         </div>
-        <form onSubmit={handleSubmit} 
-         onKeyDown={(e) => {
-                     if (e.key === 'Enter') e.preventDefault(); // prevents unintentional submit
-                 }}
-                       className="space-y-4" noValidate>
+        <form onSubmit={handleSubmit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') e.preventDefault(); // prevents unintentional submit
+          }}
+          className="space-y-4" noValidate>
           {/* Step 1: Personal Details */}
           {step === 0 && (
             <>
@@ -215,7 +246,7 @@ export default function ServiceProviderSignUp({ onSuccess }) {
                   type="text"
                   value={formData.name}
                   onChange={handleChange}
-                   className="w-full p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                  className="w-full p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
                 />
                 {renderError('name')}
               </div>
@@ -230,6 +261,18 @@ export default function ServiceProviderSignUp({ onSuccess }) {
                   className="w-full p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
                 />
                 {renderError('fatherName')}
+              </div>
+              <div>
+                <Label en="Email" hi="ईमेल" htmlFor="input-email" required />
+                <input
+                  id="input-email"
+                  name="email"
+                  type="text"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                />
+                {renderError('email')}
               </div>
               <div>
                 <Label en="Date of Birth" hi="जन्म की तारीख" htmlFor="input-dob" required />
@@ -367,7 +410,7 @@ export default function ServiceProviderSignUp({ onSuccess }) {
                 {renderError('education')}
                 {renderError('educationOther')}
               </div>
-              <div>
+              {/* <div>
                 <Label en="What kind of services do you provide?" hi="आप किस प्रकार की सेवाएं प्रदान करते हैं?" htmlFor="input-services" required />
                 <div className="flex flex-wrap gap-2 mb-2">
                   {servicesList.map((service) => (
@@ -403,8 +446,8 @@ export default function ServiceProviderSignUp({ onSuccess }) {
                 )}
                 {renderError('services')}
                 {renderError('servicesOther')}
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <Label en="Work Experience" hi="कार्य अनुभव" htmlFor="input-experience" required />
                 <input
                   id="input-experience"
@@ -417,23 +460,81 @@ export default function ServiceProviderSignUp({ onSuccess }) {
                   max={50}
                 />
                 {renderError('experience')}
-              </div>
+              </div> */}
               <div>
-                <Label en="Would you like to receive updates?" hi="क्या आप अपडेट प्राप्त करना चाहेंगे?" htmlFor="input-updates" required />
-                <select
-                  id="input-updates"
-                  name="updates"
-                  value={formData.updates}
-                  onChange={handleChange}
-                  className="w-full p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                >
-                  <option value="">Select</option>
-                  <option value="Yes">Yes / हाँ</option>
-                  <option value="No">No / नहीं</option>
-                </select>
-                {renderError('updates')}
+                <Label en="Availability (From)" hi="उपलब्धता (से)" htmlFor="availability-from" required />
+                <div className="flex gap-2">
+                  <input
+                    type="time"
+                    id="availability-from"
+                    value={formData.availability.from?.split(' ')[0] || ''}
+                    onChange={(e) =>
+                      handleChange({
+                        target: {
+                          name: 'availability.from',
+                          value: `${e.target.value} ${formData.availability.from?.split(' ')[1] || 'AM'}`,
+                        },
+                      })
+                    }
+                    className="w-full p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                  />
+                  <select
+                    value={formData.availability.from?.split(' ')[1] || 'AM'}
+                    onChange={(e) =>
+                      handleChange({
+                        target: {
+                          name: 'availability.from',
+                          value: `${formData.availability.from?.split(' ')[0] || ''} ${e.target.value}`,
+                        },
+                      })
+                    }
+                    className="p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+                {renderError('availability.from')}
               </div>
-              <div>
+
+              <div className="mt-4">
+                <Label en="Availability (To)" hi="उपलब्धता (तक)" htmlFor="availability-to" required />
+                <div className="flex gap-2">
+                  <input
+                    type="time"
+                    id="availability-to"
+                    value={formData.availability.to?.split(' ')[0] || ''}
+                    onChange={(e) =>
+                      handleChange({
+                        target: {
+                          name: 'availability.to',
+                          value: `${e.target.value} ${formData.availability.to?.split(' ')[1] || 'PM'}`,
+                        },
+                      })
+                    }
+                    className="w-full p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                  />
+                  <select
+                    value={formData.availability.to?.split(' ')[1] || 'PM'}
+                    onChange={(e) =>
+                      handleChange({
+                        target: {
+                          name: 'availability.to',
+                          value: `${formData.availability.to?.split(' ')[0] || ''} ${e.target.value}`,
+                        },
+                      })
+                    }
+                    className="p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+                {renderError('availability.to')}
+              </div>
+
+
+              {/* <div>
                 <Label en="Referred By (if any)" hi="किसके द्वारा भेजा गया (यदि कोई हो)" htmlFor="input-referredBy" />
                 <input
                   id="input-referredBy"
@@ -444,7 +545,7 @@ export default function ServiceProviderSignUp({ onSuccess }) {
                   className="w-full p-2 rounded-[6px] bg-white border border-gray-300 text-gray-800 focus:ring-2 focus:ring-purple-500 focus:outline-none"
                 />
                 {renderError('referredBy')}
-              </div>
+              </div> */}
             </>
           )}
           {/* Step 4: Confirmation */}
@@ -464,7 +565,7 @@ export default function ServiceProviderSignUp({ onSuccess }) {
                 </label>
                 {renderError('declaration')}
               </div>
-              
+
             </>
           )}
           {/* Navigation Buttons */}
@@ -489,34 +590,34 @@ export default function ServiceProviderSignUp({ onSuccess }) {
             ) : (
 
 
-              
-   
-    formData.declaration && (
-      <div className="text-right mt-4">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="ml-auto px-4 py-2 rounded bg-[#695aa6] text-white font-semibold"
-        >
-          Submit
-        </button>
-      </div>
-    )
-  )
-            //   <button
-            //     type="submit"
-            //     disabled={isSubmitting}
-            //      onClick={(e) => {
-            //                    // prevent accidental auto-clicking
-            //                  e.stopPropagation();
-            //              }}
-            //     className="ml-auto px-4 py-2 rounded bg-[#695aa6] text-white font-semibold"
-            //   >
-            //     {/* {isSubmitting ? 'Registering...' : 'Submit'} */}
-            //     Submit
-            //   </button>
-            // )}
-}
+
+
+              formData.declaration && (
+                <div className="text-right mt-4">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="ml-auto px-4 py-2 rounded bg-[#695aa6] text-white font-semibold"
+                  >
+                    Submit
+                  </button>
+                </div>
+              )
+            )
+              //   <button
+              //     type="submit"
+              //     disabled={isSubmitting}
+              //      onClick={(e) => {
+              //                    // prevent accidental auto-clicking
+              //                  e.stopPropagation();
+              //              }}
+              //     className="ml-auto px-4 py-2 rounded bg-[#695aa6] text-white font-semibold"
+              //   >
+              //     {/* {isSubmitting ? 'Registering...' : 'Submit'} */}
+              //     Submit
+              //   </button>
+              // )}
+            }
           </div>
         </form>
       </div>

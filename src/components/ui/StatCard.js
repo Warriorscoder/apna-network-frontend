@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 
 function SingleStatCard({ icon, label, value }) {
   return (
-    <div className="bg-white rounded-xl shadow p-6 flex items-center justify-between border border-gray-100 hover:shadow-md transition">
+    <div className="bg-white rounded-xl shadow p-5 sm:p-6 flex items-center justify-between border border-gray-100 hover:shadow-md transition-all duration-200">
       <div>
         <div className="text-sm text-gray-500">{label}</div>
-        <div className="text-2xl font-bold text-[#695aa6]">{value}</div>
+        <div className="text-2xl font-bold text-[#695aa6] mt-1">{value}</div>
       </div>
       <div className="text-3xl">{icon}</div>
     </div>
@@ -50,7 +50,7 @@ export default function StatCard() {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-2 sm:px-4">
       {stats.map((stat) => (
         <SingleStatCard key={stat.label} {...stat} />
       ))}

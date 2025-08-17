@@ -77,12 +77,12 @@ export default function Navbar() {
   const isActive = (href) => pathname === href
 
   const handleLogout = () => {
-    logout()
-    setProfileOpen(false)
-    setIsMobileMenuOpen(false)
-    router.push("/")
-    window.location.reload()
-  }
+  logout()
+  setProfileOpen(false)
+  setIsMobileMenuOpen(false)
+  router.push("/")  
+}
+
 
   const getDashboardLink = () => {
     if (!authInitialized) return "/dashboard/user-dashboard"

@@ -15,7 +15,8 @@ import DashboardPanel from "./DashboardPanel";
 import ServicesPanel from "./ServicesPanel";
 import RequestsPanel from "./RequestsPanel";
 import HelpPanel from "./HelpPanel";
-import { useDummyAPI } from "@/app/hooks/useDummyAPI";
+import { useAuth } from "@/app/context/Authcontext";
+import UserFeedbackModal from "@/components/ui/UserFeedbackModal";
 
 const useClientGreeting = () => {
   const [greeting, setGreeting] = useState("Welcome");
@@ -31,12 +32,14 @@ const useClientGreeting = () => {
 };
 
 export default function UserDashboard() {
-  const { user } = useDummyAPI();
+  const { user } = useAuth();
   const [activeView, setActiveView] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showFloatingMenu, setShowFloatingMenu] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [feedbackPromptShown, setFeedbackPromptShown] = useState(true);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -50,25 +53,26 @@ export default function UserDashboard() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Auto-hide floating menu on scroll down, show on scroll up
   useEffect(() => {
     if (!isMobile) return;
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setShowFloatingMenu(false);
       } else {
         setShowFloatingMenu(true);
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY, isMobile]);
+
+  const greeting = useClientGreeting();
 
   const renderContent = () => {
     switch (activeView) {
@@ -85,8 +89,6 @@ export default function UserDashboard() {
     }
   };
 
-  const greeting = useClientGreeting();
-
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -101,8 +103,31 @@ export default function UserDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#a395d4] via-[#b8a7e8] to-[#8b7cc8] flex flex-col">
       <ConditionalNavbar />
-      
-      {/* Simple floating menu button without effects */}
+
+      {/* Feedback Modal */}
+      <UserFeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+        onSubmitted={(data) => {
+          console.log("Feedback received:", data);
+        }}
+      />
+       {/* Prompting Popup on Load */}
+      {activeView === "dashboard" && feedbackPromptShown && (
+        <div className="fixed top-[6rem] right-6 z-[9999]">
+          <button
+            onClick={() => {
+              setIsFeedbackOpen(true);
+              setFeedbackPromptShown(false);
+            }}
+            className="bg-[#695aa6] hover:bg-[#57458c] text-white rounded-xl px-4 py-2 shadow-lg transition"
+          >
+            💬 We value your feedback!
+          </button>
+        </div>
+      )}
+
+      {/* Floating menu toggle for mobile */}
       {isMobile && !sidebarOpen && (
         <button
           onClick={handleSidebarToggle}
@@ -114,24 +139,23 @@ export default function UserDashboard() {
             zIndex: 40,
             opacity: showFloatingMenu ? 0.8 : 0,
             pointerEvents: showFloatingMenu ? 'auto' : 'none',
-            backgroundColor: 'rgba(255, 255, 255, 0.2)', // Simple background
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
             color: 'white',
             padding: '10px',
-            borderRadius: '8px', // Simple border radius
-            border: 'none', // No border
-            boxShadow: 'none', // No shadow
-            backdropFilter: 'none', // No blur effect
-            transition: 'opacity 0.3s ease', // Only opacity transition
+            borderRadius: '8px',
+            border: 'none',
+            boxShadow: 'none',
+            backdropFilter: 'none',
+            transition: 'opacity 0.3s ease',
           }}
           aria-label="Open sidebar"
         >
           <Menu className="w-5 h-5" />
         </button>
       )}
-      
-      {/* Simple mobile overlay without blur */}
+
       {isMobile && sidebarOpen && (
-        <div 
+        <div
           onClick={() => setSidebarOpen(false)}
           style={{
             position: 'fixed',
@@ -139,12 +163,12 @@ export default function UserDashboard() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)', // Simple overlay
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
             zIndex: 35
           }}
         />
       )}
-      
+
       <main className="flex flex-1 pt-16 lg:pt-20 relative">
         {/* Sidebar */}
         <aside
@@ -156,7 +180,6 @@ export default function UserDashboard() {
             flex flex-col border-r border-white/10
           `}
         >
-          {/* Sidebar header */}
           <div className="p-4 border-b border-white/10 flex items-center justify-between lg:justify-center">
             <div className={`${sidebarOpen ? "opacity-100" : "opacity-0 lg:hidden"}`}>
               <span className="font-bold text-lg">Menu</span>
@@ -216,7 +239,7 @@ export default function UserDashboard() {
             </ul>
           </nav>
 
-          {/* User info */}
+          {/* User Info */}
           <div className={`p-4 border-t border-white/10 ${sidebarOpen ? "" : "lg:hidden"}`}>
             <div className="flex items-center gap-3">
               <UserCircle className="w-8 h-8 text-white/80 flex-shrink-0" />
@@ -230,11 +253,8 @@ export default function UserDashboard() {
           </div>
         </aside>
 
-        {/* Main content area */}
-        <section className={`flex-1 transition-all duration-300 ${
-          isMobile ? 'w-full' : ''
-        }`}>
-          {/* Hero section - only show on dashboard */}
+        {/* Main content */}
+        <section className={`flex-1 transition-all duration-300 ${isMobile ? 'w-full' : ''}`}>
           {activeView === "dashboard" && (
             <div className="relative px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
               <div className="max-w-7xl mx-auto text-center">
@@ -251,7 +271,7 @@ export default function UserDashboard() {
                 >
                   {greeting}, {user?.name || "Guest"}! 👋
                 </h1>
-                
+
                 <p
                   className="text-base sm:text-lg text-white/90 max-w-3xl mx-auto leading-relaxed"
                   style={{ textShadow: "0 2px 12px rgba(60,50,100,0.45), 0 1px 2px rgba(0,0,0,0.3)" }}
@@ -263,7 +283,7 @@ export default function UserDashboard() {
             </div>
           )}
 
-          {/* Notification Banner - only show on dashboard */}
+          {/* Notification Banner */}
           {activeView === "dashboard" && (
             <div className="px-4 sm:px-6 lg:px-8 mb-8">
               <div className="max-w-7xl mx-auto">
@@ -277,7 +297,7 @@ export default function UserDashboard() {
             </div>
           )}
 
-          {/* Main content */}
+          {/* Main Panel Content */}
           <div className={`px-4 sm:px-6 lg:px-8 pb-8 ${activeView !== "dashboard" ? "pt-8" : ""}`}>
             <div className="max-w-7xl mx-auto">
               {renderContent()}
