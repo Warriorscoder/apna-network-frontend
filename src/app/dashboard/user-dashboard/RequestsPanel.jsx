@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import {
   ListTodo,
@@ -9,9 +11,10 @@ import {
 import axios from "axios";
 import { useDummyAPI } from "@/app/hooks/useDummyAPI";
 import { useAuth } from "@/app/context/Authcontext";
+import UserFeedbackModal from "@/components/ui/UserFeedbackModal";
 
 // Card component for mobile view
-const RequestCard = ({ req }) => {
+const RequestCard = ({ req, onFeedback }) => {
   const getStatusColorClasses = (status) => {
     switch (status) {
       case "completed": return "bg-green-100 text-green-700 border-green-200";
@@ -27,8 +30,8 @@ const RequestCard = ({ req }) => {
     <div className="bg-white/90 rounded-lg shadow-sm border border-gray-200 p-4 space-y-3">
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-2">
-           <Briefcase className="w-5 h-5 text-[#695aa6]" />
-           <h3 className="font-semibold text-gray-800">{req.service_id?.category || "N/A"}</h3>
+          <Briefcase className="w-5 h-5 text-[#695aa6]" />
+          <h3 className="font-semibold text-gray-800">{req.service_id?.category || "N/A"}</h3>
         </div>
         <span
           className={`px-2.5 py-1 text-xs rounded-full font-semibold border ${getStatusColorClasses(req.status)}`}
@@ -36,17 +39,26 @@ const RequestCard = ({ req }) => {
           {req.status || "Pending"}
         </span>
       </div>
-      
+
       <div className="pl-7 space-y-2 text-sm text-gray-600">
         <div className="flex items-center gap-2">
-            <UserCircle className="w-4 h-4 text-gray-500" />
-            <span>Provider: <span className="font-medium text-gray-800">{req.provider_id?.name || "Unknown"}</span></span>
+          <UserCircle className="w-4 h-4 text-gray-500" />
+          <span>Provider: <span className="font-medium text-gray-800">{req.provider_id?.name || "Unknown"}</span></span>
         </div>
         <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-gray-500" />
-            <span>Date: {new Date(req.createdAt).toLocaleDateString()}</span>
+          <Calendar className="w-4 h-4 text-gray-500" />
+          <span>Date: {new Date(req.createdAt).toLocaleDateString()}</span>
         </div>
       </div>
+
+      {req.status === "completed" && (
+        <button
+          onClick={() => onFeedback(req)}
+          className="text-sm text-white bg-[#695aa6] hover:bg-[#5a4d8a] px-3 py-1 rounded-md mt-2"
+        >
+          Give Feedback
+        </button>
+      )}
     </div>
   );
 };
@@ -56,7 +68,11 @@ export default function RequestsPanel() {
   const [loading, setLoading] = useState(true);
   const { makeRequest, userId } = useDummyAPI();
   const [error, setError] = useState("");
-  const {user} = useAuth()
+  const { user } = useAuth();
+
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [selectedRequestForFeedback, setSelectedRequestForFeedback] = useState(null);
+
   useEffect(() => {
     const fetchRequests = async () => {
       try {
@@ -81,22 +97,13 @@ export default function RequestsPanel() {
   if (loading) {
     return (
       <div className="space-y-6">
-        {/* Page Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2" 
-              style={{ textShadow: "0 4px 24px rgba(60,50,100,0.65), 0 2px 4px rgba(0,0,0,0.3)" }}>
-            My Service Requests
-          </h1>
-          <p className="text-white/90 text-lg" 
-             style={{ textShadow: "0 2px 12px rgba(60,50,100,0.45), 0 1px 2px rgba(0,0,0,0.3)" }}>
-            Track and manage all your service requests
-          </p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2" style={{ textShadow: "0 4px 24px rgba(60,50,100,0.65), 0 2px 4px rgba(0,0,0,0.3)" }}>My Service Requests</h1>
+          <p className="text-white/90 text-lg" style={{ textShadow: "0 2px 12px rgba(60,50,100,0.45), 0 1px 2px rgba(0,0,0,0.3)" }}>Track and manage all your service requests</p>
         </div>
-
         <div className="bg-white/70 rounded-xl shadow-lg p-4 sm:p-6 border border-white/30 backdrop-blur-sm">
           <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-[#695aa6] flex items-center">
-            <ListTodo className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-            My Requests
+            <ListTodo className="w-5 h-5 sm:w-6 sm:h-6 mr-2" /> My Requests
           </h2>
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#695aa6] mx-auto"></div>
@@ -109,45 +116,34 @@ export default function RequestsPanel() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2" 
-            style={{ textShadow: "0 4px 24px rgba(60,50,100,0.65), 0 2px 4px rgba(0,0,0,0.3)" }}>
-          My Service Requests
-        </h1>
-        <p className="text-white/90 text-lg" 
-           style={{ textShadow: "0 2px 12px rgba(60,50,100,0.45), 0 1px 2px rgba(0,0,0,0.3)" }}>
-          Track and manage all your service requests
-        </p>
+        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2" style={{ textShadow: "0 4px 24px rgba(60,50,100,0.65), 0 2px 4px rgba(0,0,0,0.3)" }}>My Service Requests</h1>
+        <p className="text-white/90 text-lg" style={{ textShadow: "0 2px 12px rgba(60,50,100,0.45), 0 1px 2px rgba(0,0,0,0.3)" }}>Track and manage all your service requests</p>
       </div>
 
       <div className="w-full bg-white/70 rounded-xl shadow-lg p-4 sm:p-6 border border-white/30 backdrop-blur-sm hover:shadow-xl transition-all">
         <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-[#695aa6] flex items-center">
-          <ListTodo className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-          My Service Requests
-          <span className="ml-auto bg-[#695aa6] text-white text-xs sm:text-sm px-2 py-1 rounded-full">
-            {requests.length}
-          </span>
+          <ListTodo className="w-5 h-5 sm:w-6 sm:h-6 mr-2" /> My Service Requests
+          <span className="ml-auto bg-[#695aa6] text-white text-xs sm:text-sm px-2 py-1 rounded-full">{requests.length}</span>
         </h2>
 
         {requests.length === 0 ? (
           <div className="text-center py-8">
             <ListTodo className="w-12 h-12 text-gray-400 mx-auto mb-3" />
             <p className="text-gray-500 mb-2">No service requests yet</p>
-            <p className="text-sm text-gray-400">
-              Browse services and make your first request to get started!
-            </p>
+            <p className="text-sm text-gray-400">Browse services and make your first request to get started!</p>
           </div>
         ) : (
           <div>
-            {/* Mobile Card View */}
             <div className="space-y-3 lg:hidden">
               {requests.map((req, index) => (
-                <RequestCard key={req._id || index} req={req} />
+                <RequestCard key={req._id || index} req={req} onFeedback={(req) => {
+                  setSelectedRequestForFeedback(req);
+                  setFeedbackModalOpen(true);
+                }} />
               ))}
             </div>
 
-            {/* Desktop Table View */}
             <div className="hidden lg:block overflow-x-auto">
               <table className="min-w-full bg-white/90 rounded-lg shadow-sm text-sm text-gray-700">
                 <thead className="bg-[#695aa6] text-white">
@@ -156,6 +152,7 @@ export default function RequestsPanel() {
                     <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">Service Category</th>
                     <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">Date</th>
                     <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">Status</th>
+                    <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -180,18 +177,18 @@ export default function RequestsPanel() {
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full font-semibold ${
-                            req.status === "completed" ? "bg-green-100 text-green-700"
-                            : req.status === "in_progress" ? "bg-blue-100 text-blue-700"
-                            : req.status === "accepted" ? "bg-purple-100 text-purple-700"
-                            : req.status === "requested" ? "bg-yellow-100 text-yellow-700"
-                            : req.status === "cancelled" ? "bg-red-100 text-red-700"
-                            : "bg-gray-100 text-gray-700"
-                          }`}
-                        >
-                          {req.status || "Pending"}
-                        </span>
+                        <span className={`px-2 py-1 text-xs rounded-full font-semibold ${req.status === "completed" ? "bg-green-100 text-green-700" : req.status === "in_progress" ? "bg-blue-100 text-blue-700" : req.status === "accepted" ? "bg-purple-100 text-purple-700" : req.status === "requested" ? "bg-yellow-100 text-yellow-700" : req.status === "cancelled" ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-700"}`}>{req.status || "Pending"}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {req.status === "completed" && (
+                          <button
+                            onClick={() => {
+                              setSelectedRequestForFeedback(req);
+                              setFeedbackModalOpen(true);
+                            }}
+                            className="px-3 py-1.5 bg-[#695aa6] text-white rounded text-xs hover:bg-[#5a4d8a] transition"
+                          >Give Feedback</button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -201,6 +198,18 @@ export default function RequestsPanel() {
           </div>
         )}
       </div>
+
+      <UserFeedbackModal
+        isOpen={feedbackModalOpen}
+        onClose={() => {
+          setFeedbackModalOpen(false);
+          setSelectedRequestForFeedback(null);
+        }}
+        onSubmitted={() => {
+          setFeedbackModalOpen(false);
+          setSelectedRequestForFeedback(null);
+        }}
+      />
     </div>
   );
 }

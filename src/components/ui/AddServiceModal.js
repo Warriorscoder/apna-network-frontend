@@ -71,12 +71,11 @@ export default function AddCategoryModal({ open, onClose, onAdd }) {
     }
   };
 
-
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/10">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/10 px-4 sm:px-6">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md mx-auto relative animate-fadeIn">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-[#695aa6] focus:outline-none text-2xl"
@@ -92,7 +91,7 @@ export default function AddCategoryModal({ open, onClose, onAdd }) {
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-[#695aa6] mb-1">Add New Category</h2>
-          <p className="text-gray-500 text-sm">Fill in the details to create a new category.</p>
+          <p className="text-gray-500 text-sm text-center">Fill in the details to create a new category.</p>
         </div>
 
         {added ? (
@@ -153,17 +152,17 @@ export default function AddCategoryModal({ open, onClose, onAdd }) {
 
             {error && <div className="text-red-500 text-sm">{error}</div>}
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
+                className="w-full sm:w-auto px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#695aa6] text-white rounded hover:bg-[#57468b] transition font-semibold shadow"
+                className="w-full sm:w-auto px-4 py-2 bg-[#695aa6] text-white rounded hover:bg-[#57468b] transition font-semibold shadow"
                 disabled={!formData.key.trim() || !formData.title.trim() || loading}
               >
                 {loading ? "Adding..." : "Add Category"}
@@ -194,4 +193,3 @@ export default function AddCategoryModal({ open, onClose, onAdd }) {
     </div>
   );
 }
-

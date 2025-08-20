@@ -10,9 +10,7 @@ export default function ComplaintsTable() {
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
-
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/complaints`);
-
         if (!res.ok) throw new Error('Failed to fetch complaints');
         const data = await res.json();
         setComplaints(data);
@@ -31,23 +29,23 @@ export default function ComplaintsTable() {
   if (!complaints.length) return <div className="text-center text-gray-400 py-4">No complaints found.</div>;
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto w-full max-w-full">
       <table className="min-w-full table-auto border border-gray-300 rounded-xl overflow-hidden text-sm">
         <thead className="bg-[#f9f7ff] sticky top-0 z-10 border-b border-gray-300">
           <tr>
-            <th className="px-4 py-3 text-left font-semibold text-[#695aa6]">Title</th>
-            <th className="px-4 py-3 text-left font-semibold text-[#695aa6]">User</th>
-            <th className="px-4 py-3 text-left font-semibold text-[#695aa6]">Provider</th>
-            <th className="px-4 py-3 text-left font-semibold text-[#695aa6]">Status</th>
+            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Title</th>
+            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">User</th>
+            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Provider</th>
+            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Status</th>
           </tr>
         </thead>
         <tbody>
           {complaints.map((c) => (
             <tr key={c._id} className="even:bg-gray-50 hover:bg-[#f3f0fa] border-b border-gray-200">
-              <td className="px-4 py-2">{c.title}</td>
-              <td className="px-4 py-2">{c.userName || c.user_id?.name || "N/A"}</td>
-              <td className="px-4 py-2">{c.providerName || c.provider_id?.name || "N/A"}</td>
-              <td className="px-4 py-2">
+              <td className="px-3 py-2 sm:px-4">{c.title}</td>
+              <td className="px-3 py-2 sm:px-4">{c.userName || c.user_id?.name || "N/A"}</td>
+              <td className="px-3 py-2 sm:px-4">{c.providerName || c.provider_id?.name || "N/A"}</td>
+              <td className="px-3 py-2 sm:px-4">
                 <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                   c.status?.toLowerCase() === "resolved"
                     ? "bg-green-100 text-green-700"

@@ -1,10 +1,27 @@
 'use client';
 
-import React, { useState } from "react";
-import { Menu } from "lucide-react"; // Optional icons
+import React, { useState, useEffect } from "react";
+import { Menu } from "lucide-react";
 
 export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, toggleCollapse }) {
   const [contentOpen, setContentOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Auto-collapse sidebar on small screens
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile && !collapsed) {
+      toggleCollapse(); // Auto collapse on load if mobile
+    }
+  }, [isMobile]);
 
   const sections = [
     { name: "Dashboard", icon: "🏠" },
@@ -25,19 +42,19 @@ export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, togg
 
   return (
     <aside
-      className={`fixed top-0 left-0 h-screen z-50 bg-[#695aa6] text-white shadow-lg transition-all duration-300 overflow-y-auto${
+      className={`fixed top-0 left-0 h-screen bg-[#695aa6] text-white shadow-lg z-50 transition-all duration-300 overflow-y-auto ${
         collapsed ? "w-20" : "w-64"
       }`}
     >
-      {/* Sidebar Header with Toggle Button */}
+      {/* Header */}
       <div className="flex items-center justify-between px-4 py-4 border-b border-white/20">
         {!collapsed && <h2 className="text-lg font-bold">Admin Panel</h2>}
         <button
-           onClick={toggleCollapse}
-           className="text-white hover:opacity-75 transition"
-           title="Toggle Sidebar"
+          onClick={toggleCollapse}
+          className="text-white hover:opacity-75 transition"
+          title="Toggle Sidebar"
         >
-           <Menu size={22} />
+          <Menu size={22} />
         </button>
       </div>
 
@@ -53,8 +70,8 @@ export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, togg
         </div>
       )}
 
-      {/* Navigation Links */}
-      <nav className="mt-6 px-2 flex-1 overflow-y-auto">
+      {/* Navigation */}
+      <nav className="mt-6 px-2 flex-1">
         <ul className="space-y-1">
           {sections.map((item) => (
             <li key={item.name}>
@@ -69,7 +86,7 @@ export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, togg
             </li>
           ))}
 
-          {/* Content Management Dropdown */}
+          {/* Content Management Toggle */}
           <li>
             <button
               type="button"
@@ -79,9 +96,7 @@ export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, togg
               <span>📂</span>
               {!collapsed && <span>Content Management</span>}
               {!collapsed && (
-                <span className="ml-auto">
-                  {contentOpen ? "▲" : "▼"}
-                </span>
+                <span className="ml-auto">{contentOpen ? "▲" : "▼"}</span>
               )}
             </button>
 
