@@ -279,6 +279,7 @@ export default function OtpPage() {
       // ✅ Handle user flows
       if (data.success && data.existing && role === "providers") {
         const result = loginWithToken(data.token); // ✅ use context
+        console.log(result)
         if (result.success) {
           toast.success("OTP verified. Login successful");
           router.push("/dashboard/provider-dashboard");
@@ -304,6 +305,7 @@ export default function OtpPage() {
         if (result.success) {
           toast.success("Admin OTP verified");
           router.push("/dashboard/admin-dashboard");
+          
         } else {
           toast.error(result.message || "Login failed");
         }

@@ -13,8 +13,8 @@ import {
   ArrowLeft,
   X,
 } from "lucide-react";
-import { toast } from 'react-toastify';
-import axios from 'axios';
+import { toast } from "react-toastify";
+import axios from "axios";
 import { useAuth } from "@/app/context/Authcontext";
 
 const Dialoguebox = ({ data, isOpen, onClose }) => {
@@ -95,9 +95,9 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
   const averageRating =
     reviews.length > 0
       ? (
-        reviews.reduce((sum, review) => sum + review.rating, 0) /
-        reviews.length
-      ).toFixed(1)
+          reviews.reduce((sum, review) => sum + review.rating, 0) /
+          reviews.length
+        ).toFixed(1)
       : data?.rating || "N/A";
 
   const totalReviews = reviews.length;
@@ -109,8 +109,8 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
     percentage:
       reviews.length > 0
         ? (reviews.filter((review) => review.rating === rating).length /
-          reviews.length) *
-        100
+            reviews.length) *
+          100
         : 0,
   }));
 
@@ -121,10 +121,11 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            className={`${size} ${star <= rating
-              ? "fill-yellow-400 text-yellow-400"
-              : "text-gray-300"
-              }`}
+            className={`${size} ${
+              star <= rating
+                ? "fill-yellow-400 text-yellow-400"
+                : "text-gray-300"
+            }`}
           />
         ))}
       </div>
@@ -146,13 +147,42 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
     setShowReviews(false);
   };
 
-  // email code 
+  // email code
 
-  const sendEmailNotification = async ({ name, phone, email, userEmail, category, now }) => {
-    console.log("name", name, " email ", email, " phone ", phone, " category ", category, " now ", now, " userEmail ", userEmail)
+  const sendEmailNotification = async ({
+    name,
+    phone,
+    email,
+    userEmail,
+    category,
+    now,
+  }) => {
+    console.log(
+      "name",
+      name,
+      " email ",
+      email,
+      " phone ",
+      phone,
+      " category ",
+      category,
+      " now ",
+      now,
+      " userEmail ",
+      userEmail
+    );
 
-    if (!name || !phone || !email || !userEmail || !category || !now || !validateEmail(email) || !validateEmail(userEmail)) {
-      toast.error('Missing or invalid input fields');
+    if (
+      !name ||
+      !phone ||
+      !email ||
+      !userEmail ||
+      !category ||
+      !now ||
+      !validateEmail(email) ||
+      !validateEmail(userEmail)
+    ) {
+      toast.error("Missing or invalid input fields");
       return;
     }
 
@@ -162,21 +192,23 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
       await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/notify`, {
         name,
         phone,
-        email,       // provider email
-        userEmail,   // client email
+        email, // provider email
+        userEmail, // client email
         category,
         now,
       });
 
-      toast.success('Email sent successfully!');
+      toast.success("Email sent successfully!");
     } catch (error) {
-      console.error('Email send failed:', error?.response?.data || error.message);
-      toast.error('Failed to send email');
+      console.error(
+        "Email send failed:",
+        error?.response?.data || error.message
+      );
+      toast.error("Failed to send email");
     } finally {
       setIsSending(false);
     }
   };
-
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -184,22 +216,24 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
 
   const createServiceRequest = async ({ user_id, provider_id, service_id }) => {
     if (!user_id || !provider_id || !service_id) {
-      toast.error('Missing user or service information');
+      toast.error("Missing user or service information");
       return;
     }
 
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/`, {
-        user_id,
-        provider_id,
-        service_id,
-      });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/`,
+        {
+          user_id,
+          provider_id,
+          service_id,
+        }
+      );
 
       if (response.data.message) {
         toast.warn(response.data.message);
-      }
-      else {
-        toast.success("Sercvice request made successfully!!")
+      } else {
+        toast.success("Sercvice request made successfully!!");
         sendEmailNotification({
           name: user?.name,
           phone: user?.phone,
@@ -209,14 +243,14 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
           now: new Date().toISOString(),
         });
       }
-
     } catch (error) {
-      console.error('Service request failed:', error?.response?.data || error.message);
-      toast.error('Failed to submit service request');
+      console.error(
+        "Service request failed:",
+        error?.response?.data || error.message
+      );
+      toast.error("Failed to submit service request");
     }
   };
-
-
 
   if (!isOpen || !data) return null;
 
@@ -400,7 +434,6 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
                           </div>
                         )}
                       </div>
-
                     </div>
                   </div>
                 )}
@@ -450,14 +483,91 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
                 </button>
               </div>
 
-              {/* Mobile-Optimized About Section */}
+              {/* Service Details Section */}
               <div className="mb-4 sm:mb-6">
-                <h3 className="text-base sm:text-lg font-semibold mb-2">
-                  About
+                <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">
+                  Service Details
                 </h3>
-                <p className="text-gray-600 text-sm sm:text-base">
-                  {data?.title || "Professional service provider"}
-                </p>
+
+                {/* Service Title */}
+                <div className="mb-3">
+                  <h4 className="text-sm sm:text-base font-semibold text-gray-800 mb-1">
+                    Service Title
+                  </h4>
+                  <p className="text-gray-700 text-sm sm:text-base">
+                    {data?.title || "Professional service provider"}
+                  </p>
+                </div>
+
+                {/* Service Description */}
+                <div>
+                  <h4 className="text-sm sm:text-base font-semibold text-gray-800 mb-2">
+                    Service Description
+                  </h4>
+                  <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
+                    {(() => {
+                      const category = data?.category?.toLowerCase() || "";
+                      const title = data?.title?.toLowerCase() || "";
+
+                      if (
+                        category.includes("plumber") ||
+                        title.includes("plumber")
+                      ) {
+                        return "Professional plumbing services including pipe installation, repair, water heater services, bathroom fittings, kitchen plumbing, and emergency leak repairs. Experienced in both residential and commercial plumbing work with quality materials and reliable service.";
+                      } else if (
+                        category.includes("electrician") ||
+                        title.includes("electrician")
+                      ) {
+                        return "Expert electrical services covering house wiring, electrical panel installation, ceiling fan and light fixture installation, electrical repairs, and safety inspections. Licensed electrician with experience in modern electrical systems and emergency electrical services.";
+                      } else if (
+                        category.includes("carpenter") ||
+                        title.includes("carpenter")
+                      ) {
+                        return "Skilled carpentry services including custom furniture making, door and window installation, kitchen cabinets, wooden flooring, furniture repair, and interior woodwork. Quality craftsmanship with attention to detail and durable materials.";
+                      } else if (
+                        category.includes("painter") ||
+                        title.includes("painter")
+                      ) {
+                        return "Professional painting services for interior and exterior walls, texture painting, wall putty work, color consultation, and protective coatings. Using premium quality paints and modern techniques for long-lasting and beautiful finishes.";
+                      } else if (
+                        category.includes("mason") ||
+                        title.includes("mason")
+                      ) {
+                        return "Expert masonry services including brickwork, stone work, concrete construction, plastering, tiling, and structural repairs. Experienced in both traditional and modern construction techniques with quality materials.";
+                      } else if (
+                        category.includes("mechanic") ||
+                        title.includes("mechanic")
+                      ) {
+                        return "Reliable automotive repair services including engine diagnostics, brake services, transmission repair, electrical system repair, and routine maintenance. Experienced with all vehicle types and committed to quality repairs.";
+                      } else if (
+                        category.includes("ac") ||
+                        category.includes("air conditioning") ||
+                        title.includes("ac")
+                      ) {
+                        return "Professional AC services including installation, repair, maintenance, gas refilling, and cleaning services. Expert in all AC brands and types with quick response time and genuine spare parts.";
+                      } else if (
+                        category.includes("cleaning") ||
+                        title.includes("cleaning")
+                      ) {
+                        return "Comprehensive cleaning services for homes and offices including deep cleaning, regular maintenance cleaning, carpet cleaning, and specialized cleaning services. Using eco-friendly products and professional cleaning equipment.";
+                      } else if (
+                        category.includes("gardening") ||
+                        title.includes("gardening")
+                      ) {
+                        return "Professional gardening and landscaping services including garden design, plant care, lawn maintenance, tree pruning, and seasonal garden care. Creating beautiful and sustainable outdoor spaces.";
+                      } else if (
+                        category.includes("security") ||
+                        title.includes("security")
+                      ) {
+                        return "Reliable security services including security guard services, surveillance system installation, access control systems, and security consultations. Ensuring safety and peace of mind for residential and commercial properties.";
+                      } else {
+                        return `Professional ${
+                          data?.category || "service"
+                        } provider offering quality services with experienced professionals. Committed to customer satisfaction, timely completion, and competitive pricing. Contact for detailed consultation and customized service solutions.`;
+                      }
+                    })()}
+                  </p>
+                </div>
               </div>
 
               {/* Mobile-Optimized Contact & Experience */}
@@ -493,7 +603,8 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
                         style={{ color: "#695aa6" }}
                       />
                       <span className="text-gray-600 text-sm sm:text-base">
-                        {`${data.experience} years` || "Experience not specified"}
+                        {`${data.experience} years` ||
+                          "Experience not specified"}
                       </span>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -536,13 +647,13 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
                     createServiceRequest({
                       user_id: user.id,
                       provider_id: data.provider_id,
-                      service_id: data.serviceId
-                    })
+                      service_id: data.serviceId,
+                    });
                   }}
-
                   disabled={isSending}
-                  className={`flex-1 text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 font-medium text-sm sm:text-base ${isSending ? 'opacity-60 cursor-not-allowed' : ''
-                    }`}
+                  className={`flex-1 text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 font-medium text-sm sm:text-base ${
+                    isSending ? "opacity-60 cursor-not-allowed" : ""
+                  }`}
                   style={{ backgroundColor: "#695aa6" }}
                   onMouseEnter={(e) => {
                     if (!isSending) e.target.style.backgroundColor = "#5a4a96";
@@ -551,10 +662,9 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
                     if (!isSending) e.target.style.backgroundColor = "#695aa6";
                   }}
                 >
-                  {isSending ? 'Loading...' : 'Send Email'}
+                  {isSending ? "Loading..." : "Send Email"}
                 </button>
               </div>
-
             </>
           )}
         </div>

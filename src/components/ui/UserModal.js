@@ -59,8 +59,9 @@ export default function UserModal({ open, onClose, onSubmit, initialData }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 px-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md max-h-screen overflow-y-auto relative animate-fadeIn">
+        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-[#695aa6] focus:outline-none text-2xl"
@@ -82,7 +83,7 @@ export default function UserModal({ open, onClose, onSubmit, initialData }) {
             placeholder="Name"
             value={form.name}
             onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
+            className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-base"
             required
           />
           <input
@@ -91,11 +92,11 @@ export default function UserModal({ open, onClose, onSubmit, initialData }) {
             placeholder="Email"
             value={form.email}
             onChange={handleChange}
-            className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
+            className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-base"
             required
           />
 
-          <div className="flex justify-between gap-2">
+          <div className="flex flex-col sm:flex-row justify-between gap-3">
             <button
               type="button"
               onClick={() => handleSubmit("Provider")}
