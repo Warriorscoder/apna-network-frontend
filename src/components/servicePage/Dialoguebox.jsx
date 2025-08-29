@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import {
   User,
   Star,
@@ -18,6 +18,8 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { useAuth } from "@/app/context/Authcontext";
 import UserFeedbackModal from "@/components/ui/UserFeedbackModal";
+import { useRouter } from "next/navigation";
+
 
 const Dialoguebox = ({ data, isOpen, onClose }) => {
   const [showReviews, setShowReviews] = useState(false);
@@ -25,10 +27,12 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const { user } = useAuth();
-
-  
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
 
+  const router = useRouter();
+  // console.log("user ",user)
+  // console.log("data from dialoguebox ",data)
+  // Sample reviews data (you can replace this with API call)
   const sampleReviews = [
     {
       id: 1,
@@ -223,11 +227,15 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
 
   // request code
   const createServiceRequest = async ({ user_id, provider_id, service_id }) => {
-    if (!user_id || !provider_id || !service_id) {
-      toast.error("Missing user or service information");
+    // if (!user_id || !provider_id || !service_id) {
+    //   toast.error("Missing user or service information");
+    //   return;
+    // }
+    if(user.role === 'not logged in'){
+      toast.error("Please login to request a service");
+      router.push('/login');
       return;
     }
-
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/`,

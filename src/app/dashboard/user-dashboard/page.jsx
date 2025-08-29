@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   Menu,
   X,
@@ -16,6 +16,9 @@ import ServicesPanel from "./ServicesPanel";
 import RequestsPanel from "./RequestsPanel";
 import HelpPanel from "./HelpPanel";
 import { useAuth } from "@/app/context/Authcontext";
+import UserFeedbackModal from "@/components/ui/UserFeedbackModal";
+import { useRouter } from "next/navigation";
+
 
 const useClientGreeting = () => {
   const [greeting, setGreeting] = useState("Welcome");
@@ -32,11 +35,24 @@ const useClientGreeting = () => {
 
 export default function UserDashboard() {
   const { user } = useAuth();
+  console.log("Authenticated user:", user);
   const [activeView, setActiveView] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showFloatingMenu, setShowFloatingMenu] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [feedbackPromptShown, setFeedbackPromptShown] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    if(user?.role === 'not logged in'){
+      router.push('/login');
+    }
+    if(user?.role === 'provider'){
+      router.push('/');
+    }
+  }, [user?.role]);
 
   useEffect(() => {
     const checkScreenSize = () => {

@@ -295,6 +295,7 @@ const ServicesPanel = () => {
         const categoriesRes = await axios.get(`${API_BASE_URL}/categories`);
         if (categoriesRes.data.success) {
           setAllCategories(categoriesRes.data.data);
+          console.log("all categories:", categoriesRes.data.data);
         } else {
           toast.error("Could not load service categories.");
           console.error("Error in categories response:", categoriesRes.data.message);
@@ -450,7 +451,7 @@ const ServicesPanel = () => {
   const availableCategories = allCategories.filter(
     (cat) => !services.some((s) => s.category === (cat.key || cat._id))
   );
-
+  console.log("available categories:", availableCategories);
   return (
     <div className="space-y-6">
       {/* Page Header */}

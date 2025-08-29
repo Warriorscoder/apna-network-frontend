@@ -12,6 +12,7 @@ import DashboardOverview from "./DashboardOverview";
 import { useAuthenticatedAPI } from "@/app/hooks/useAuthenticatedAPI";
 import { useAuth } from "@/app/context/Authcontext";
 import FeedbackModal from "@/components/ui/FeedbackModal"; // Make sure path is correct
+import { useRouter } from "next/navigation";
 
 export default function ProviderDashboardPage() {
   const [activeView, setActiveView] = useState("dashboard");
@@ -23,6 +24,16 @@ export default function ProviderDashboardPage() {
 
   const { provider } = useAuthenticatedAPI();
   const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+      if(user?.role === 'not logged in'){
+        router.push('/login');
+      }
+      if(user?.role === 'user'){
+        router.push('/');
+      }
+    }, [user?.role]);
 
   useEffect(() => {
     const checkScreenSize = () => {

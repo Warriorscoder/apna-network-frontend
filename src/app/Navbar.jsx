@@ -95,7 +95,7 @@ export default function Navbar() {
 
   const getUserDisplayName = () => {
     const current = getCurrentUser()
-    console.log("current" , current)
+    // console.log("current" , current)
     if (current?.name) return current.name.split(" ")[0]
     if (current?.fullName) return current.fullName
     if (current?.firstName) {
