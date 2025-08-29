@@ -12,10 +12,12 @@ import {
   Calendar,
   ArrowLeft,
   X,
+  Edit,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useAuth } from "@/app/context/Authcontext";
+import UserFeedbackModal from "@/components/ui/UserFeedbackModal";
 
 const Dialoguebox = ({ data, isOpen, onClose }) => {
   const [showReviews, setShowReviews] = useState(false);
@@ -23,9 +25,10 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const { user } = useAuth();
-  // console.log("user ",user)
-  // console.log("data from dialoguebox ",data)
-  // Sample reviews data (you can replace this with API call)
+
+  
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+
   const sampleReviews = [
     {
       id: 1,
@@ -147,8 +150,14 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
     setShowReviews(false);
   };
 
-  // email code
+  // ✅ Handle feedback submission
+  const handleFeedbackSubmitted = (feedbackData) => {
+    console.log("Feedback received for provider:", data.name, feedbackData);
+    toast.success("Thank you for your feedback!");
+    setFeedbackModalOpen(false);
+  };
 
+  // email code
   const sendEmailNotification = async ({
     name,
     phone,
@@ -213,7 +222,6 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   // request code
-
   const createServiceRequest = async ({ user_id, provider_id, service_id }) => {
     if (!user_id || !provider_id || !service_id) {
       toast.error("Missing user or service information");
@@ -233,7 +241,7 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
       if (response.data.message) {
         toast.warn(response.data.message);
       } else {
-        toast.success("Sercvice request made successfully!!");
+        toast.success("Service request made successfully!!");
         sendEmailNotification({
           name: user?.name,
           phone: user?.phone,
@@ -326,7 +334,7 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
                         </div>
 
                         {/* Mobile-Optimized Rating Distribution */}
-                        <div className="space-y-2 sm:space-y-3">
+                        <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
                           <h4 className="font-semibold text-gray-800 mb-2 sm:mb-3 text-sm sm:text-base">
                             Rating Distribution
                           </h4>
@@ -350,6 +358,20 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
                               </span>
                             </div>
                           ))}
+                        </div>
+
+                        
+                        <div className="border-t border-gray-200 pt-4">
+                          <button
+                            onClick={() => setFeedbackModalOpen(true)}
+                            className="w-full bg-[#695aa6] hover:bg-[#5a4d8a] text-white py-2.5 px-4 rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center space-x-2"
+                          >
+                            <Edit className="w-4 h-4" />
+                            <span>Share Your Feedback</span>
+                          </button>
+                          <p className="text-xs text-gray-500 text-center mt-2">
+                            Help others by sharing your experience
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -669,6 +691,12 @@ const Dialoguebox = ({ data, isOpen, onClose }) => {
           )}
         </div>
       </div>
+
+      <UserFeedbackModal
+        isOpen={feedbackModalOpen}
+        onClose={() => setFeedbackModalOpen(false)}
+        onSubmitted={handleFeedbackSubmitted}
+      />
     </div>
   );
 };
