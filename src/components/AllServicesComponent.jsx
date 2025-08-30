@@ -32,9 +32,8 @@ const ServiceCard = ({ service, onClick }) => {
       style={{ borderColor: "#a99fd4" }}
     >
       <div
-        className={`transition-all duration-300 ease-in-out flex flex-col items-center ${
-          hovered ? "translate-y-[-35%] sm:translate-y-[-40%]" : "translate-y-0"
-        }`}
+        className={`transition-all duration-300 ease-in-out flex flex-col items-center ${hovered ? "translate-y-[-35%] sm:translate-y-[-40%]" : "translate-y-0"
+          }`}
       >
         <img
           src={service.image || "/placeholder.svg?height=64&width=64"}
@@ -46,11 +45,10 @@ const ServiceCard = ({ service, onClick }) => {
         </h3>
       </div>
       <div
-        className={`absolute bottom-2 sm:bottom-4 px-2 text-xs text-gray-600 text-center transition-all duration-300 ease-in-out ${
-          hovered
+        className={`absolute bottom-2 sm:bottom-4 px-2 text-xs text-gray-600 text-center transition-all duration-300 ease-in-out ${hovered
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-2 pointer-events-none"
-        }`}
+          }`}
       >
         <p className="mb-1 text-xs sm:text-sm leading-tight">
           {service.subtitle}
@@ -111,7 +109,7 @@ const AllServicesComponent = ({
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [serviceData, setServiceData] = useState([]);
-
+  // console.log(selectedProvider)
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -121,6 +119,12 @@ const AllServicesComponent = ({
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedTehsil, setSelectedTehsil] = useState(""); // ✅ ADDED: Tehsil filter
   const [availableTehsils, setAvailableTehsils] = useState([]); // ✅ ADDED: Store available tehsils
+
+  // reviews related states
+  const [allReviews, setAllReviews] = useState([])
+  const [reviewdata, setReviewdata] = useState([])
+  const [providerId, setProviderId] = useState()
+  const [serviceId, setServiceId] = useState()
 
   const [categorySearchTerm, setCategorySearchTerm] = useState(""); // ✅ ADDED: Category search state
 
@@ -201,10 +205,9 @@ const AllServicesComponent = ({
             district: district || "Not specified",
             location: location || "Not specified",
             address: formattedAddress,
-            rating: Math.floor(Math.random() * 5) + 1,
-            availability: `${provider.availability?.from || "9:00 AM"} - ${
-              provider.availability?.to || "6:00 PM"
-            }`,
+            // experience_level: provider.experience_level || "Not specified",
+            availability: `${provider.availability?.from || "9:00 AM"} - ${provider.availability?.to || "6:00 PM"
+              }`,
             phone: provider.phone || "Not provided",
           };
         });
@@ -268,11 +271,13 @@ const AllServicesComponent = ({
       experience: serviceInfo?.experience_level || "Experience not specified",
       serviceId: serviceInfo?._id,
     };
-
+    // console.log("Card Data:", cardData);
     setSelectedProvider(cardData);
+    setProviderId(cardData?.provider_id);
+    setServiceId(cardData?.serviceId);
     setIsDialogOpen(true);
   };
-
+  
   // Handle back to services
   const handleBackToServices = () => {
     setShowProviderList(false);
@@ -282,14 +287,47 @@ const AllServicesComponent = ({
     setSelectedState("");
     setSelectedCity("");
     setSelectedTehsil("");
-    setAvailableTehsils([]); 
+    setAvailableTehsils([]);
     setServiceData([]);
-    setCategorySearchTerm(""); 
+    setCategorySearchTerm("");
   };
 
   const handleBackToHome = () => {
     router.push("/");
   };
+
+  // all reviews fetch
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const allReviews = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/`);
+        if(allReviews.data.success){
+          setAllReviews(allReviews.data.data);
+        }
+
+        // console.log("all reviews", allReviews?.data);
+      } catch (error) {
+        console.log("error in fetching reviews ", error);
+      }
+    };
+    fetchReviews();
+  }, [])
+  // filter out reviews
+  useEffect(() => {
+  // Only run the filter if we have a selected provider and a list of reviews
+  if (selectedProvider && allReviews.length > 0) {
+    const filtered = allReviews.filter(review => 
+      review.provider_id === selectedProvider.provider_id && 
+      review.serviceId   === selectedProvider.serviceId
+    );
+    
+    setReviewdata(filtered); // Set the filtered reviews to your state
+    // console.log("filtered review ", reviewdata) 
+  } else {
+    // Optional: If no provider is selected, clear the reviews
+    setReviewdata([]);
+  }
+}, [allReviews, selectedProvider]); 
 
   // Enhanced filter providers based on search term and selected filters
   const filteredAndSearchedProviders = filteredProviders.filter((provider) => {
@@ -302,14 +340,14 @@ const AllServicesComponent = ({
 
     // Search term filtering - check multiple fields
     const matchesSearchTerm =
-      !searchTerm ||
-      name.includes(searchTerm.toLowerCase()) ||
-      address.includes(searchTerm.toLowerCase()) ||
-      village.includes(searchTerm.toLowerCase()) ||
-      tehsil.includes(searchTerm.toLowerCase()) ||
-      district.includes(searchTerm.toLowerCase()) ||
-      location.includes(searchTerm.toLowerCase());
-
+    !searchTerm ||
+    name.includes(searchTerm.toLowerCase()) ||
+    address.includes(searchTerm.toLowerCase()) ||
+    village.includes(searchTerm.toLowerCase()) ||
+    tehsil.includes(searchTerm.toLowerCase()) ||
+    district.includes(searchTerm.toLowerCase()) ||
+    location.includes(searchTerm.toLowerCase());
+    
     // State filtering - check against Indian states
     let matchesState = true;
     if (selectedState) {
@@ -319,13 +357,13 @@ const AllServicesComponent = ({
         district.includes(selectedStateLower) ||
         address.includes(selectedStateLower);
     }
-
+    
     // City filtering - enhanced matching
     let matchesCity = true;
     if (selectedCity) {
       const selectedCityLower = selectedCity.toLowerCase();
       matchesCity =
-        district.includes(selectedCityLower) ||
+      district.includes(selectedCityLower) ||
         location.includes(selectedCityLower) ||
         address.includes(selectedCityLower) ||
         village.includes(selectedCityLower);
@@ -335,13 +373,13 @@ const AllServicesComponent = ({
     if (selectedTehsil) {
       const selectedTehsilLower = selectedTehsil.toLowerCase();
       matchesTehsil =
-        tehsil.includes(selectedTehsilLower) ||
+      tehsil.includes(selectedTehsilLower) ||
         address.includes(selectedTehsilLower);
-    }
+      }
 
-    return matchesSearchTerm && matchesState && matchesCity && matchesTehsil;
-  });
-
+      return matchesSearchTerm && matchesState && matchesCity && matchesTehsil;
+    });
+    
   // Clear all filters function
   const clearAllFilters = () => {
     setSearchTerm("");
@@ -349,14 +387,15 @@ const AllServicesComponent = ({
     setSelectedCity("");
     setSelectedTehsil("");
   };
-
+   
+  
   // Filter services based on search term
   const filteredServices = services.filter(
     (service) =>
       service.title.toLowerCase().includes(categorySearchTerm.toLowerCase()) ||
-      service.subtitle?.toLowerCase().includes(categorySearchTerm.toLowerCase())
+    service.subtitle?.toLowerCase().includes(categorySearchTerm.toLowerCase())
   );
-
+  
   // Provider List View - Mobile Optimized
   if (showProviderList && !openInNewPage) {
     return (
@@ -367,7 +406,7 @@ const AllServicesComponent = ({
           style={{
             background: "linear-gradient(135deg, #a99fd4 0%, #695aa6 100%)",
           }}
-        >
+          >
           {/* Mobile Navigation */}
           <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10">
             <button
@@ -595,11 +634,11 @@ const AllServicesComponent = ({
                       selectedCity ||
                       selectedTehsil ||
                       searchTerm) && (
-                      <span className="text-[#695aa6] font-medium">
-                        {" "}
-                        matching your criteria
-                      </span>
-                    )}
+                        <span className="text-[#695aa6] font-medium">
+                          {" "}
+                          matching your criteria
+                        </span>
+                      )}
                   </p>
                   {/* Show active filters */}
                   {(selectedState || selectedCity || selectedTehsil) && (
@@ -637,9 +676,9 @@ const AllServicesComponent = ({
                         <th className="text-left py-4 px-4 font-semibold text-gray-800">
                           Location
                         </th>
-                        <th className="text-left py-4 px-4 font-semibold text-gray-800">
-                          Rating
-                        </th>
+                        {/* <th className="text-left py-4 px-4 font-semibold text-gray-800">
+                          Experience
+                        </th> */}
                         <th className="text-left py-4 px-4 font-semibold text-gray-800">
                           Actions
                         </th>
@@ -664,12 +703,11 @@ const AllServicesComponent = ({
                               {provider.address}
                             </div>
                           </td>
-                          <td className="py-4 px-4 text-gray-700">
+                          {/* <td className="py-4 px-4 text-gray-700">
                             <div className="flex items-center gap-1">
-                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                              <span>{provider.rating}</span>
+                              <span>{provider.experience_level}</span>
                             </div>
-                          </td>
+                          </td> */}
                           <td className="py-4 px-4">
                             <button
                               onClick={() => handleMoreDetails(provider)}
@@ -763,6 +801,9 @@ const AllServicesComponent = ({
             setIsDialogOpen(false);
             setSelectedProvider(null);
           }}
+          providerId = {providerId}
+          serviceId = {serviceId}
+          allreviews = {reviewdata}
         />
       </div>
     );

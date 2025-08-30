@@ -29,9 +29,8 @@ const ServiceCategoryCard = ({ service, onClick }) => {
       style={{ borderColor: "#a99fd4" }}
     >
       <div
-        className={`transition-all duration-300 ease-in-out flex flex-col items-center ${
-          hovered ? "translate-y-[-25%] sm:translate-y-[-30%]" : "translate-y-0"
-        }`}
+        className={`transition-all duration-300 ease-in-out flex flex-col items-center ${hovered ? "translate-y-[-25%] sm:translate-y-[-30%]" : "translate-y-0"
+          }`}
       >
         <img
           src={service.image || "/placeholder.svg?height=64&width=64"}
@@ -43,11 +42,10 @@ const ServiceCategoryCard = ({ service, onClick }) => {
         </h3>
       </div>
       <div
-        className={`absolute bottom-2 sm:bottom-4 px-2 text-xs text-gray-600 text-center transition-all duration-300 ease-in-out ${
-          hovered
+        className={`absolute bottom-2 sm:bottom-4 px-2 text-xs text-gray-600 text-center transition-all duration-300 ease-in-out ${hovered
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-2 pointer-events-none"
-        }`}
+          }`}
       >
         <p className="mb-1 text-xs sm:text-sm leading-tight">
           {service.subtitle}
@@ -124,8 +122,46 @@ function ServicesPanel() {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  const [selectedTehsil, setSelectedTehsil] = useState(""); 
-  const [availableTehsils, setAvailableTehsils] = useState([]); 
+  const [selectedTehsil, setSelectedTehsil] = useState("");
+  const [availableTehsils, setAvailableTehsils] = useState([]);
+
+  const [providerId, setProviderId] = useState()
+  const [serviceId, setServiceId] = useState()
+  const [allReviews, setAllReviews] = useState([])
+  const [reviewdata, setReviewdata] = useState([])
+
+  // all reviews fetch
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const allReviews = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/`);
+        if (allReviews.data.success) {
+          setAllReviews(allReviews.data.data);
+        }
+
+        // console.log("all reviews", allReviews?.data);
+      } catch (error) {
+        console.log("error in fetching reviews ", error);
+      }
+    };
+    fetchReviews();
+  }, [])
+  // filter out reviews
+  useEffect(() => {
+    // Only run the filter if we have a selected provider and a list of reviews
+    if (selectedProvider && allReviews.length > 0) {
+      const filtered = allReviews.filter(review =>
+        review.provider_id === selectedProvider.provider_id &&
+        review.serviceId === selectedProvider.serviceId
+      );
+
+      setReviewdata(filtered); // Set the filtered reviews to your state
+      // console.log("filtered review ", reviewdata) 
+    } else {
+      // Optional: If no provider is selected, clear the reviews
+      setReviewdata([]);
+    }
+  }, [allReviews, selectedProvider]);
 
   useEffect(() => {
     const fetchallcategories = async () => {
@@ -223,9 +259,8 @@ function ServicesPanel() {
             // Clean formatted address
             address: formattedAddress,
             rating: Math.floor(Math.random() * 5) + 1,
-            availability: `${provider.availability?.from || "9 AM"} - ${
-              provider.availability?.to || "6 PM"
-            }`,
+            availability: `${provider.availability?.from || "9 AM"} - ${provider.availability?.to || "6 PM"
+              }`,
             phone: provider.phone || "Not provided",
           };
         });
@@ -287,10 +322,13 @@ function ServicesPanel() {
       experience: serviceInfo?.experience_level,
       serviceId: serviceInfo._id,
     };
+    console.log("card data id", cardData);
     setSelectedProvider(cardData);
+    setProviderId(cardData?.provider_id);
+    setServiceId(cardData?.serviceId);
     setIsDialogOpen(true);
   };
-
+ console.log("service id in panel", serviceId);
   const handleBackToCategories = () => {
     setViewMode("categories");
     setSelectedService(null);
@@ -565,7 +603,7 @@ function ServicesPanel() {
                   </h3>
                   <p className="text-gray-600 text-sm mb-4">
                     No providers found matching your search and filters.
-                  
+
                     {selectedTehsil && (
                       <span className="block mt-1">
                         No providers found in <strong>{selectedTehsil}</strong>{" "}
@@ -616,11 +654,11 @@ function ServicesPanel() {
                         selectedCity ||
                         selectedTehsil ||
                         searchTerm) && (
-                        <span className="text-[#695aa6] font-medium">
-                          {" "}
-                          matching your criteria
-                        </span>
-                      )}
+                          <span className="text-[#695aa6] font-medium">
+                            {" "}
+                            matching your criteria
+                          </span>
+                        )}
                     </p>
                     {(selectedState || selectedCity || selectedTehsil) && (
                       <div className="flex flex-wrap justify-center gap-2 mt-2">
@@ -656,9 +694,9 @@ function ServicesPanel() {
                           <th className="py-4 px-4 text-left font-semibold text-gray-800">
                             Location
                           </th>
-                          <th className="py-4 px-4 text-left font-semibold text-gray-800">
+                          {/* <th className="py-4 px-4 text-left font-semibold text-gray-800">
                             Rating
-                          </th>
+                          </th> */}
                           <th className="py-4 px-4 text-left font-semibold text-gray-800">
                             Actions
                           </th>
@@ -683,12 +721,12 @@ function ServicesPanel() {
                                 {provider.address}
                               </div>
                             </td>
-                            <td className="py-4 px-4 text-gray-700">
+                            {/* <td className="py-4 px-4 text-gray-700">
                               <div className="flex items-center gap-1">
                                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                                 <span>{provider.rating}</span>
                               </div>
-                            </td>
+                            </td> */}
                             <td className="py-4 px-4">
                               <button
                                 onClick={() => handleMoreDetails(provider)}
@@ -727,6 +765,9 @@ function ServicesPanel() {
           setIsDialogOpen(false);
           setSelectedProvider(null);
         }}
+        providerId={providerId}
+        serviceId={serviceId}
+        allreviews={reviewdata}
       />
     </div>
   );
