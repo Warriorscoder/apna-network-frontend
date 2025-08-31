@@ -209,6 +209,7 @@ function ServicesPanel() {
       const filteredServices = services.filter(
         (item) => item.category === serviceKey
       );
+      console.log("filtered services", filteredServices);
       setServiceData(filteredServices);
 
       if (filteredServices.length > 0) {
@@ -316,19 +317,20 @@ function ServicesPanel() {
     );
     const cardData = {
       ...provider,
-      title: serviceInfo?.description || `${selectedService?.title} Service`,
+      title: serviceInfo?.title,
+      description: serviceInfo?.description,
       tags: serviceInfo?.tags || [selectedService?.title?.toLowerCase()],
       category: serviceInfo?.category || selectedService?.serviceKey,
       experience: serviceInfo?.experience_level,
       serviceId: serviceInfo._id,
     };
-    console.log("card data id", cardData);
+    // console.log("card data id", cardData);
     setSelectedProvider(cardData);
     setProviderId(cardData?.provider_id);
     setServiceId(cardData?.serviceId);
     setIsDialogOpen(true);
   };
- console.log("service id in panel", serviceId);
+//  console.log("service id in panel", serviceId);
   const handleBackToCategories = () => {
     setViewMode("categories");
     setSelectedService(null);

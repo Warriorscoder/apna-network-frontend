@@ -13,8 +13,8 @@ const UserFeedbackModal = ({ isOpen, onClose, onSubmitted, providerId, serviceId
   const [recommend, setRecommend] = useState(null);
   const [loading, setLoading] = useState(false);
   const {user} = useAuth();
-  console.log("serviceId in modal:", serviceId);
-  console.log("ProviderId in modal:", providerId);
+  // console.log("serviceId in modal:", serviceId);
+  // console.log("ProviderId in modal:", providerId);
   if (!isOpen) return null;
 
   const toggleTag = (tag) => {

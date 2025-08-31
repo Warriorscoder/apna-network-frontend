@@ -368,7 +368,7 @@
 //                           ))}
 //                         </div>
 
-                        
+
 //                         <div className="border-t border-gray-200 pt-4">
 //                           <button
 //                             onClick={() => setFeedbackModalOpen(true)}
@@ -728,8 +728,8 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
   const { user } = useAuth();
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const router = useRouter();
-  console.log("serviceId", serviceId);
-  console.log("providerId", providerId);
+  // console.log("serviceId", serviceId);
+  // console.log("providerId", providerId);
 
   // Use the 'allreviews' prop directly, ensuring it's an array to prevent errors.
   const safeAllReviews = allreviews || [];
@@ -741,9 +741,9 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
   const averageRating =
     totalReviews > 0
       ? (
-          safeAllReviews.reduce((sum, review) => sum + review.stars, 0) /
-          totalReviews
-        ).toFixed(1)
+        safeAllReviews.reduce((sum, review) => sum + review.stars, 0) /
+        totalReviews
+      ).toFixed(1)
       : 0;
 
   // Calculate rating distribution directly from the prop.
@@ -753,8 +753,8 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
     percentage:
       totalReviews > 0
         ? (safeAllReviews.filter((review) => review.stars === rating).length /
-            totalReviews) *
-          100
+          totalReviews) *
+        100
         : 0,
   }));
 
@@ -765,11 +765,10 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
-            className={`${size} ${
-              star <= rating
+            className={`${size} ${star <= rating
                 ? "fill-yellow-400 text-yellow-400"
                 : "text-gray-300"
-            }`}
+              }`}
           />
         ))}
       </div>
@@ -822,16 +821,19 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
 
   // Email code
   const sendEmailNotification = async ({ name, phone, email, userEmail, category, now }) => {
-    if (!name || !phone || !email || !userEmail || !category || !now || !validateEmail(email) || !validateEmail(userEmail)) {
-      toast.error("Missing or invalid input fields");
-      return;
-    }
     try {
+      if (!name || !phone || !email || !userEmail || !category || !now || !validateEmail(email) || !validateEmail(userEmail)) {
+        // console.log("Validation failed for email notification:", { name, phone, email, userEmail, category, now });
+        toast.error("Missing or invalid input fields");
+        return;
+      }
       setIsSending(true);
-      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/notify`, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/notify`, {
         name, phone, email, userEmail, category, now,
       });
-      toast.success("Email sent successfully!");
+      if (response.data.success)
+        toast.success("Email sent successfully!");
+
     } catch (error) {
       console.error("Email send failed:", error?.response?.data || error.message);
       toast.error("Failed to send email");
@@ -924,7 +926,7 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
                       ))}
                     </div>
                     <div className="border-t border-gray-200 pt-4">
-                      <button onClick={handleOpenFeedbackModal}className="w-full bg-[#695aa6] hover:bg-[#5a4d8a] text-white py-2.5 px-4 rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center space-x-2">
+                      <button onClick={handleOpenFeedbackModal} className="w-full bg-[#695aa6] hover:bg-[#5a4d8a] text-white py-2.5 px-4 rounded-lg transition-colors duration-200 font-medium text-sm flex items-center justify-center space-x-2">
                         <Edit className="w-4 h-4" />
                         <span>Share Your Feedback</span>
                       </button>
@@ -1010,15 +1012,7 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
                 <div>
                   <h4 className="text-sm sm:text-base font-semibold text-gray-800 mb-2">Service Description</h4>
                   <p className="text-gray-700 text-sm sm:text-base leading-relaxed">
-                    {(() => {
-                      const category = data?.category?.toLowerCase() || "";
-                      const title = data?.title?.toLowerCase() || "";
-                      if (category.includes("plumber") || title.includes("plumber")) return "Professional plumbing services including pipe installation, repair, water heater services, bathroom fittings, kitchen plumbing, and emergency leak repairs. Experienced in both residential and commercial plumbing work with quality materials and reliable service.";
-                      if (category.includes("electrician") || title.includes("electrician")) return "Expert electrical services covering house wiring, electrical panel installation, ceiling fan and light fixture installation, electrical repairs, and safety inspections. Licensed electrician with experience in modern electrical systems and emergency electrical services.";
-                      if (category.includes("carpenter") || title.includes("carpenter")) return "Skilled carpentry services including custom furniture making, door and window installation, kitchen cabinets, wooden flooring, furniture repair, and interior woodwork. Quality craftsmanship with attention to detail and durable materials.";
-                      // ... (other categories)
-                      return `Professional ${data?.category || "service"} provider offering quality services with experienced professionals. Committed to customer satisfaction, timely completion, and competitive pricing. Contact for detailed consultation and customized service solutions.`;
-                    })()}
+                    {data?.description || "Professional service provider offering quality services with experienced professionals. Committed to customer satisfaction, timely completion, and competitive pricing. Contact for detailed consultation and customized service solutions."}
                   </p>
                 </div>
               </div>
@@ -1079,12 +1073,12 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
           )}
         </div>
       </div>
-      <UserFeedbackModal 
-      isOpen={feedbackModalOpen} onClose={() => 
-      setFeedbackModalOpen(false)} 
-      onSubmitted={handleFeedbackSubmitted}
-      providerId = {providerId}
-      serviceId = {serviceId} />
+      <UserFeedbackModal
+        isOpen={feedbackModalOpen} onClose={() =>
+          setFeedbackModalOpen(false)}
+        onSubmitted={handleFeedbackSubmitted}
+        providerId={providerId}
+        serviceId={serviceId} />
     </div>
   );
 };
