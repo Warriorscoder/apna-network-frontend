@@ -27,10 +27,10 @@ export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, togg
     { name: "Dashboard", icon: "🏠" },
     { name: "Service Approvals", icon: "⏳" },
     { name: "Manage Users", icon: "👥" },
-    { name: "Manage Services", icon: "🧾" },
-    { name: "Categories", icon: "📂" },
-    { name: "Complaints", icon: "⚠️" },
-    { name: "Testimonials", icon: "💬" },
+    //{ name: "Manage Services", icon: "🧾" },
+    //{ name: "Categories", icon: "📂" },
+    //{ name: "Complaints", icon: "⚠️" },
+    //{ name: "Testimonials", icon: "💬" },
     { name: "Activity", icon: "📜" },
   ];
 
@@ -88,37 +88,30 @@ export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, togg
 
           {/* Content Management Toggle */}
           <li>
-            <button
-              type="button"
-              onClick={() => setContentOpen((prev) => !prev)}
-              className="w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition font-medium"
-            >
-              <span>📂</span>
-              {!collapsed && <span>Content Management</span>}
-              {!collapsed && (
-                <span className="ml-auto">{contentOpen ? "▲" : "▼"}</span>
-              )}
-            </button>
+  <div className="w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg font-medium">
+    <span>📂</span>
+    {!collapsed && <span>Content Management</span>}
+  </div>
 
-            {contentOpen && !collapsed && (
-              <ul className="ml-6 mt-1 space-y-1">
-                {contentSections.map((item) => (
-                  <li key={item.name}>
-                    <button
-                      type="button"
-                      onClick={() => onNavigate(item.name)}
-                      className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition font-medium"
-                    >
-                      <span>{item.icon}</span>
-                      <span>{item.name}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        </ul>
-      </nav>
+  {!collapsed && (
+    <ul className="ml-6 mt-1 space-y-1">
+      {contentSections.map((item) => (
+        <li key={item.name}>
+          <button
+            type="button"
+            onClick={() => onNavigate(item.name)}
+            className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition font-medium"
+          >
+            <span>{item.icon}</span>
+            <span>{item.name}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  )}
+</li>
+</ul>
+</nav>
 
       {/* Footer */}
       <div className="px-4 py-4 border-t border-white/20 text-sm">
