@@ -209,7 +209,7 @@ export default function OtpPage() {
   const [counter, setCounter] = useState(30);
   const [canResend, setCanResend] = useState(false);
 
-  const { loginWithToken } = useAuth(); // ✅ get from context
+  const { loginWithToken } = useAuth(); 
 
   useEffect(() => {
     let timer;
