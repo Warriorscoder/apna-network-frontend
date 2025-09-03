@@ -33,11 +33,9 @@ export default function StatCard() {
           { label: "Total Service Providers", value: data.totalProviders, icon: "🛠️" },
           { label: "Total Services", value: data.totalServices, icon: "📦" },
           { label: "Pending Services", value: data.pendingServices, icon: "⏳" },
-          { label: "Total Complaints", value: data.totalComplaints, icon: "⚠️" },
-          { label: "Resolved Complaints", value: data.resolvedComplaints, icon: "✅" },
-          { label: "Total Testimonials", value: data.totalTestimonials, icon: "💬" },
-          { label: "Approved Success Stories", value: data.approvedStories, icon: "🌟" },
-          { label: "Pending Success Stories", value: data.pendingStories, icon: "🕒" },
+        
+          { label: " Success Stories", value: data.approvedStories, icon: "🌟" },
+         
           { label: "Total Blogs", value: data.totalBlogs, icon: "📝" },
           { label: "Total Newsletters", value: data.totalNewsletters, icon: "📬" },
         ]);

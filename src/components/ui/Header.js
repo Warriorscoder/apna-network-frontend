@@ -1,19 +1,15 @@
-'use client';
-
+"use client";
 import NotificationBadge from "./NotificationBadge";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState, useRef} from "react";
+import { Bell, User, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function Header() {
+export default function Header({ onToggleSidebar, onNavigate }) {
   const [showMenu, setShowMenu] = useState(false);
   const [adminName, setAdminName] = useState("Admin");
   const menuRef = useRef(null);
   const router = useRouter();
-
-  // Toggle dropdown
   const toggleDropdown = () => setShowMenu((prev) => !prev);
-
-  // Load admin name from localStorage
   useEffect(() => {
     const storedAdmin = localStorage.getItem("admin");
     if (storedAdmin) {
@@ -25,8 +21,7 @@ export default function Header() {
       }
     }
   }, []);
-
-  // Close dropdown when clicking outside
+  
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -37,45 +32,73 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Handle Logout
+
   const handleLogout = () => {
     localStorage.removeItem("admin");
     router.push("/");
   };
-
-  // Handle View Profile
-  const handleViewProfile = () => {
+  
+   const handleViewProfile = () => {
     router.push("/profile"); // Change route if needed
   };
 
+  // 🔹 Navbar menu items
+  const navLinks = [
+    { name: "Dashboard", id: "Dashboard", path: "/dashboard/admin-dashboard" },
+    { name: "Users", id: "Manage Users", path: "/dashboard/admin-dashboard?tab=users" },
+    { name: "Services", id: "Manage Services", path: "/dashboard/admin-dashboard?tab=services" },
+   
+  ];
+
   return (
-    <header className="bg-white shadow border-b px-4 sm:px-6 md:px-8 py-3 sm:py-4">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl sm:text-2xl font-bold text-[#695aa6] tracking-tight">
-          Admin Dashboard
-        </h1>
+    <header className="sticky top-0 z-30 bg-gradient-to-r from-purple-200 to-purple-300 shadow-md">
+      <div className="flex justify-between items-center px-6 py-4">
+        {/* Left - Logo */}
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold text-purple-900">Apna Network</h1>
+        </div>
 
-        <div className="flex items-center gap-4 sm:gap-6 relative" ref={menuRef}>
-          <NotificationBadge />
-
-          <div
-            onClick={toggleDropdown}
-            className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded transition"
-          >
-            <span className="text-xl">👤</span>
-            <span className="text-[#695aa6] font-medium text-sm sm:text-base">
-              {adminName}
+        {/* Center - Dynamic Nav Links */}
+        <nav className="hidden md:flex gap-6 text-purple-900 font-medium">
+          {navLinks.map((link) => (
+            <span
+              key={link.id}
+              className="cursor-pointer hover:text-purple-700"
+              onClick={() => {
+                if (onNavigate) {
+                  onNavigate(link.id); // Sidebar highlight + internal scroll if same page
+                }
+                router.push(link.path); // Always change page/URL
+              }}
+            >
+              {link.name}
             </span>
-          </div>
+          ))}
+        </nav>
 
-          {showMenu && (
-            <div className="absolute right-0 top-14 bg-white border border-gray-200 rounded shadow-md z-50 w-40 sm:w-44">
-              <ul className="flex flex-col py-2 text-sm text-gray-700">
+        {/* Right - Notifications & Profile */}
+        <div className="flex items-center gap-6">
+          <button className="relative hover:text-purple-700">
+            <Bell className="w-6 h-6" />
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+              3
+            </span>
+          </button>
+
+          {/* Profile Dropdown */}
+          <div className="relative group">
+            <button className="flex items-center gap-2 bg-white text-purple-900 px-3 py-2 rounded-full shadow hover:shadow-md">
+              <User className="w-5 h-5" />
+              {adminName}
+            </button>
+
+            <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+              <ul className="text-sm text-gray-700">
                 <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={handleViewProfile}
                 >
-                  View Profile
+                 View Profile
                 </li>
                 <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -85,7 +108,7 @@ export default function Header() {
                 </li>
               </ul>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </header>
