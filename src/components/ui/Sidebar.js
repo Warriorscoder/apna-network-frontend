@@ -28,7 +28,7 @@ export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, togg
     { name: "Service Approvals", icon: "⏳" },
     { name: "Manage Users", icon: "👥" },
     //{ name: "Manage Services", icon: "🧾" },
-    //{ name: "Categories", icon: "📂" },
+    { name: "Categories", icon: "📂" },
     //{ name: "Complaints", icon: "⚠️" },
     //{ name: "Testimonials", icon: "💬" },
     { name: "Activity", icon: "📜" },
