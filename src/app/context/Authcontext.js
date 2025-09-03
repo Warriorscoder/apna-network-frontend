@@ -272,7 +272,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [authInitialized, setAuthInitialized] = useState(false);
   const router = useRouter();
-  
+
   useEffect(() => {
     const initializeAuth = () => {
       setLoading(true);
@@ -281,7 +281,7 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const decoded = jwtDecode(token);
-          console.log("decoded token inside context", decoded);
+          // console.log("decoded token inside context", decoded);
 
           if (decoded) {
             setUser({
@@ -289,19 +289,28 @@ export const AuthProvider = ({ children }) => {
               name: decoded.name,
               email: decoded.email || '',
               role: decoded.role,
+
               phone:decoded.phone,
               date:decoded.date
+
             });
           } else {
             console.warn("Token found but missing required fields.");
-            setUser(null);
+             setUser(null);
           }
         } catch (e) {
           console.error("Failed to decode token:", e);
           setUser(null);
         }
       } else {
-        setUser(null);
+        console.log("No token found in localStorage.");
+        setUser({
+          id: '',
+          name: '',
+          email: '',
+          role: 'not logged in',
+          phone:''
+        });
       }
 
       setAuthInitialized(true);
@@ -322,17 +331,27 @@ export const AuthProvider = ({ children }) => {
           name: decoded.name,
           email: decoded.email || "",
           role: decoded.role,
+
           phone:decoded.phone,
           date:decoded.date
+
         };
         setUser(userData);
         return { success: true, user: userData };
       } else {
         localStorage.removeItem("token");
-        setUser(null);
+        console.warn("Invalid token format.");
+        setUser({
+          id: '',
+          name: '',
+          email: '',
+          role: 'not logged in',
+          phone: ''
+        });
         return { success: false, message: "Invalid token format" };
       }
     } catch (error) {
+      console.error("Error decoding token:", error);x
       localStorage.removeItem("token");
       setUser(null);
       return { success: false, message: "Invalid or corrupt token" };
@@ -346,7 +365,7 @@ console.log("userdate" ,user);
     router.push('/')
   };
 
-  const isAuthenticated = () => !!user;
+  const isAuthenticated = () => user?.role && user?.role !== 'not logged in';
 
   const getCurrentUser = () => user;
 

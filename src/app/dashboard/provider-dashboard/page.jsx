@@ -12,6 +12,7 @@ import DashboardOverview from "./DashboardOverview";
 import { useAuthenticatedAPI } from "@/app/hooks/useAuthenticatedAPI";
 import { useAuth } from "@/app/context/Authcontext";
 import FeedbackModal from "@/components/ui/FeedbackModal"; // Make sure path is correct
+import { useRouter } from "next/navigation";
 
 export default function ProviderDashboardPage() {
   const [activeView, setActiveView] = useState("dashboard");
@@ -23,6 +24,16 @@ export default function ProviderDashboardPage() {
 
   const { provider } = useAuthenticatedAPI();
   const { user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+      if(user?.role === 'not logged in'){
+        router.push('/login');
+      }
+      if(user?.role === 'user'){
+        router.push('/');
+      }
+    }, [user?.role]);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -163,23 +174,6 @@ export default function ProviderDashboardPage() {
         </section>
       </main>
 
-      {/* Floating Feedback Button */}
-      {activeView === "dashboard" && (
-        <button
-          onClick={() => setFeedbackOpen(true)}
-          className="fixed bottom-6 right-6 z-40 bg-[#695aa6] text-white px-4 py-2 rounded-full shadow-lg hover:bg-[#5a4d8a] transition flex items-center gap-2"
-        >
-          <Star className="w-4 h-4" />
-          Give Feedback
-        </button>
-      )}
-
-      {/* Feedback Modal */}
-      <FeedbackModal
-        isOpen={feedbackOpen}
-        onClose={() => setFeedbackOpen(false)}
-        onSubmit={handleFeedbackSubmit}
-      />
     </div>
   );
 }

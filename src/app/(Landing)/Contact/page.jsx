@@ -4,6 +4,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Phone, Mail, Clock, Send, ArrowRight, CheckCircle, ChevronDown, ChevronUp } from "lucide-react"
 import ConditionalNavbar from "@/components/ConditionalNavbar"
+import axios from "axios"
+import { toast } from "react-toastify"
 
 const ContactPage = () => {
   const router = useRouter()
@@ -28,27 +30,52 @@ const ContactPage = () => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    const companyEmail = process.env.NEXT_PUBLIC_EMAIL;
+
+    if (!companyEmail) {
+      console.error("Error: NEXT_PUBLIC_EMAIL environment variable is not set.");
+      toast.error("Server configuration error. Please contact support.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const emailPayload = {
+      ...formData,
+      companyEmail: companyEmail,
+      userEmail: formData.email,
+    };
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      console.log("Contact form submitted:", formData)
-      setSubmitStatus("success")
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-        serviceType: "",
-      })
+      const response = await axios.post(`${process.env.  NEXT_PUBLIC_API_BASE_URL}/contact`, emailPayload);
+
+      if (response.status === 200) {
+        console.log("Contact form submitted successfully:", formData);
+        setSubmitStatus("success");
+        toast.success("Your message has been sent successfully!");
+
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+          serviceType: "",
+        });
+      } else {
+        throw new Error(response.data.message || 'An unexpected error occurred.');
+      }
     } catch (error) {
-      setSubmitStatus("error")
+      console.error("Submission failed:", error?.response?.data || error.message);
+      setSubmitStatus("error");
+      toast.error("Failed to send your message. Please try again later.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const toggleFAQ = (index) => {
     setOpenFAQ(openFAQ === index ? null : index)
@@ -269,7 +296,7 @@ const ContactPage = () => {
                   ) : (
                     <>
                       <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-                      Send Message
+                      Send Email
                     </>
                   )}
                 </button>
@@ -349,9 +376,8 @@ const ContactPage = () => {
                 </button>
 
                 <div
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                    openFAQ === index ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                  }`}
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${openFAQ === index ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                    }`}
                 >
                   <div className="px-4 sm:px-6 pb-3 sm:pb-4">
                     <div className="h-px bg-white/20 mb-3 sm:mb-4"></div>

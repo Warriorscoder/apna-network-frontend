@@ -1,4 +1,5 @@
 "use client";
+import { useAuth } from "@/app/context/Authcontext";
 import {
   LayoutDashboard,
   ListTodo,
@@ -12,7 +13,7 @@ import { useState, useEffect } from "react";
 
 const Sidebar = ({ activeView, setActiveView, sidebarOpen, setSidebarOpen, isMobile }) => {
   const [hasMounted, setHasMounted] = useState(false);
-
+  const {user} = useAuth();
   useEffect(() => {
     setHasMounted(true);
   }, []);
@@ -97,7 +98,7 @@ const Sidebar = ({ activeView, setActiveView, sidebarOpen, setSidebarOpen, isMob
           <UserCircle className="w-8 h-8 text-white/80 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">
-              Provider Account
+              {user?.name}
             </p>
             <p className="text-xs text-white/60">Service Provider</p>
           </div>

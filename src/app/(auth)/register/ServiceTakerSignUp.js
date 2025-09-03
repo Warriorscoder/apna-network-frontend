@@ -6,7 +6,10 @@ import Link from "next/link";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useSearchParams } from 'next/navigation';
-import { useAuth } from "@/app/context/Authcontext"
+
+
+
+import { useAuth } from "@/app/context/Authcontext";
 
 
 export default function ServiceTakerSignUp() {
@@ -21,7 +24,6 @@ export default function ServiceTakerSignUp() {
     address: "",
     email: ""
   });
-
 
 
   const [errors, setErrors] = useState({});
@@ -57,17 +59,31 @@ export default function ServiceTakerSignUp() {
     setIsSubmitting(true);
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  try {
-    const res = await axios.post(`${apiUrl}/users/complete`, {gender :formData.gender ,name:formData.name, address: formData.address, phone , role});
-    console.log(phone,role,formData)
-    const data = res.data;
-    console.log("Response data:", data);
-    if (data.success) {
-      toast.success("Registration successful!");
-      loginWithToken(data.token)
-      router.push("/dashboard/user-dashboard");
-    }
+
    
+
+    try {
+      const res = await axios.post(`${apiUrl}/users/complete`, { gender: formData.gender, address: formData.address, phone, name: formData.name, email: formData.email });
+      console.log(phone, role, formData)
+      const data = res.data;
+      const result = loginWithToken(data.token);
+      if (result.success) {
+        toast.success("OTP verified. Login successful");
+        router.push("/dashboard/user-dashboard");
+      } else {
+        toast.error(result.message || "Login failed");
+      }
+
+    } catch (err) {
+      console.error("Error occurred during form submission:", err);
+
+      if (err.response) {
+        console.log("Server responded with error:", err.response.data.message);
+      } else if (err.request) {
+        console.log("No response received from server. Possible network error.");
+      } else {
+        console.log("Client-side error:", err.message);
+      }
     } finally {
       setIsSubmitting(false);
       console.log("Form submission ended");

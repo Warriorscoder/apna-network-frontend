@@ -1,17 +1,20 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Star, X } from "lucide-react";
 import axios from "axios";
+import { useAuth } from "@/app/context/Authcontext";
 
 const TAG_OPTIONS = ["on-time", "polite", "skilled", "clean", "friendly", "efficient"];
 
-const UserFeedbackModal = ({ isOpen, onClose, onSubmitted }) => {
+const UserFeedbackModal = ({ isOpen, onClose, onSubmitted, providerId, serviceId }) => {
   const [rating, setRating] = useState(0);
   const [feedbackText, setFeedbackText] = useState("");
   const [tags, setTags] = useState([]);
   const [recommend, setRecommend] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const {user} = useAuth();
+  // console.log("serviceId in modal:", serviceId);
+  // console.log("ProviderId in modal:", providerId);
   if (!isOpen) return null;
 
   const toggleTag = (tag) => {
@@ -25,23 +28,16 @@ const UserFeedbackModal = ({ isOpen, onClose, onSubmitted }) => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-
-      const response = await axios.post(
-        "http://localhost:8000/api/feedback/user",
-        {
-          rating,
-          feedbackText,
-          tags,
-          recommend,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/create`,{
+        name:user.name,
+        serviceId : serviceId,
+        user_id: user.id,
+        provider_id: providerId,
+        stars: rating,
+        comment: feedbackText,
+        tags: tags,
+      })
+      
       console.log("Feedback submitted:", response.data);
       onSubmitted?.(response.data);
       setRating(0);
@@ -51,7 +47,7 @@ const UserFeedbackModal = ({ isOpen, onClose, onSubmitted }) => {
       onClose();
     } catch (err) {
       console.error(err);
-      alert("Failed to submit feedback.");
+      // alert("Failed to submit feedback.");
     } finally {
       setLoading(false);
     }
@@ -119,7 +115,7 @@ const UserFeedbackModal = ({ isOpen, onClose, onSubmitted }) => {
         </div>
 
         {/* Recommend */}
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <p className="text-sm font-medium mb-1">Would you recommend us?</p>
           <div className="flex gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -141,7 +137,7 @@ const UserFeedbackModal = ({ isOpen, onClose, onSubmitted }) => {
               <span>No</span>
             </label>
           </div>
-        </div>
+        </div> */}
 
         {/* Actions */}
         <div className="flex justify-end gap-2">

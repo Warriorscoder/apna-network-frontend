@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   Menu,
   X,
@@ -17,6 +17,8 @@ import RequestsPanel from "./RequestsPanel";
 import HelpPanel from "./HelpPanel";
 import { useAuth } from "@/app/context/Authcontext";
 import UserFeedbackModal from "@/components/ui/UserFeedbackModal";
+import { useRouter } from "next/navigation";
+
 
 const useClientGreeting = () => {
   const [greeting, setGreeting] = useState("Welcome");
@@ -33,6 +35,7 @@ const useClientGreeting = () => {
 
 export default function UserDashboard() {
   const { user } = useAuth();
+  console.log("Authenticated user:", user);
   const [activeView, setActiveView] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -40,6 +43,16 @@ export default function UserDashboard() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [feedbackPromptShown, setFeedbackPromptShown] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    if(user?.role === 'not logged in'){
+      router.push('/login');
+    }
+    if(user?.role === 'provider'){
+      router.push('/');
+    }
+  }, [user?.role]);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -49,8 +62,8 @@ export default function UserDashboard() {
     };
 
     checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
   useEffect(() => {
@@ -68,8 +81,8 @@ export default function UserDashboard() {
       setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY, isMobile]);
 
   const greeting = useClientGreeting();
@@ -104,49 +117,26 @@ export default function UserDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-[#a395d4] via-[#b8a7e8] to-[#8b7cc8] flex flex-col">
       <ConditionalNavbar />
 
-      {/* Feedback Modal */}
-      <UserFeedbackModal
-        isOpen={isFeedbackOpen}
-        onClose={() => setIsFeedbackOpen(false)}
-        onSubmitted={(data) => {
-          console.log("Feedback received:", data);
-        }}
-      />
-       {/* Prompting Popup on Load */}
-      {activeView === "dashboard" && feedbackPromptShown && (
-        <div className="fixed top-[6rem] right-6 z-[9999]">
-          <button
-            onClick={() => {
-              setIsFeedbackOpen(true);
-              setFeedbackPromptShown(false);
-            }}
-            className="bg-[#695aa6] hover:bg-[#57458c] text-white rounded-xl px-4 py-2 shadow-lg transition"
-          >
-            💬 We value your feedback!
-          </button>
-        </div>
-      )}
-
       {/* Floating menu toggle for mobile */}
       {isMobile && !sidebarOpen && (
         <button
           onClick={handleSidebarToggle}
           className="lg:hidden"
           style={{
-            position: 'fixed',
-            top: '80px',
-            left: '12px',
+            position: "fixed",
+            top: "80px",
+            left: "12px",
             zIndex: 40,
             opacity: showFloatingMenu ? 0.8 : 0,
-            pointerEvents: showFloatingMenu ? 'auto' : 'none',
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '8px',
-            border: 'none',
-            boxShadow: 'none',
-            backdropFilter: 'none',
-            transition: 'opacity 0.3s ease',
+            pointerEvents: showFloatingMenu ? "auto" : "none",
+            backgroundColor: "rgba(255, 255, 255, 0.2)",
+            color: "white",
+            padding: "10px",
+            borderRadius: "8px",
+            border: "none",
+            boxShadow: "none",
+            backdropFilter: "none",
+            transition: "opacity 0.3s ease",
           }}
           aria-label="Open sidebar"
         >
@@ -158,13 +148,13 @@ export default function UserDashboard() {
         <div
           onClick={() => setSidebarOpen(false)}
           style={{
-            position: 'fixed',
+            position: "fixed",
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 35
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 35,
           }}
         />
       )}
@@ -174,14 +164,22 @@ export default function UserDashboard() {
         <aside
           className={`
             fixed lg:sticky top-16 lg:top-20 left-0 h-[calc(100vh-4rem)] lg:h-[calc(100vh-5rem)]
-            ${sidebarOpen ? "translate-x-0 w-64" : "-translate-x-full lg:translate-x-0 lg:w-20"}
+            ${
+              sidebarOpen
+                ? "translate-x-0 w-64"
+                : "-translate-x-full lg:translate-x-0 lg:w-20"
+            }
             bg-[rgba(60,50,100,0.95)] backdrop-blur-md text-white
             transition-all duration-300 ease-in-out z-40 lg:z-30
             flex flex-col border-r border-white/10
           `}
         >
           <div className="p-4 border-b border-white/10 flex items-center justify-between lg:justify-center">
-            <div className={`${sidebarOpen ? "opacity-100" : "opacity-0 lg:hidden"}`}>
+            <div
+              className={`${
+                sidebarOpen ? "opacity-100" : "opacity-0 lg:hidden"
+              }`}
+            >
               <span className="font-bold text-lg">Menu</span>
             </div>
             {sidebarOpen && (
@@ -221,11 +219,15 @@ export default function UserDashboard() {
                         ? "bg-white/20 text-white shadow-lg"
                         : "hover:bg-white/10 text-white/80 hover:text-white"
                     } ${!sidebarOpen ? "lg:justify-center" : ""}`}
-                    title={!sidebarOpen ? label : ''}
+                    title={!sidebarOpen ? label : ""}
                   >
-                    <Icon className={`w-6 h-6 flex-shrink-0 ${
-                      activeView === key ? "text-white" : "text-white/80 group-hover:text-white"
-                    }`} />
+                    <Icon
+                      className={`w-6 h-6 flex-shrink-0 ${
+                        activeView === key
+                          ? "text-white"
+                          : "text-white/80 group-hover:text-white"
+                      }`}
+                    />
                     <span
                       className={`font-medium transition-opacity duration-300 ${
                         sidebarOpen ? "opacity-100" : "lg:opacity-0 lg:sr-only"
@@ -240,7 +242,11 @@ export default function UserDashboard() {
           </nav>
 
           {/* User Info */}
-          <div className={`p-4 border-t border-white/10 ${sidebarOpen ? "" : "lg:hidden"}`}>
+          <div
+            className={`p-4 border-t border-white/10 ${
+              sidebarOpen ? "" : "lg:hidden"
+            }`}
+          >
             <div className="flex items-center gap-3">
               <UserCircle className="w-8 h-8 text-white/80 flex-shrink-0" />
               <div className="flex-1 min-w-0">
@@ -254,7 +260,11 @@ export default function UserDashboard() {
         </aside>
 
         {/* Main content */}
-        <section className={`flex-1 transition-all duration-300 ${isMobile ? 'w-full' : ''}`}>
+        <section
+          className={`flex-1 transition-all duration-300 ${
+            isMobile ? "w-full" : ""
+          }`}
+        >
           {activeView === "dashboard" && (
             <div className="relative px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
               <div className="max-w-7xl mx-auto text-center">
@@ -266,7 +276,10 @@ export default function UserDashboard() {
 
                 <h1
                   className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-3"
-                  style={{ textShadow: "0 4px 24px rgba(60,50,100,0.65), 0 2px 4px rgba(0,0,0,0.3)"}}
+                  style={{
+                    textShadow:
+                      "0 4px 24px rgba(60,50,100,0.65), 0 2px 4px rgba(0,0,0,0.3)",
+                  }}
                   suppressHydrationWarning={true}
                 >
                   {greeting}, {user?.name || "Guest"}! 👋
@@ -274,10 +287,14 @@ export default function UserDashboard() {
 
                 <p
                   className="text-base sm:text-lg text-white/90 max-w-3xl mx-auto leading-relaxed"
-                  style={{ textShadow: "0 2px 12px rgba(60,50,100,0.45), 0 1px 2px rgba(0,0,0,0.3)" }}
+                  style={{
+                    textShadow:
+                      "0 2px 12px rgba(60,50,100,0.45), 0 1px 2px rgba(0,0,0,0.3)",
+                  }}
                 >
-                  Connect with trusted local service providers in your community.
-                  From home repairs to personal services, find reliable professionals near you.
+                  Connect with trusted local service providers in your
+                  community. From home repairs to personal services, find
+                  reliable professionals near you.
                 </p>
               </div>
             </div>
@@ -290,7 +307,8 @@ export default function UserDashboard() {
                 <div className="bg-white/30 backdrop-blur-sm rounded-xl px-6 py-4 shadow-lg border border-white/30 flex items-center justify-center gap-3">
                   <Bell className="w-5 h-5 text-[#695aa6] flex-shrink-0" />
                   <span className="text-sm sm:text-base text-gray-700 font-medium text-center">
-                    🎉 Welcome to your dashboard! Explore services and manage your requests easily.
+                    🎉 Welcome to your dashboard! Explore services and manage
+                    your requests easily.
                   </span>
                 </div>
               </div>
@@ -298,10 +316,12 @@ export default function UserDashboard() {
           )}
 
           {/* Main Panel Content */}
-          <div className={`px-4 sm:px-6 lg:px-8 pb-8 ${activeView !== "dashboard" ? "pt-8" : ""}`}>
-            <div className="max-w-7xl mx-auto">
-              {renderContent()}
-            </div>
+          <div
+            className={`px-4 sm:px-6 lg:px-8 pb-8 ${
+              activeView !== "dashboard" ? "pt-8" : ""
+            }`}
+          >
+            <div className="max-w-7xl mx-auto">{renderContent()}</div>
           </div>
         </section>
       </main>
