@@ -94,14 +94,6 @@ const EnhancedServiceCard = ({ service, onMoreDetails, index }) => (
       >
         View Details
       </button>
-      {service.phone && service.phone !== "Not provided" && (
-        <a
-          href={`tel:${service.phone}`}
-          className="py-2.5 px-4 border border-[#695aa6] text-[#695aa6] rounded-lg text-sm hover:bg-[#695aa6] hover:text-white transition-colors font-medium"
-        >
-          Call
-        </a>
-      )}
     </div>
   </div>
 );
@@ -209,7 +201,6 @@ function ServicesPanel() {
       const filteredServices = services.filter(
         (item) => item.category === serviceKey
       );
-      console.log("filtered services", filteredServices);
       setServiceData(filteredServices);
 
       if (filteredServices.length > 0) {

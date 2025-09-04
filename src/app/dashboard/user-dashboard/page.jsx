@@ -35,7 +35,6 @@ const useClientGreeting = () => {
 
 export default function UserDashboard() {
   const { user } = useAuth();
-  console.log("Authenticated user:", user);
   const [activeView, setActiveView] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);

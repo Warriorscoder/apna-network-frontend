@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react"; // ✅ ADDED useMemo
 import { useRouter } from "next/navigation";
 import { services } from "@/data/services";
 import {
@@ -16,7 +16,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import Dialoguebox from "@/components/servicePage/Dialoguebox";
-import LocationSelector from "@/components/LocationSelector"; // Import the LocationSelector
+import LocationSelector from "@/components/LocationSelector";
 import axios from "axios";
 import ConditionalNavbar from "./ConditionalNavbar";
 
@@ -32,8 +32,9 @@ const ServiceCard = ({ service, onClick }) => {
       style={{ borderColor: "#a99fd4" }}
     >
       <div
-        className={`transition-all duration-300 ease-in-out flex flex-col items-center ${hovered ? "translate-y-[-35%] sm:translate-y-[-40%]" : "translate-y-0"
-          }`}
+        className={`transition-all duration-300 ease-in-out flex flex-col items-center ${
+          hovered ? "translate-y-[-35%] sm:translate-y-[-40%]" : "translate-y-0"
+        }`}
       >
         <img
           src={service.image || "/placeholder.svg?height=64&width=64"}
@@ -45,10 +46,11 @@ const ServiceCard = ({ service, onClick }) => {
         </h3>
       </div>
       <div
-        className={`absolute bottom-2 sm:bottom-4 px-2 text-xs text-gray-600 text-center transition-all duration-300 ease-in-out ${hovered
+        className={`absolute bottom-2 sm:bottom-4 px-2 text-xs text-gray-600 text-center transition-all duration-300 ease-in-out ${
+          hovered
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-2 pointer-events-none"
-          }`}
+        }`}
       >
         <p className="mb-1 text-xs sm:text-sm leading-tight">
           {service.subtitle}
@@ -95,6 +97,8 @@ const AllServicesComponent = ({
   openInNewPage = false,
   showBackButton = false,
   showNavbar = false,
+  initialServiceKey, // ✅ NEW: open list directly for a given service
+  backBehavior = "inline", // "inline" | "history"
 }) => {
   const router = useRouter();
   const [providers, setProviders] = useState([]);
@@ -121,22 +125,24 @@ const AllServicesComponent = ({
   const [availableTehsils, setAvailableTehsils] = useState([]); // ✅ ADDED: Store available tehsils
 
   // reviews related states
-  const [allReviews, setAllReviews] = useState([])
-  const [reviewdata, setReviewdata] = useState([])
-  const [providerId, setProviderId] = useState()
-  const [serviceId, setServiceId] = useState()
+  const [allReviews, setAllReviews] = useState([]);
+  const [reviewdata, setReviewdata] = useState([]);
+  const [providerId, setProviderId] = useState();
+  const [serviceId, setServiceId] = useState();
 
   const [categorySearchTerm, setCategorySearchTerm] = useState(""); // ✅ ADDED: Category search state
 
   // Handle service click - UNIFIED LOGIC
   const handleServiceClick = (service) => {
     if (openInNewPage) {
+      // Featured Services: open separate page
       router.push(`/service/${service.serviceKey}`);
-    } else {
-      setSelectedService(service);
-      setShowProviderList(true);
-      fetchServiceProviders(service.serviceKey);
+      return;
     }
+    // Navbar service page: open inline provider list
+    setSelectedService(service);
+    setShowProviderList(true);
+    fetchServiceProviders(service.serviceKey);
   };
 
   // Fetch providers for selected service
@@ -205,10 +211,11 @@ const AllServicesComponent = ({
             district: district || "Not specified",
             location: location || "Not specified",
             address: formattedAddress,
-            // experience_level: provider.experience_level || "Not specified",
-            availability: `${provider.availability?.from || "9:00 AM"} - ${provider.availability?.to || "6:00 PM"
-              }`,
+            availability: `${provider.availability?.from || "9:00 AM"} - ${
+              provider.availability?.to || "6:00 PM"
+            }`,
             phone: provider.phone || "Not provided",
+            rating: Math.floor(Math.random() * 5) + 1, // ✅ USE RANDOM RATING LIKE DASHBOARD
           };
         });
 
@@ -277,9 +284,18 @@ const AllServicesComponent = ({
     setServiceId(cardData?.serviceId);
     setIsDialogOpen(true);
   };
-  
+
   // Handle back to services
   const handleBackToServices = () => {
+    if (backBehavior === "history") {
+      if (typeof window !== "undefined" && window.history.length > 1) {
+        router.back();
+      } else {
+        router.push("/"); // fallback to home
+      }
+      return;
+    }
+    // default inline behavior
     setShowProviderList(false);
     setSelectedService(null);
     setFilteredProviders([]);
@@ -300,8 +316,10 @@ const AllServicesComponent = ({
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const allReviews = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/`);
-        if(allReviews.data.success){
+        const allReviews = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/`
+        );
+        if (allReviews.data.success) {
           setAllReviews(allReviews.data.data);
         }
 
@@ -311,26 +329,28 @@ const AllServicesComponent = ({
       }
     };
     fetchReviews();
-  }, [])
+  }, []);
   // filter out reviews
   useEffect(() => {
-  // Only run the filter if we have a selected provider and a list of reviews
-  if (selectedProvider && allReviews.length > 0) {
-    const filtered = allReviews.filter(review => 
-      review.provider_id === selectedProvider.provider_id && 
-      review.serviceId   === selectedProvider.serviceId
-    );
-    
-    setReviewdata(filtered); // Set the filtered reviews to your state
-    // console.log("filtered review ", reviewdata) 
-  } else {
-    // Optional: If no provider is selected, clear the reviews
-    setReviewdata([]);
-  }
-}, [allReviews, selectedProvider]); 
+    // Only run the filter if we have a selected provider and a list of reviews
+    if (selectedProvider && allReviews.length > 0) {
+      const filtered = allReviews.filter(
+        (review) =>
+          review.provider_id === selectedProvider.provider_id &&
+          review.serviceId === selectedProvider.serviceId
+      );
+
+      setReviewdata(filtered); // Set the filtered reviews to your state
+      // console.log("filtered review ", reviewdata)
+    } else {
+      // Optional: If no provider is selected, clear the reviews
+      setReviewdata([]);
+    }
+  }, [allReviews, selectedProvider]);
 
   // Enhanced filter providers based on search term and selected filters
   const filteredAndSearchedProviders = filteredProviders.filter((provider) => {
+    // ✅ USE filteredProviders DIRECTLY
     const address = provider.address?.toLowerCase() || "";
     const name = provider.name?.toLowerCase() || "";
     const village = provider.village?.toLowerCase() || "";
@@ -340,14 +360,14 @@ const AllServicesComponent = ({
 
     // Search term filtering - check multiple fields
     const matchesSearchTerm =
-    !searchTerm ||
-    name.includes(searchTerm.toLowerCase()) ||
-    address.includes(searchTerm.toLowerCase()) ||
-    village.includes(searchTerm.toLowerCase()) ||
-    tehsil.includes(searchTerm.toLowerCase()) ||
-    district.includes(searchTerm.toLowerCase()) ||
-    location.includes(searchTerm.toLowerCase());
-    
+      !searchTerm ||
+      name.includes(searchTerm.toLowerCase()) ||
+      address.includes(searchTerm.toLowerCase()) ||
+      village.includes(searchTerm.toLowerCase()) ||
+      tehsil.includes(searchTerm.toLowerCase()) ||
+      district.includes(searchTerm.toLowerCase()) ||
+      location.includes(searchTerm.toLowerCase());
+
     // State filtering - check against Indian states
     let matchesState = true;
     if (selectedState) {
@@ -357,13 +377,13 @@ const AllServicesComponent = ({
         district.includes(selectedStateLower) ||
         address.includes(selectedStateLower);
     }
-    
+
     // City filtering - enhanced matching
     let matchesCity = true;
     if (selectedCity) {
       const selectedCityLower = selectedCity.toLowerCase();
       matchesCity =
-      district.includes(selectedCityLower) ||
+        district.includes(selectedCityLower) ||
         location.includes(selectedCityLower) ||
         address.includes(selectedCityLower) ||
         village.includes(selectedCityLower);
@@ -373,13 +393,13 @@ const AllServicesComponent = ({
     if (selectedTehsil) {
       const selectedTehsilLower = selectedTehsil.toLowerCase();
       matchesTehsil =
-      tehsil.includes(selectedTehsilLower) ||
+        tehsil.includes(selectedTehsilLower) ||
         address.includes(selectedTehsilLower);
-      }
+    }
 
-      return matchesSearchTerm && matchesState && matchesCity && matchesTehsil;
-    });
-    
+    return matchesSearchTerm && matchesState && matchesCity && matchesTehsil;
+  });
+
   // Clear all filters function
   const clearAllFilters = () => {
     setSearchTerm("");
@@ -387,15 +407,24 @@ const AllServicesComponent = ({
     setSelectedCity("");
     setSelectedTehsil("");
   };
-   
-  
+
   // Filter services based on search term
   const filteredServices = services.filter(
     (service) =>
       service.title.toLowerCase().includes(categorySearchTerm.toLowerCase()) ||
-    service.subtitle?.toLowerCase().includes(categorySearchTerm.toLowerCase())
+      service.subtitle?.toLowerCase().includes(categorySearchTerm.toLowerCase())
   );
-  
+
+  // ✅ Auto-open provider list on pages that pass initialServiceKey (service category page)
+  useEffect(() => {
+    if (!initialServiceKey) return;
+    const svc = services.find((s) => s.serviceKey === initialServiceKey);
+    if (!svc) return;
+    setSelectedService(svc);
+    setShowProviderList(true);
+    fetchServiceProviders(svc.serviceKey);
+  }, [initialServiceKey]);
+
   // Provider List View - Mobile Optimized
   if (showProviderList && !openInNewPage) {
     return (
@@ -406,7 +435,18 @@ const AllServicesComponent = ({
           style={{
             background: "linear-gradient(135deg, #a99fd4 0%, #695aa6 100%)",
           }}
-          >
+        >
+          {/* Back button - top left */}
+          <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10">
+            <button
+              onClick={handleBackToServices}
+              className="flex items-center space-x-1 sm:space-x-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-gray-800 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-all duration-200 backdrop-blur-sm text-sm sm:text-base"
+            >
+              <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+              {/* Always show "Back" */}
+              <span className="font-medium">Back</span>
+            </button>
+          </div>
           {/* Mobile Navigation */}
           <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10">
             <button
@@ -634,11 +674,11 @@ const AllServicesComponent = ({
                       selectedCity ||
                       selectedTehsil ||
                       searchTerm) && (
-                        <span className="text-[#695aa6] font-medium">
-                          {" "}
-                          matching your criteria
-                        </span>
-                      )}
+                      <span className="text-[#695aa6] font-medium">
+                        {" "}
+                        matching your criteria
+                      </span>
+                    )}
                   </p>
                   {/* Show active filters */}
                   {(selectedState || selectedCity || selectedTehsil) && (
@@ -740,12 +780,7 @@ const AllServicesComponent = ({
                               <h3 className="font-semibold text-gray-800 text-sm sm:text-lg truncate">
                                 {provider.name}
                               </h3>
-                              <div className="flex items-center space-x-1 mt-1">
-                                <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400 flex-shrink-0" />
-                                <span className="text-xs sm:text-sm text-gray-600">
-                                  {provider.rating}
-                                </span>
-                              </div>
+                              {/* ✅ REMOVED RATING FROM HERE TO MATCH USER DASHBOARD DESKTOP */}
                             </div>
                           </div>
                         </div>
@@ -774,15 +809,6 @@ const AllServicesComponent = ({
                           >
                             View Details
                           </button>
-                          {provider.phone &&
-                            provider.phone !== "Not provided" && (
-                              <a
-                                href={`tel:${provider.phone}`}
-                                className="py-2 sm:py-2.5 px-3 sm:px-4 border border-[#695aa6] text-[#695aa6] rounded-lg text-xs sm:text-sm hover:bg-[#695aa6] hover:text-white transition-colors font-medium"
-                              >
-                                Call
-                              </a>
-                            )}
                         </div>
                       </div>
                     ))}
@@ -801,9 +827,9 @@ const AllServicesComponent = ({
             setIsDialogOpen(false);
             setSelectedProvider(null);
           }}
-          providerId = {providerId}
-          serviceId = {serviceId}
-          allreviews = {reviewdata}
+          providerId={providerId}
+          serviceId={serviceId}
+          allreviews={reviewdata}
         />
       </div>
     );
