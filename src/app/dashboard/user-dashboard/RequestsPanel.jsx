@@ -246,7 +246,6 @@ export default function RequestsPanel() {
         setSelectedRequestForDelete(null);
 
         // Show success message (you can add a toast notification here)
-        console.log("Request deleted successfully");
       } else {
         throw new Error("Failed to delete request");
       }
