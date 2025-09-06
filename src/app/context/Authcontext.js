@@ -289,7 +289,10 @@ export const AuthProvider = ({ children }) => {
               name: decoded.name,
               email: decoded.email || '',
               role: decoded.role,
-              phone: decoded.phone
+
+              phone:decoded.phone,
+              date:decoded.date
+
             });
           } else {
             console.warn("Token found but missing required fields.");
@@ -328,7 +331,10 @@ export const AuthProvider = ({ children }) => {
           name: decoded.name,
           email: decoded.email || "",
           role: decoded.role,
-          phone: decoded.phone
+
+          phone:decoded.phone,
+          date:decoded.date
+
         };
         setUser(userData);
         return { success: true, user: userData };
@@ -351,7 +357,7 @@ export const AuthProvider = ({ children }) => {
       return { success: false, message: "Invalid or corrupt token" };
     }
   };
-
+console.log("userdate" ,user);
   const logout = () => {
     setUser(null);
     localStorage.removeItem("token");

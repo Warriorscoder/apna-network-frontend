@@ -1,15 +1,27 @@
 'use client';
 import React from 'react';
 
+ import { useAuth } from '@/app/context/Authcontext';
+
 export default function AdminProfile() {
-  const admin = {
-    name: "Raj Kumar",
-    email: "admin@example.com",
-    phone: "+91 9999999999",
-    role: "Administrator",
-    joined: "01 Jan 2024",
-    location: "Hyderabad, India",
-  };
+  // const admin = {
+  //   name: "Raj Kumar",
+  //   email: "admin@example.com",
+  //   phone: "+91 9999999999",
+  //   role: "Administrator",
+  //   joined: "01 Jan 2024",
+  //   location: "Hyderabad, India",
+  const admin ={
+    location :'N/A',
+  email:'N/A'
+  }
+  // };
+
+
+
+  const {user  } = useAuth();
+  console.log('date in AdminProfile:', user?.date);
+  console.log('User data in AdminProfile:', user);
 
   return (
     <div className="min-h-screen bg-[#f9f9f9] py-10 px-4 sm:px-6 lg:px-8">
@@ -28,7 +40,7 @@ export default function AdminProfile() {
             <h2 className="text-lg font-semibold text-gray-700">Personal Details</h2>
             <div>
               <span className="block text-sm font-medium text-gray-500">Full Name</span>
-              <p className="text-base">{admin.name}</p>
+              <p className="text-base">{user?.name}</p>
             </div>
             <div>
               <span className="block text-sm font-medium text-gray-500">Email</span>
@@ -36,7 +48,7 @@ export default function AdminProfile() {
             </div>
             <div>
               <span className="block text-sm font-medium text-gray-500">Phone</span>
-              <p className="text-base">{admin.phone}</p>
+              <p className="text-base">{user?.phone}</p>
             </div>
           </div>
 
@@ -44,11 +56,11 @@ export default function AdminProfile() {
             <h2 className="text-lg font-semibold text-gray-700">Professional Info</h2>
             <div>
               <span className="block text-sm font-medium text-gray-500">Role</span>
-              <p className="text-base">{admin.role}</p>
+              <p className="text-base">{user?.role}</p>
             </div>
             <div>
               <span className="block text-sm font-medium text-gray-500">Joined On</span>
-              <p className="text-base">{admin.joined}</p>
+              <p className="text-base">{user?.date}</p>
             </div>
             <div>
               <span className="block text-sm font-medium text-gray-500">Location</span>
@@ -57,8 +69,8 @@ export default function AdminProfile() {
           </div>
         </section>
 
-        <footer className="mt-10 border-t pt-4 text-sm text-gray-400 text-center sm:text-right">
-          Last updated on 20 July 2025
+        <footer className="mt-10 border-t pt-4 text-sm text-gray-400 text-center sm:text-right">Last Updated:
+       <span className='ml-2 font-black'>{user?.date.split('T')[0]}</span>
         </footer>
       </div>
     </div>

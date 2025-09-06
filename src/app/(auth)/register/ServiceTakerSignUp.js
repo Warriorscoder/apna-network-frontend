@@ -6,7 +6,11 @@ import Link from "next/link";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useSearchParams } from 'next/navigation';
+
+
+
 import { useAuth } from "@/app/context/Authcontext";
+
 
 export default function ServiceTakerSignUp() {
 
@@ -20,6 +24,7 @@ export default function ServiceTakerSignUp() {
     address: "",
     email: ""
   });
+
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,6 +58,9 @@ export default function ServiceTakerSignUp() {
 
     setIsSubmitting(true);
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+
+   
 
     try {
       const res = await axios.post(`${apiUrl}/users/complete`, { gender: formData.gender, address: formData.address, phone, name: formData.name, email: formData.email });
