@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "@/components/ui/Sidebar";
-import Header from "@/components/ui/Header";
+// import Header from "@/components/ui/Header" // removed: use common Navbar instead
 import StatCard from "@/components/ui/StatCard";
 import UsersTable from "@/components/ui/UsersTable";
 import ServiceProvidersTable from "@/components/ui/ServiceProvidersTable";
@@ -17,6 +17,7 @@ import NewletterManager from "@/components/ui/NewletterManager";
 import AddServiceModal from "@/components/ui/AddServiceModal";
 import ContentModal from "@/components/ui/ContentModal";
 import { ToastProvider } from "@/components/ui/ToastProvider";
+import Navbar from "@/app/Navbar"; // ✅ use the same Navbar as user/provider
 
 export default function AdminDashboard() {
   const [collapsed, setCollapsed] = useState(false);
@@ -25,16 +26,13 @@ export default function AdminDashboard() {
   const [contentModalOpen, setContentModalOpen] = useState(false);
   const [contentType, setContentType] = useState("");
   const [contentInitialData, setContentInitialData] = useState(null);
- const [authError, setAuthError] = useState(false);
+  const [authError, setAuthError] = useState(false);
 
-  
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/stats`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}` // send token
-          }
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
 
         if (res.status === 401 || res.status === 403) {
@@ -53,7 +51,6 @@ export default function AdminDashboard() {
     fetchStats();
   }, []);
 
-  // Refs for sections (so Navbar can scroll smoothly)
   const sectionRefs = {
     Dashboard: useRef(null),
     "Service Approvals": useRef(null),
@@ -68,10 +65,8 @@ export default function AdminDashboard() {
     Newsletter: useRef(null),
   };
 
-  // Handle navigation (works for Sidebar + Header)
   const handleNavigate = (section) => {
-    setSelectedSection(section); // keep multi-page style
-    // smooth scroll when section exists in DOM
+    setSelectedSection(section);
     setTimeout(() => {
       sectionRefs[section]?.current?.scrollIntoView({ behavior: "smooth" });
     }, 50);
@@ -87,9 +82,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const saved = localStorage.getItem("sidebarCollapsed");
-    if (saved === "true") {
-      setCollapsed(true);
-    }
+    if (saved === "true") setCollapsed(true);
   }, []);
 
   const handleOpenModal = (type, data = null) => {
@@ -97,7 +90,8 @@ export default function AdminDashboard() {
     setContentInitialData(data);
     setContentModalOpen(true);
   };
-   if (authError) {
+
+  if (authError) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-red-50">
         <div className="text-center p-8 bg-white shadow-lg rounded-xl">
@@ -110,18 +104,27 @@ export default function AdminDashboard() {
 
   return (
     <ToastProvider>
+      {/* ✅ Shared Navbar (fixed) */}
+      <Navbar />
+
+      {/* Spacer to offset fixed navbar height */}
+      <div className="h-16 sm:h-20" />
+
       <div className="min-h-screen flex bg-gradient-to-tr from-white to-[#695aa6]/10">
         {/* Sidebar */}
         <div
-          className={`fixed z-40 h-full shadow-lg transition-all duration-300 ${
-            collapsed ? "w-20" : "w-64"
-          }`}
+          className={`fixed z-40 shadow-lg transition-all duration-300
+            ${collapsed ? "w-20" : "w-64"}
+            top-16 sm:top-20
+            h-[calc(100vh-4rem)] sm:h-[calc(100vh-5rem)]
+          `}
         >
           <Sidebar
             onNavigate={handleNavigate}
             onAddServiceClick={() => setShowAddServiceModal(true)}
             collapsed={collapsed}
             toggleCollapse={toggleCollapse}
+            fixed={false}               // ✅ render inside fixed wrapper (no own positioning)
           />
         </div>
 
@@ -131,50 +134,40 @@ export default function AdminDashboard() {
             collapsed ? "pl-20" : "pl-64"
           }`}
         >
-          {/* Header also uses same navigation */}
-          <Header onToggleSidebar={toggleCollapse} onNavigate={handleNavigate} />
+          {/* removed the old admin Header to avoid double bars */}
+          {/* <Header onToggleSidebar={toggleCollapse} onNavigate={handleNavigate} /> */}
 
-          <main className="p-4 md:p-8 overflow-y-auto space-y-8 max-w-7xl w-full mx-auto max-h-[calc(100vh-64px)] pt-4">
-            {/* Dashboard */}
+          <main className="p-4 md:p-8 overflow-y-auto space-y-8 max-w-7xl w-full mx-auto
+                           max-h-[calc(100vh-4rem)] sm:max-h-[calc(100vh-5rem)] /* ✅ respect navbar height */
+                           pt-4">
             {selectedSection === "Dashboard" && (
               <section id="Dashboard" ref={sectionRefs["Dashboard"]}>
                 <StatCard />
               </section>
             )}
 
-            {/* Service Approvals */}
             {selectedSection === "Service Approvals" && (
               <section id="Service Approvals" ref={sectionRefs["Service Approvals"]}>
-                <h2 className="text-xl font-semibold mb-4">
-                  Pending Service Approvals
-                </h2>
+                <h2 className="text-xl font-semibold mb-4">Pending Service Approvals</h2>
                 <div className="bg-white rounded-xl p-4 shadow overflow-x-auto">
                   <ServicesApprovalTable />
                 </div>
               </section>
             )}
 
-            {/* Manage Users */}
             {selectedSection === "Manage Users" && (
-              <section
-                id="Manage Users"
-                ref={sectionRefs["Manage Users"]}
-                className="space-y-8"
-              >
+              <section id="Manage Users" ref={sectionRefs["Manage Users"]} className="space-y-8">
                 <div className="bg-white rounded-xl p-4 shadow overflow-x-auto">
                   <h3 className="text-lg font-semibold text-[#695aa6]">Users</h3>
                   <UsersTable />
                 </div>
                 <div className="bg-white rounded-xl p-4 shadow overflow-x-auto">
-                  <h3 className="text-lg font-semibold text-[#695aa6]">
-                    Service Providers
-                  </h3>
+                  <h3 className="text-lg font-semibold text-[#695aa6]">Service Providers</h3>
                   <ServiceProvidersTable />
                 </div>
               </section>
             )}
 
-            {/* Manage Services */}
             {selectedSection === "Manage Services" && (
               <section id="Manage Services" ref={sectionRefs["Manage Services"]}>
                 <h2 className="text-xl font-semibold mb-4">Manage Services</h2>
@@ -184,7 +177,6 @@ export default function AdminDashboard() {
               </section>
             )}
 
-            {/* Categories */}
             {selectedSection === "Categories" && (
               <section id="Categories" ref={sectionRefs["Categories"]}>
                 <h2 className="text-xl font-semibold mb-4">Categories</h2>
@@ -194,7 +186,6 @@ export default function AdminDashboard() {
               </section>
             )}
 
-            {/* Complaints */}
             {selectedSection === "Complaints" && (
               <section id="Complaints" ref={sectionRefs["Complaints"]}>
                 <h2 className="text-xl font-semibold mb-4">Complaints</h2>
@@ -204,7 +195,6 @@ export default function AdminDashboard() {
               </section>
             )}
 
-            {/* Testimonials */}
             {selectedSection === "Testimonials" && (
               <section id="Testimonials" ref={sectionRefs["Testimonials"]}>
                 <h2 className="text-xl font-semibold mb-4">Testimonials</h2>
@@ -214,7 +204,6 @@ export default function AdminDashboard() {
               </section>
             )}
 
-            {/* Activity */}
             {selectedSection === "Activity" && (
               <section id="Activity" ref={sectionRefs["Activity"]}>
                 <h2 className="text-xl font-semibold mb-4">Activity Log</h2>
@@ -224,7 +213,6 @@ export default function AdminDashboard() {
               </section>
             )}
 
-            {/* Blogs */}
             {selectedSection === "Blogs" && (
               <section id="Blogs" ref={sectionRefs["Blogs"]}>
                 <h2 className="text-xl font-semibold mb-4">Blogs</h2>
@@ -234,12 +222,8 @@ export default function AdminDashboard() {
               </section>
             )}
 
-            {/* Success Stories */}
             {selectedSection === "Success Stories" && (
-              <section
-                id="Success Stories"
-                ref={sectionRefs["Success Stories"]}
-              >
+              <section id="Success Stories" ref={sectionRefs["Success Stories"]}>
                 <h2 className="text-xl font-semibold mb-4">Success Stories</h2>
                 <div className="bg-white rounded-xl p-4 shadow overflow-x-auto">
                   <SuccessStoriesManager />
@@ -247,7 +231,6 @@ export default function AdminDashboard() {
               </section>
             )}
 
-            {/* Newsletter */}
             {selectedSection === "Newsletter" && (
               <section id="Newsletter" ref={sectionRefs["Newsletter"]}>
                 <h2 className="text-xl font-semibold mb-4">Newsletter</h2>
@@ -258,7 +241,6 @@ export default function AdminDashboard() {
             )}
           </main>
 
-          {/* Modals */}
           {showAddServiceModal && (
             <AddServiceModal
               open={showAddServiceModal}
