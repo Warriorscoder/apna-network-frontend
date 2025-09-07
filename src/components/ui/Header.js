@@ -1,5 +1,6 @@
 "use client";
 import NotificationBadge from "./NotificationBadge";
+import Link from "next/link";
 import { useEffect, useState, useRef} from "react";
 import { Bell, User, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -41,14 +42,21 @@ export default function Header({ onToggleSidebar, onNavigate }) {
    const handleViewProfile = () => {
     router.push("/profile"); // Change route if needed
   };
-
-  // 🔹 Navbar menu items
   const navLinks = [
-    { name: "Dashboard", id: "Dashboard", path: "/dashboard/admin-dashboard" },
-    { name: "Users", id: "Manage Users", path: "/dashboard/admin-dashboard?tab=users" },
-    { name: "Services", id: "Manage Services", path: "/dashboard/admin-dashboard?tab=services" },
-   
-  ];
+  { id: "home", name: "Home", path: "/" },
+  { id: "about", name: "About", path: "/about" },
+  { id: "services", name: "Services", path: "/services" },
+  { id: "contact", name: "Contact", path: "/contact" },
+];
+
+
+  {/* Nav Links */}
+        <ul className="hidden md:flex space-x-8 font-semibold">
+          <li><Link href="/">Home</Link></li>
+          <li><Link href="/about">About</Link></li>
+          <li><Link href="/services">Services</Link></li>
+          <li><Link href="/contact">Contact</Link></li>
+        </ul>
 
   return (
     <header className="sticky top-0 z-30 bg-gradient-to-r from-purple-200 to-purple-300 shadow-md">
