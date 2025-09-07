@@ -3,15 +3,19 @@
 import React, { useState, useEffect } from "react";
 import { Menu } from "lucide-react";
 
-export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, toggleCollapse }) {
+export default function Sidebar({
+  onNavigate,
+  onAddServiceClick,
+  collapsed,
+  toggleCollapse,
+  fixed = true,
+  offsetTop = 0
+}) {
   const [contentOpen, setContentOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Auto-collapse sidebar on small screens
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -19,7 +23,7 @@ export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, togg
 
   useEffect(() => {
     if (isMobile && !collapsed) {
-      toggleCollapse(); // Auto collapse on load if mobile
+      toggleCollapse();
     }
   }, [isMobile]);
 
@@ -27,10 +31,7 @@ export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, togg
     { name: "Dashboard", icon: "🏠" },
     { name: "Service Approvals", icon: "⏳" },
     { name: "Manage Users", icon: "👥" },
-    //{ name: "Manage Services", icon: "🧾" },
-    //{ name: "Categories", icon: "📂" },
-    //{ name: "Complaints", icon: "⚠️" },
-    //{ name: "Testimonials", icon: "💬" },
+    { name: "Categories", icon: "📂" },
     { name: "Activity", icon: "📜" },
   ];
 
@@ -40,14 +41,20 @@ export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, togg
     { name: "Newsletter", icon: "📧" },
   ];
 
+  // width: fill wrapper when not fixed; use internal width only when fixed
+  const widthClass = fixed ? (collapsed ? "w-20" : "w-64") : "w-full";
+
   return (
     <aside
-      className={`fixed top-0 left-0 h-screen bg-[#695aa6] text-white shadow-lg z-50 transition-all duration-300 overflow-y-auto ${
-        collapsed ? "w-20" : "w-64"
-      }`}
+      className={`${fixed ? "fixed left-0" : "relative"} ${widthClass} bg-[#695aa6] text-white shadow-lg transition-all duration-300 overflow-y-auto overflow-x-hidden flex flex-col`}
+      style={
+        fixed
+          ? { top: offsetTop, height: `calc(100vh - ${offsetTop}px)`, zIndex: 40 }
+          : { height: "100%" }
+      }
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-white/20">
+      <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"} px-4 py-4 border-b border-white/20`}>
         {!collapsed && <h2 className="text-lg font-bold">Admin Panel</h2>}
         <button
           onClick={toggleCollapse}
@@ -58,63 +65,89 @@ export default function Sidebar({ onNavigate, onAddServiceClick, collapsed, togg
         </button>
       </div>
 
-      {/* Add Service Button */}
-      {onAddServiceClick && (
-        <div className="px-4 mt-4">
-          <button
-            onClick={onAddServiceClick}
-            className="w-full bg-white text-[#695aa6] font-semibold px-4 py-2 rounded hover:bg-[#f3f0fa] border border-[#695aa6] transition text-sm"
-          >
-            {!collapsed ? "+ Add Category" : "+"}
-          </button>
-        </div>
-      )}
-
       {/* Navigation */}
       <nav className="mt-6 px-2 flex-1">
         <ul className="space-y-1">
+          {/* Add Category inside the list, aligned like other items */}
+          {onAddServiceClick && (
+            <li>
+              <button
+                type="button"
+                onClick={onAddServiceClick}
+                className={`w-full flex items-center rounded-lg font-medium
+                  ${collapsed
+                    ? "justify-center px-0 py-3 hover:bg-white/10"
+                    : "justify-start gap-3 px-3 py-2 bg-white text-[#695aa6] hover:bg-[#f3f0fa] border border-[#695aa6]"
+                  } transition`}
+                title={collapsed ? "Add Category" : undefined}
+              >
+                <span className="text-lg leading-none">➕</span>
+                {!collapsed && <span>Add Category</span>}
+              </button>
+            </li>
+          )}
+
           {sections.map((item) => (
             <li key={item.name}>
               <button
                 type="button"
                 onClick={() => onNavigate(item.name)}
-                className="w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 transition font-medium"
+                className={`w-full text-left flex items-center rounded-lg hover:bg-white/10 transition font-medium
+                  ${collapsed ? "justify-center px-0 py-3" : "justify-start gap-3 px-3 py-2"}`}
+                title={collapsed ? item.name : undefined}
               >
-                <span>{item.icon}</span>
+                <span className="text-lg leading-none">{item.icon}</span>
                 {!collapsed && <span>{item.name}</span>}
               </button>
             </li>
           ))}
 
-          {/* Content Management Toggle */}
-          <li>
-  <div className="w-full text-left flex items-center gap-3 px-3 py-2 rounded-lg font-medium">
-    <span>📂</span>
-    {!collapsed && <span>Content Management</span>}
-  </div>
+          {/* Content Management */}
+          <li className="mt-2">
+            <div className={`w-full flex items-center rounded-lg font-medium ${collapsed ? "justify-center px-0 py-2" : "justify-start gap-3 px-3 py-2"}`}>
+              <span>📂</span>
+              {!collapsed && <span>Content Management</span>}
+            </div>
 
-  {!collapsed && (
-    <ul className="ml-6 mt-1 space-y-1">
-      {contentSections.map((item) => (
-        <li key={item.name}>
-          <button
-            type="button"
-            onClick={() => onNavigate(item.name)}
-            className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition font-medium"
-          >
-            <span>{item.icon}</span>
-            <span>{item.name}</span>
-          </button>
-        </li>
-      ))}
-    </ul>
-  )}
-</li>
-</ul>
-</nav>
+            {!collapsed && (
+              <ul className="ml-3 mt-1 space-y-1">
+                {contentSections.map((item) => (
+                  <li key={item.name}>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate(item.name)}
+                      className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition font-medium"
+                    >
+                      <span>{item.icon}</span>
+                      <span>{item.name}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {collapsed && (
+              <ul className="mt-1 space-y-1">
+                {contentSections.map((item) => (
+                  <li key={item.name}>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate(item.name)}
+                      className="w-full flex items-center justify-center px-0 py-2 rounded-lg hover:bg-white/10 transition font-medium"
+                      title={item.name}
+                    >
+                      <span>{item.icon}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        </ul>
+      </nav>
 
       {/* Footer */}
-      <div className="px-4 py-4 border-t border-white/20 text-sm">
+      <div className={`px-4 py-4 border-t border-white/20 text-sm ${collapsed ? "text-center" : ""}`}>
         {!collapsed ? "Logged in as Admin" : "⚙️"}
       </div>
     </aside>
