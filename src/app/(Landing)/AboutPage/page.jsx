@@ -279,7 +279,7 @@ const AboutPage = () => {
               Explore Services
             </button>
             <button
-              onClick={() => router.push("/register")}
+              onClick={() => router.push("/login")}
               className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:text-[#695aa6] transition text-sm sm:text-base"
             >
               Join as Provider
