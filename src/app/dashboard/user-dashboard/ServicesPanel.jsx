@@ -210,7 +210,7 @@ function ServicesPanel() {
         });
         if (!result.data.success) throw new Error("Failed to fetch providers");
 
-        const providersData = result.data.providers || [];
+        const providersData = result.data.data || [];
 
         const getAddressComponent = (value) => {
           if (!value || value === "undefined" || value === null) return null;
