@@ -945,7 +945,7 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
                           <div className="flex items-start justify-between mb-3 sm:mb-4">
                             <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
                               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-[#695aa6] to-[#5a4d8a] rounded-full flex items-center justify-center flex-shrink-0">
-                                <span className="text-xs sm:text-sm font-medium text-white">{(review.user_id?.name || "A").charAt(0)}</span>
+                                <span className="text-xs sm:text-sm font-medium text-white">{(review?.name || "A").charAt(0)}</span>
                               </div>
                               <div className="min-w-0 flex-1">
                                 <p className="font-semibold text-gray-800 text-sm sm:text-base truncate">{review?.name || "Anonymous User"}</p>

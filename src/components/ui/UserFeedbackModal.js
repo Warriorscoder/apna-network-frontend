@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Star, X } from "lucide-react";
 import axios from "axios";
 import { useAuth } from "@/app/context/Authcontext";
+import { useRouter } from "next/navigation";
 
 const TAG_OPTIONS = ["on-time", "polite", "skilled", "clean", "friendly", "efficient"];
 
@@ -13,6 +14,7 @@ const UserFeedbackModal = ({ isOpen, onClose, onSubmitted, providerId, serviceId
   const [recommend, setRecommend] = useState(null);
   const [loading, setLoading] = useState(false);
   const {user} = useAuth();
+  const router = useRouter();
   // console.log("serviceId in modal:", serviceId);
   // console.log("ProviderId in modal:", providerId);
   if (!isOpen) return null;
@@ -44,6 +46,7 @@ const UserFeedbackModal = ({ isOpen, onClose, onSubmitted, providerId, serviceId
       setFeedbackText("");
       setTags([]);
       setRecommend(null);
+      router.push('/');
       onClose();
     } catch (err) {
       console.error(err);
