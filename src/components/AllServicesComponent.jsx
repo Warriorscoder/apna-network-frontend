@@ -165,7 +165,7 @@ const AllServicesComponent = ({
           throw new Error("Failed to fetch providers");
         }
 
-        const providersData = result.data.providers || [];
+        const providersData = result.data.data || [];
         // --- DEBUG --- 1. Check the raw data from your API
         console.log("1. Raw data from API:", providersData);
 
