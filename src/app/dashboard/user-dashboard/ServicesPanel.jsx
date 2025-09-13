@@ -17,6 +17,85 @@ import axios from "axios";
 import Dialoguebox from "@/components/servicePage/Dialoguebox";
 import LocationSelector from "@/components/LocationSelector";
 
+const HP_TEHSILS = {
+  Kangra: [
+    "Kangra",
+    "Nagrota Bagwan",
+    "Rait",
+    "Baijnath",
+    "Dehra",
+    "Bhawarna",
+    "Fatehpur",
+    "Indora",
+    "Lambagaon",
+    "Nurpur",
+    "Panchrukhi",
+    "Sulah",
+    "Pragpur",
+    "Nagrota Surian",
+    "Dharamshala",
+    "Baroh",
+    "Surani",
+    "Palampur",
+  ],
+  Shimla: [
+    "Mashobra",
+    "Basantpur",
+    "Theog",
+    "Nankhari",
+    "Rampur",
+    "Jubbal",
+    "Kotkhai",
+    "Chopal",
+    "Narkanda",
+    "Rohru",
+    "Chohara",
+    "Totu",
+    "Kupvi",
+  ],
+  Mandi: [
+    "Mandi Sadar",
+    "Balh",
+    "Sunder Nagar",
+    "Gopalpur",
+    "Dharampur",
+    "Drang",
+    "Chauntra",
+    "Seraj",
+    "Gohar",
+    "Karsog",
+    "BaliChowki",
+    "Nihri",
+    "Dhanotu",
+    "Churag",
+  ],
+  Chamba: [
+    "Chamba",
+    "Mehla",
+    "Bharmour",
+    "Tissa",
+    "Salooni",
+    "Bhattiyat",
+    "Pangi",
+  ],
+  Kullu: ["Kullu", "Naggar", "Banjar", "Anni", "Nirmand", "Bhuntar"],
+  Solan: ["Dharmpur", "Kandaghat", "Nalagarh", "Solan", "Kunihar", "Patta"],
+  Sirmaur: [
+    "Nahan",
+    "Paonta Sahib",
+    "Rajgarh",
+    "Sangrah",
+    "Shillai",
+    "Pachhad",
+    "Tilordhar",
+  ],
+  Una: ["Una", "Amb", "Bangana", "Haroli", "Gagret"],
+  Hamirpur: ["Hamirpur", "Nadaun", "Bijhari", "Bhoranj", "Sujanpur", "Bamson"],
+  Bilaspur: ["Bilaspur", "Ghumarwin", "Jhandutta", "Shri Naina Devi"],
+  Kinnaur: ["Nichar", "Kalpa", "Pooh"],
+  LahaulSpiti: ["Lahaul", "Spiti"],
+};
+
 const ServiceCategoryCard = ({ service, onClick }) => {
   const [hovered, setHovered] = useState(false);
 
@@ -29,8 +108,9 @@ const ServiceCategoryCard = ({ service, onClick }) => {
       style={{ borderColor: "#a99fd4" }}
     >
       <div
-        className={`transition-all duration-300 ease-in-out flex flex-col items-center ${hovered ? "translate-y-[-25%] sm:translate-y-[-30%]" : "translate-y-0"
-          }`}
+        className={`transition-all duration-300 ease-in-out flex flex-col items-center ${
+          hovered ? "translate-y-[-25%] sm:translate-y-[-30%]" : "translate-y-0"
+        }`}
       >
         <img
           src={service.image || "/placeholder.svg?height=64&width=64"}
@@ -42,10 +122,11 @@ const ServiceCategoryCard = ({ service, onClick }) => {
         </h3>
       </div>
       <div
-        className={`absolute bottom-2 sm:bottom-4 px-2 text-xs text-gray-600 text-center transition-all duration-300 ease-in-out ${hovered
+        className={`absolute bottom-2 sm:bottom-4 px-2 text-xs text-gray-600 text-center transition-all duration-300 ease-in-out ${
+          hovered
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-2 pointer-events-none"
-          }`}
+        }`}
       >
         <p className="mb-1 text-xs sm:text-sm leading-tight">
           {service.subtitle}
@@ -117,16 +198,18 @@ function ServicesPanel() {
   const [selectedTehsil, setSelectedTehsil] = useState("");
   const [availableTehsils, setAvailableTehsils] = useState([]);
 
-  const [providerId, setProviderId] = useState()
-  const [serviceId, setServiceId] = useState()
-  const [allReviews, setAllReviews] = useState([])
-  const [reviewdata, setReviewdata] = useState([])
+  const [providerId, setProviderId] = useState();
+  const [serviceId, setServiceId] = useState();
+  const [allReviews, setAllReviews] = useState([]);
+  const [reviewdata, setReviewdata] = useState([]);
 
   // all reviews fetch
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const allReviews = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/`);
+        const allReviews = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/`
+        );
         if (allReviews.data.success) {
           setAllReviews(allReviews.data.data);
         }
@@ -137,18 +220,19 @@ function ServicesPanel() {
       }
     };
     fetchReviews();
-  }, [])
+  }, []);
   // filter out reviews
   useEffect(() => {
     // Only run the filter if we have a selected provider and a list of reviews
     if (selectedProvider && allReviews.length > 0) {
-      const filtered = allReviews.filter(review =>
-        review.provider_id === selectedProvider.provider_id &&
-        review.serviceId === selectedProvider.serviceId
+      const filtered = allReviews.filter(
+        (review) =>
+          review.provider_id === selectedProvider.provider_id &&
+          review.serviceId === selectedProvider.serviceId
       );
 
       setReviewdata(filtered); // Set the filtered reviews to your state
-      // console.log("filtered review ", reviewdata) 
+      // console.log("filtered review ", reviewdata)
     } else {
       // Optional: If no provider is selected, clear the reviews
       setReviewdata([]);
@@ -251,41 +335,14 @@ function ServicesPanel() {
             // Clean formatted address
             address: formattedAddress,
             rating: Math.floor(Math.random() * 5) + 1,
-            availability: `${provider.availability?.from || "9 AM"} - ${provider.availability?.to || "6 PM"
-              }`,
+            availability: `${provider.availability?.from || "9 AM"} - ${
+              provider.availability?.to || "6 PM"
+            }`,
             phone: provider.phone || "Not provided",
           };
         });
 
-        const tehsilSet = new Set();
-
-        transformedData.forEach((provider) => {
-          if (
-            provider.address &&
-            provider.address !== "Address not available"
-          ) {
-            // Split address by comma and extract potential tehsils
-            const addressParts = provider.address
-              .split(",")
-              .map((part) => part.trim());
-
-            // Add each valid address part as potential tehsil
-            addressParts.forEach((part) => {
-              if (
-                part &&
-                part.length > 2 &&
-                part !== "Uttar Pradesh" &&
-                part !== "UP"
-              ) {
-                tehsilSet.add(part);
-              }
-            });
-          }
-        });
-
-        // Convert to sorted array
-        const uniqueTehsils = Array.from(tehsilSet).sort();
-        setAvailableTehsils(uniqueTehsils);
+        setAvailableTehsils([]);
         setFilteredProviders(transformedData);
       } else {
         setFilteredProviders([]);
@@ -301,6 +358,26 @@ function ServicesPanel() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (selectedState !== "HP") {
+      if (selectedTehsil) setSelectedTehsil("");
+      if (availableTehsils.length) setAvailableTehsils([]);
+      return;
+    }
+    if (selectedCity) {
+      const normalized =
+        selectedCity === "Lahaul and Spiti" ? "LahaulSpiti" : selectedCity;
+      const list = HP_TEHSILS[normalized] || [];
+      setAvailableTehsils(list);
+      if (selectedTehsil && !list.includes(selectedTehsil)) {
+        setSelectedTehsil("");
+      }
+    } else {
+      setAvailableTehsils([]);
+      setSelectedTehsil("");
+    }
+  }, [selectedState, selectedCity]);
 
   const handleMoreDetails = (provider) => {
     const serviceInfo = serviceData.find(
@@ -321,7 +398,7 @@ function ServicesPanel() {
     setServiceId(cardData?.serviceId);
     setIsDialogOpen(true);
   };
-//  console.log("service id in panel", serviceId);
+  //  console.log("service id in panel", serviceId);
   const handleBackToCategories = () => {
     setViewMode("categories");
     setSelectedService(null);
@@ -383,11 +460,9 @@ function ServicesPanel() {
     }
 
     let matchesTehsil = true;
-    if (selectedTehsil) {
-      const selectedTehsilLower = selectedTehsil.toLowerCase();
-      matchesTehsil =
-        tehsil.includes(selectedTehsilLower) ||
-        address.includes(selectedTehsilLower);
+    if (selectedState === "HP" && selectedTehsil) {
+      const sel = selectedTehsil.toLowerCase();
+      matchesTehsil = tehsil.includes(sel) || address.includes(sel);
     }
 
     return matchesSearchTerm && matchesState && matchesCity && matchesTehsil;
@@ -528,41 +603,46 @@ function ServicesPanel() {
                       onStateChange={setSelectedState}
                       onCityChange={setSelectedCity}
                     />
-
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Filter by Tehsil
-                      </label>
-                      <div className="relative">
-                        <select
-                          value={selectedTehsil}
-                          onChange={(e) => setSelectedTehsil(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#695aa6] focus:border-transparent text-sm bg-white"
-                        >
-                          <option value="">All Tehsils</option>
-                          {availableTehsils.map((tehsil, index) => (
-                            <option key={index} value={tehsil}>
-                              {tehsil}
-                            </option>
-                          ))}
-                        </select>
-                        {selectedTehsil && (
-                          <button
-                            onClick={() => setSelectedTehsil("")}
-                            className="absolute right-8 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    {selectedState === "HP" && (
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Filter by Tehsil (Himachal Pradesh)
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={selectedTehsil}
+                            onChange={(e) => setSelectedTehsil(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#695aa6] focus:border-transparent text-sm bg-white disabled:opacity-50"
+                            disabled={availableTehsils.length === 0}
                           >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
+                            <option value="">All Tehsils</option>
+                            {availableTehsils.map((t) => (
+                              <option key={t} value={t}>
+                                {t}
+                              </option>
+                            ))}
+                          </select>
+                          {selectedTehsil && (
+                            <button
+                              onClick={() => setSelectedTehsil("")}
+                              className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {availableTehsils.length > 0
+                            ? `Loaded ${availableTehsils.length} tehsils`
+                            : selectedCity
+                            ? "No tehsils data for this city"
+                            : "Select a city to load tehsils"}
+                        </p>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {availableTehsils.length > 0
-                          ? `Choose from ${availableTehsils.length} available tehsils`
-                          : "No tehsils available for this service"}
-                      </p>
-                    </div>
-
-                    {(selectedState || selectedCity || selectedTehsil) && (
+                    )}
+                    {(selectedState ||
+                      selectedCity ||
+                      (selectedState === "HP" && selectedTehsil)) && (
                       <div className="mt-3 flex justify-end">
                         <button
                           onClick={clearAllFilters}
@@ -596,8 +676,7 @@ function ServicesPanel() {
                   </h3>
                   <p className="text-gray-600 text-sm mb-4">
                     No providers found matching your search and filters.
-
-                    {selectedTehsil && (
+                    {selectedTehsil && selectedState === "HP" && (
                       <span className="block mt-1">
                         No providers found in <strong>{selectedTehsil}</strong>{" "}
                         tehsil.
@@ -647,11 +726,11 @@ function ServicesPanel() {
                         selectedCity ||
                         selectedTehsil ||
                         searchTerm) && (
-                          <span className="text-[#695aa6] font-medium">
-                            {" "}
-                            matching your criteria
-                          </span>
-                        )}
+                        <span className="text-[#695aa6] font-medium">
+                          {" "}
+                          matching your criteria
+                        </span>
+                      )}
                     </p>
                     {(selectedState || selectedCity || selectedTehsil) && (
                       <div className="flex flex-wrap justify-center gap-2 mt-2">
@@ -665,7 +744,7 @@ function ServicesPanel() {
                             City: {selectedCity}
                           </span>
                         )}
-                        {selectedTehsil && (
+                        {selectedTehsil && selectedState === "HP" && (
                           <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">
                             Tehsil: {selectedTehsil}
                           </span>
