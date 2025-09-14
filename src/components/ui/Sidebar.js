@@ -9,10 +9,17 @@ export default function Sidebar({
   collapsed,
   toggleCollapse,
   fixed = true,
-  offsetTop = 0
+  offsetTop = 0,
+  activeSection // ✅ optional controlled prop from parent
 }) {
   const [contentOpen, setContentOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [localActive, setLocalActive] = useState(activeSection || "Dashboard"); // ✅ local fallback
+
+  // Sync when parent changes activeSection
+  useEffect(() => {
+    if (activeSection && activeSection !== localActive) setLocalActive(activeSection);
+  }, [activeSection]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -26,6 +33,13 @@ export default function Sidebar({
       toggleCollapse();
     }
   }, [isMobile]);
+
+  const setActiveAndNavigate = (name) => {
+    setLocalActive(name);
+    onNavigate && onNavigate(name);
+  };
+
+  const isActive = (name) => localActive === name;
 
   const sections = [
     { name: "Dashboard", icon: "🏠" },
@@ -41,7 +55,14 @@ export default function Sidebar({
     { name: "Newsletter", icon: "📧" },
   ];
 
-  // width: fill wrapper when not fixed; use internal width only when fixed
+  const baseItem =
+    "w-full text-left flex items-center rounded-lg transition font-medium";
+  const activeStyles =
+    "bg-white/25 shadow-inner";
+  const hoverStyles = "hover:bg-white/10";
+  const collapsedBase = "justify-center px-0 py-3";
+  const expandedBase = "justify-start gap-3 px-3 py-2";
+
   const widthClass = fixed ? (collapsed ? "w-20" : "w-64") : "w-full";
 
   return (
@@ -68,7 +89,6 @@ export default function Sidebar({
       {/* Navigation */}
       <nav className="mt-6 px-2 flex-1">
         <ul className="space-y-1">
-          {/* Add Category inside the list, aligned like other items */}
           {onAddServiceClick && (
             <li>
               <button
@@ -87,24 +107,40 @@ export default function Sidebar({
             </li>
           )}
 
-          {sections.map((item) => (
-            <li key={item.name}>
-              <button
-                type="button"
-                onClick={() => onNavigate(item.name)}
-                className={`w-full text-left flex items-center rounded-lg hover:bg-white/10 transition font-medium
-                  ${collapsed ? "justify-center px-0 py-3" : "justify-start gap-3 px-3 py-2"}`}
-                title={collapsed ? item.name : undefined}
-              >
-                <span className="text-lg leading-none">{item.icon}</span>
-                {!collapsed && <span>{item.name}</span>}
-              </button>
-            </li>
-          ))}
+            {sections.map((item) => (
+              <li key={item.name}>
+                <button
+                  type="button"
+                  onClick={() => setActiveAndNavigate(item.name)}
+                  className={[
+                    baseItem,
+                    collapsed ? collapsedBase : expandedBase,
+                    hoverStyles,
+                    isActive(item.name) ? activeStyles : ""
+                  ].join(" ")}
+                  title={collapsed ? item.name : undefined}
+                  aria-current={isActive(item.name) ? "page" : undefined}
+                >
+                  <span className="text-lg leading-none">{item.icon}</span>
+                  {!collapsed && (
+                    <span className={isActive(item.name) ? "font-semibold" : ""}>
+                      {item.name}
+                    </span>
+                  )}
+                  {isActive(item.name) && collapsed && (
+                    <span className="absolute right-2 w-2 h-2 rounded-full bg-white"></span>
+                  )}
+                </button>
+              </li>
+            ))}
 
           {/* Content Management */}
           <li className="mt-2">
-            <div className={`w-full flex items-center rounded-lg font-medium ${collapsed ? "justify-center px-0 py-2" : "justify-start gap-3 px-3 py-2"}`}>
+            <div
+              className={`w-full flex items-center rounded-lg font-medium ${
+                collapsed ? "justify-center px-0 py-2" : "justify-start gap-3 px-3 py-2"
+              }`}
+            >
               <span>📂</span>
               {!collapsed && <span>Content Management</span>}
             </div>
@@ -115,11 +151,18 @@ export default function Sidebar({
                   <li key={item.name}>
                     <button
                       type="button"
-                      onClick={() => onNavigate(item.name)}
-                      className="w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition font-medium"
+                      onClick={() => setActiveAndNavigate(item.name)}
+                      className={[
+                        "w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg transition font-medium",
+                        hoverStyles,
+                        isActive(item.name) ? activeStyles : ""
+                      ].join(" ")}
+                      aria-current={isActive(item.name) ? "page" : undefined}
                     >
                       <span>{item.icon}</span>
-                      <span>{item.name}</span>
+                      <span className={isActive(item.name) ? "font-semibold" : ""}>
+                        {item.name}
+                      </span>
                     </button>
                   </li>
                 ))}
@@ -129,14 +172,22 @@ export default function Sidebar({
             {collapsed && (
               <ul className="mt-1 space-y-1">
                 {contentSections.map((item) => (
-                  <li key={item.name}>
+                  <li key={item.name} className="relative">
                     <button
                       type="button"
-                      onClick={() => onNavigate(item.name)}
-                      className="w-full flex items-center justify-center px-0 py-2 rounded-lg hover:bg-white/10 transition font-medium"
+                      onClick={() => setActiveAndNavigate(item.name)}
+                      className={[
+                        "w-full flex items-center justify-center px-0 py-2 rounded-lg transition font-medium",
+                        hoverStyles,
+                        isActive(item.name) ? activeStyles : ""
+                      ].join(" ")}
                       title={item.name}
+                      aria-current={isActive(item.name) ? "page" : undefined}
                     >
                       <span>{item.icon}</span>
+                      {isActive(item.name) && (
+                        <span className="absolute right-1 top-1 w-2 h-2 rounded-full bg-white"></span>
+                      )}
                     </button>
                   </li>
                 ))}

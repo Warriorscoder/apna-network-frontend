@@ -1,11 +1,12 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useToast } from "@/components/ui/ToastProvider";
 
 export default function ServiceTakersTable() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchUsers = () => {
     setLoading(true);
@@ -42,11 +43,36 @@ export default function ServiceTakersTable() {
     }
   };
 
+  const filteredUsers = useMemo(() => {
+    if (!searchTerm.trim()) return users;
+    const q = searchTerm.toLowerCase();
+    return users.filter(u =>
+      (u.name || "").toLowerCase().includes(q) ||
+      (u.email || "").toLowerCase().includes(q) ||
+      (u.phone || "").toString().toLowerCase().includes(q)
+    );
+  }, [users, searchTerm]);
+
   if (loading) return <p className="text-center text-gray-500 py-4">Loading users...</p>;
   if (!users.length) return <p className="text-center text-gray-400 py-4">No service takers found.</p>;
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+        <div className="flex-1 max-w-xs">
+          <input
+            type="text"
+            placeholder="Search by name, email, phone..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#695aa6] focus:border-transparent"
+          />
+        </div>
+        <div className="text-sm text-gray-500">
+          Showing {filteredUsers.length} / {users.length}
+        </div>
+      </div>
+
       <div className="overflow-x-auto bg-white shadow-md rounded-xl border border-gray-200">
         <table className="min-w-full text-left text-sm sm:text-base">
           <thead className="bg-gray-100 text-gray-700">
@@ -58,21 +84,29 @@ export default function ServiceTakersTable() {
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
-              <tr key={u._id} className="border-t hover:bg-gray-50">
-                <td className="py-2 px-4">{u.name || "N/A"}</td>
-                <td className="py-2 px-4">{u.email || "N/A"}</td>
-                <td className="py-2 px-4">{u.phone || "N/A"}</td>
-                <td className="py-2 px-4">
-                  <button
-                    onClick={() => handleRemove(u._id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded text-xs sm:text-sm hover:bg-red-600 transition"
-                  >
-                    Remove
-                  </button>
+            {filteredUsers.length ? (
+              filteredUsers.map((u) => (
+                <tr key={u._id} className="border-t hover:bg-gray-50">
+                  <td className="py-2 px-4">{u.name || "N/A"}</td>
+                  <td className="py-2 px-4">{u.email || "N/A"}</td>
+                  <td className="py-2 px-4">{u.phone || "N/A"}</td>
+                  <td className="py-2 px-4">
+                    <button
+                      onClick={() => handleRemove(u._id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded text-xs sm:text-sm hover:bg-red-600 transition"
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="py-6 px-4 text-center text-gray-400">
+                  No users match "{searchTerm}"
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
