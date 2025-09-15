@@ -530,7 +530,6 @@ import {
   X,
 } from "lucide-react";
 import axios from "axios";
-import { useDummyAPI } from "@/app/hooks/useDummyAPI";
 import { useAuth } from "@/app/context/Authcontext";
 import UserFeedbackModal from "@/components/ui/UserFeedbackModal";
 
@@ -753,6 +752,7 @@ export default function RequestsPanel() {
   }, []);
 
   const openFeedbackModal = useCallback((request) => {
+    // console.log("Opening feedback modal for request:", request);
     setSelectedRequestForFeedback(request);
     setFeedbackModalOpen(true);
   }, []);
@@ -904,6 +904,8 @@ export default function RequestsPanel() {
       </div>
 
       <UserFeedbackModal
+        providerId={selectedRequestForFeedback?.provider_id?._id}
+        serviceId={selectedRequestForFeedback?.service_id?._id}
         isOpen={feedbackModalOpen}
         onClose={() => {
           setFeedbackModalOpen(false);

@@ -767,6 +767,7 @@
 // }
 
 // export default ServicesPanel;
+"use client";
 import {
   Briefcase,
   Search,
@@ -868,7 +869,6 @@ const ServiceCategoryCard = ({ service, onClick }) => {
   const [hovered, setHovered] = useState(false);
 
 
-// ✅ OPTIMIZATION: Wrapped in memo to prevent re-renders when props are unchanged.
 const ServiceCategoryCard = memo(({ service, onClick }) => {
   const [hovered, setHovered] = useState(false);
   
@@ -908,9 +908,8 @@ const ServiceCategoryCard = memo(({ service, onClick }) => {
     </div>
   );
 });
-ServiceCategoryCard.displayName = "ServiceCategoryCard"; // Good practice for memo components
+ServiceCategoryCard.displayName = "ServiceCategoryCard";
 
-// ✅ OPTIMIZATION: Wrapped in memo to prevent re-renders when props are unchanged.
 const EnhancedServiceCard = memo(({ service, onMoreDetails, index }) => (
   <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm hover:shadow-md transition-all">
     <div className="flex items-start justify-between mb-3">
@@ -977,30 +976,40 @@ function ServicesPanel() {
   const [allReviews, setAllReviews] = useState([]);
   const [reviewdata, setReviewdata] = useState([]);
 
-
+function ServicesPanel() {
   const [providerId, setProviderId] = useState();
   const [serviceId, setServiceId] = useState();
   const [allReviews, setAllReviews] = useState([]);
   const [reviewdata, setReviewdata] = useState([]);
+  const [allcategories, setAllcategories] = useState([]);
+  const [filteredProviders, setFilteredProviders] = useState([]);
+  const [availableTehsils, setAvailableTehsils] = useState([]);
+  const [serviceData, setServiceData] = useState([]);
+  const [selectedService, setSelectedService] = useState(null);
+  const [selectedProvider, setSelectedProvider] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categorySearchTerm, setCategorySearchTerm] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedTehsil, setSelectedTehsil] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [viewMode, setViewMode] = useState("categories");
+  const [showFilters, setShowFilters] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // all reviews fetch
+  // Fetch initial data
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
       try {
-      
-const [categoriesRes, reviewsRes] = await Promise.all([
-  axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/categories/`),
-  axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/`)
-]);
+        const [categoriesRes, reviewsRes] = await Promise.all([
+          axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/categories/`),
+          axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/`),
+        ]);
 
-if (categoriesRes.data.success) {
-  setAllcategories(categoriesRes.data.data);
-}
-if (reviewsRes.data.success) {
-  setAllReviews(reviewsRes.data.data);
-}
-
+        if (categoriesRes.data.success) setAllcategories(categoriesRes.data.data);
+        if (reviewsRes.data.success) setAllReviews(reviewsRes.data.data);
       } catch (error) {
         console.log("Error fetching initial data", error);
         setError("Failed to load page data.");
@@ -1012,6 +1021,7 @@ if (reviewsRes.data.success) {
     fetchAllData();
   }, []);
 
+  // Filter reviews when provider is selected
   useEffect(() => {
     if (selectedProvider && allReviews.length > 0) {
       const filtered = allReviews.filter(
@@ -1019,223 +1029,193 @@ if (reviewsRes.data.success) {
           review.provider_id === selectedProvider.provider_id &&
           review.serviceId === selectedProvider.serviceId
       );
-useEffect(() => {
-  if (allReviews && selectedProvider) {
-    const filtered = allReviews.filter(
-      (review) => review.provider_id === selectedProvider.provider_id
-    );
-    setReviewdata(filtered);
-  } else {
-    setReviewdata([]);
-  }
-}, [allReviews, selectedProvider]);
-
-// ✅ OPTIMIZATION: Memoize expensive filtering operations.
-const filteredServiceCategories = useMemo(
-  () =>
-    allcategories.filter((category) =>
-      category.title.toLowerCase().includes(categorySearchTerm.toLowerCase())
-    ),
-  [allcategories, categorySearchTerm]
-);
-
-// ✅ OPTIMIZATION: Memoize the main provider filtering logic.
-const filteredAndSearchedProviders = useMemo(() => {
-  return filteredProviders.filter((provider) => {
-    const address = provider.address?.toLowerCase() || "";
-    const name = provider.name?.toLowerCase() || "";
-    const village = provider.village?.toLowerCase() || "";
-    const tehsil = provider.tehsil?.toLowerCase() || "";
-    const district = provider.district?.toLowerCase() || "";
-    const location = provider.location?.toLowerCase() || "";
-
-    const searchTermLower = searchTerm.toLowerCase();
-    const selectedStateLower = selectedState.toLowerCase();
-    const selectedCityLower = selectedCity.toLowerCase();
-    const selectedTehsilLower = selectedTehsil.toLowerCase();
-
-    const matchesSearchTerm =
-      !searchTerm ||
-      name.includes(searchTermLower) ||
-      address.includes(searchTermLower) ||
-      village.includes(searchTermLower) ||
-      tehsil.includes(searchTermLower) ||
-      district.includes(searchTermLower) ||
-      location.includes(searchTermLower);
-
-    const matchesState =
-      !selectedState ||
-      location.includes(selectedStateLower) ||
-      district.includes(selectedStateLower) ||
-      address.includes(selectedStateLower);
-
-    const matchesCity =
-      !selectedCity ||
-      district.includes(selectedCityLower) ||
-      location.includes(selectedCityLower) ||
-      address.includes(selectedCityLower) ||
-      village.includes(selectedCityLower);
-
-    const matchesTehsil =
-      !selectedTehsil ||
-      tehsil.includes(selectedTehsilLower) ||
-      address.includes(selectedTehsilLower);
-
-    return matchesSearchTerm && matchesState && matchesCity && matchesTehsil;
-  });
-}, [filteredProviders, searchTerm, selectedState, selectedCity, selectedTehsil]);
-
-// ✅ OPTIMIZATION: Memoize functions to stabilize their references.
-const fetchServiceProviders = useCallback(async (serviceKey) => {
-  setLoading(true);
-  setError(null);
-  try {
-    const apiurl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    const response = await axios.get(`${apiurl}/services/`);
-    if (!response.data.success) throw new Error("Failed to fetch services");
-
-    const services = response.data.data || [];
-    const filteredServices = services.filter(
-      (item) => item.category === serviceKey
-    );
-    setServiceData(filteredServices);
-
-    if (filteredServices.length > 0) {
-      const providerIds = filteredServices.map((item) => item.provider_id);
-      const result = await axios.post(
-        `${apiurl}/providers/multi-by-id`,
-        { ids: providerIds }
-      );
-      if (!result.data.success) throw new Error("Failed to fetch providers");
-
-      const providersData = result.data.providers || [];
-      const getAddressComponent = (value) =>
-        value && String(value).trim() ? String(value).trim() : null;
-
-      const transformedData = providersData.map((provider) => {
-        const addressComponents = [
-          getAddressComponent(provider.village),
-          getAddressComponent(provider.panchayat_ward),
-          getAddressComponent(provider.tehsil),
-          getAddressComponent(provider.district),
-          getAddressComponent(provider.location),
-        ].filter(Boolean);
-
-        const formattedAddress =
-          addressComponents.length > 0
-            ? addressComponents.join(", ")
-            : "Address not available";
-
-        return {
-          name: provider.name || "Name not available",
-          email: provider.email || "Email not available",
-          provider_id: provider._id,
-          village: getAddressComponent(provider.village) || "Not specified",
-          tehsil: getAddressComponent(provider.tehsil) || "Not specified",
-          district: getAddressComponent(provider.district) || "Not specified",
-          location: getAddressComponent(provider.location) || "Not specified",
-          address: formattedAddress,
-          rating: Math.floor(Math.random() * 5) + 1,
-          availability: `${provider.availability?.from || "9 AM"} - ${
-            provider.availability?.to || "6 PM"
-          }`,
-          phone: provider.phone || "Not provided",
-        };
-      });
-
-      const tehsilSet = new Set(
-        transformedData.map((p) => p.tehsil).filter((t) => t && t !== "Not specified")
-      );
-      setAvailableTehsils(Array.from(tehsilSet).sort());
-      setFilteredProviders(transformedData);
+      setReviewdata(filtered);
     } else {
+      setReviewdata([]);
+    }
+  }, [allReviews, selectedProvider]);
+
+  const filteredServiceCategories = useMemo(
+    () =>
+      allcategories.filter((category) =>
+        category.title.toLowerCase().includes(categorySearchTerm.toLowerCase())
+      ),
+    [allcategories, categorySearchTerm]
+  );
+
+  const filteredAndSearchedProviders = useMemo(() => {
+    return filteredProviders.filter((provider) => {
+      const address = provider.address?.toLowerCase() || "";
+      const name = provider.name?.toLowerCase() || "";
+      const village = provider.village?.toLowerCase() || "";
+      const tehsil = provider.tehsil?.toLowerCase() || "";
+      const district = provider.district?.toLowerCase() || "";
+      const location = provider.location?.toLowerCase() || "";
+
+      const searchTermLower = searchTerm.toLowerCase();
+      const selectedStateLower = selectedState.toLowerCase();
+      const selectedCityLower = selectedCity.toLowerCase();
+      const selectedTehsilLower = selectedTehsil.toLowerCase();
+
+      const matchesSearchTerm =
+        !searchTerm ||
+        name.includes(searchTermLower) ||
+        address.includes(searchTermLower) ||
+        village.includes(searchTermLower) ||
+        tehsil.includes(searchTermLower) ||
+        district.includes(searchTermLower) ||
+        location.includes(searchTermLower);
+
+      const matchesState =
+        !selectedState ||
+        location.includes(selectedStateLower) ||
+        district.includes(selectedStateLower) ||
+        address.includes(selectedStateLower);
+
+      const matchesCity =
+        !selectedCity ||
+        district.includes(selectedCityLower) ||
+        location.includes(selectedCityLower) ||
+        address.includes(selectedCityLower) ||
+        village.includes(selectedCityLower);
+
+      const matchesTehsil =
+        !selectedTehsil ||
+        tehsil.includes(selectedTehsilLower) ||
+        address.includes(selectedTehsilLower);
+
+      return matchesSearchTerm && matchesState && matchesCity && matchesTehsil;
+    });
+  }, [filteredProviders, searchTerm, selectedState, selectedCity, selectedTehsil]);
+
+  const fetchServiceProviders = useCallback(async (serviceKey) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const apiurl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await axios.get(`${apiurl}/services/`);
+      if (!response.data.success) throw new Error("Failed to fetch services");
+
+      const services = response.data.data || [];
+      const filteredServices = services.filter(
+        (item) => item.category === serviceKey
+      );
+      setServiceData(filteredServices);
+
+      if (filteredServices.length > 0) {
+        const providerIds = filteredServices.map((item) => item.provider_id);
+        const result = await axios.post(`${apiurl}/providers/multi-by-id`, { ids: providerIds });
+        if (!result.data.success) throw new Error("Failed to fetch providers");
+
+        const providersData = result.data.providers || [];
+        const getAddressComponent = (value) =>
+          value && String(value).trim() ? String(value).trim() : null;
+
+        const transformedData = providersData.map((provider) => {
+          const addressComponents = [
+            getAddressComponent(provider.village),
+            getAddressComponent(provider.panchayat_ward),
+            getAddressComponent(provider.tehsil),
+            getAddressComponent(provider.district),
+            getAddressComponent(provider.location),
+          ].filter(Boolean);
+
+          const formattedAddress =
+            addressComponents.length > 0
+              ? addressComponents.join(", ")
+              : "Address not available";
+
+          return {
+            name: provider.name || "Name not available",
+            email: provider.email || "Email not available",
+            provider_id: provider._id,
+            village: getAddressComponent(provider.village) || "Not specified",
+            tehsil: getAddressComponent(provider.tehsil) || "Not specified",
+            district: getAddressComponent(provider.district) || "Not specified",
+            location: getAddressComponent(provider.location) || "Not specified",
+            address: formattedAddress,
+            rating: Math.floor(Math.random() * 5) + 1,
+            availability: `${provider.availability?.from || "9 AM"} - ${provider.availability?.to || "6 PM"}`,
+            phone: provider.phone || "Not provided",
+          };
+        });
+
+        const tehsilSet = new Set(
+          transformedData.map((p) => p.tehsil).filter((t) => t && t !== "Not specified")
+        );
+        setAvailableTehsils(Array.from(tehsilSet).sort());
+        setFilteredProviders(transformedData);
+      } else {
+        setFilteredProviders([]);
+        setAvailableTehsils([]);
+      }
+    } catch (error) {
+      console.error("Error fetching providers:", error);
+      setError("Failed to load providers. Please try again later.");
       setFilteredProviders([]);
       setAvailableTehsils([]);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error fetching providers:", error);
-    setError("Failed to load providers. Please try again later.");
+  }, []);
+
+  const handleCategorySelect = useCallback(
+    async (service) => {
+      setSelectedService(service);
+      setViewMode("providers");
+      fetchServiceProviders(service.key);
+    },
+    [fetchServiceProviders]
+  );
+
+  const handleMoreDetails = useCallback(
+    (provider) => {
+      const serviceInfo = serviceData.find(
+        (item) => item.provider_id === provider.provider_id
+      );
+
+      const cardData = {
+        ...provider,
+        title: serviceInfo?.title,
+        description: serviceInfo?.description,
+        tags: serviceInfo?.tags || [selectedService?.title?.toLowerCase()],
+        category: serviceInfo?.category || selectedService?.serviceKey,
+        experience: serviceInfo?.experience_level,
+        serviceId: serviceInfo?._id,
+      };
+      setSelectedProvider(cardData);
+      setProviderId(cardData?.provider_id);
+      setServiceId(cardData?.serviceId);
+      setIsDialogOpen(true);
+    },
+    [serviceData, selectedService]
+  );
+
+  const handleBackToCategories = useCallback(() => {
+    setViewMode("categories");
+    setSelectedService(null);
     setFilteredProviders([]);
+    setSearchTerm("");
+    setServiceData([]);
+    setCategorySearchTerm("");
+    setSelectedState("");
+    setSelectedCity("");
+    setSelectedTehsil("");
     setAvailableTehsils([]);
-  } finally {
-    setLoading(false);
-  }
-}, []);
+    setShowFilters(false);
+  }, []);
 
-const handleCategorySelect = useCallback(
-  async (service) => {
-    setSelectedService(service);
-    setViewMode("providers");
-    fetchServiceProviders(service.key);
-  },
-  [fetchServiceProviders]
-);
+  const clearAllFilters = useCallback(() => {
+    setSearchTerm("");
+    setSelectedState("");
+    setSelectedCity("");
+    setSelectedTehsil("");
+  }, []);
 
-const handleMoreDetails = useCallback(
-  (provider) => {
-    const serviceInfo = serviceData.find(
-      (item) => item.provider_id === provider.provider_id
-    );
-
-    const cardData = {
-      ...provider,
-      title: serviceInfo?.title,
-      description: serviceInfo?.description,
-      tags: serviceInfo?.tags || [selectedService?.title?.toLowerCase()],
-      category: serviceInfo?.category || selectedService?.serviceKey,
-      experience: serviceInfo?.experience_level,
-      serviceId: serviceInfo?._id,
-    };
-    setSelectedProvider(cardData);
-    setProviderId(cardData?.provider_id);
-    setServiceId(cardData?.serviceId);
-    setIsDialogOpen(true);
-  },
-  [serviceData, selectedService]
-);
-
-const handleBackToCategories = useCallback(() => {
-  setViewMode("categories");
-  setSelectedService(null);
-  setFilteredProviders([]);
-  setSearchTerm("");
-  setServiceData([]);
-  setCategorySearchTerm("");
-  setSelectedState("");
-  setSelectedCity("");
-  setSelectedTehsil("");
-  setAvailableTehsils([]);
-  setShowFilters(false);
-}, []);
-
-const clearAllFilters = useCallback(() => {
-  setSearchTerm("");
-  setSelectedState("");
-  setSelectedCity("");
-  setSelectedTehsil("");
-}, []);
-
-                  </div>
-                  <div className="hidden lg:block overflow-x-auto">
-                    {/* Desktop Table View */}
-                  </div>
-                  <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {filteredAndSearchedProviders.map((provider, index) => (
-                      <EnhancedServiceCard
-                        key={provider.provider_id}
-                        service={provider}
-                        onMoreDetails={handleMoreDetails}
-                        index={index}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-      
+  return (
+    <div className="space-y-6">
+      {/* Render UI (title, filters, cards, etc.) */}
+      {/* Dialog box */}
       <Dialoguebox
         data={selectedProvider}
         isOpen={isDialogOpen}
