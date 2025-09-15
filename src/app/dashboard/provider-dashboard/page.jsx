@@ -161,7 +161,7 @@ export default function ProviderDashboardPage() {
 
           {/* Notifications Bar - only show on dashboard */}
           {activeView === "dashboard" && (
-            <NotificationsBar pendingRequests={2} />
+            <NotificationsBar />
           )}
 
           <div

@@ -99,6 +99,10 @@ export default function HelpPanel() {
                 <span className="w-2 h-2 bg-[#695aa6] rounded-full mt-2 mr-3 flex-shrink-0"></span>
                 Understanding payment processes and policies
               </li>
+              <li className="flex items-start">
+                <span className="w-2 h-2 bg-[#695aa6] rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                If you any other service category you want us to add, please let us know!
+              </li>
             </ul>
             <div className="bg-gray-50 rounded-lg p-4 mt-4">
               <h3 className="font-semibold text-gray-800 mb-2 flex items-center">
