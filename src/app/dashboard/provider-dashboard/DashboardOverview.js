@@ -1,9 +1,7 @@
 import React from "react";
 import { Briefcase, ListTodo } from "lucide-react";
-import { useAuthenticatedAPI } from "@/app/hooks/useAuthenticatedAPI";
 
 export default function DashboardOverview({ setActiveView }) {
-  const { provider } = useAuthenticatedAPI();
 
   return (
     <div className="space-y-6">

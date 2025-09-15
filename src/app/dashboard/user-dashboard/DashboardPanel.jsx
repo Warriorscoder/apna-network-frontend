@@ -1,9 +1,7 @@
 import React from "react";
 import { Briefcase, ListTodo } from "lucide-react";
-import { useDummyAPI } from "@/app/hooks/useDummyAPI";
 
 export default function DashboardPanel({ setActiveView }) {
- const { user } = useDummyAPI();
 
   return (
     <div className="space-y-6">
