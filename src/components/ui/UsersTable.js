@@ -93,7 +93,7 @@ export default function ServiceTakersTable() {
           </div>
         )) : (
           <div className="text-center text-gray-400 text-sm py-4">
-            No users match "{searchTerm}"
+            {`No users match ${searchTerm}`}
           </div>
         )}
       </div>
@@ -128,7 +128,7 @@ export default function ServiceTakersTable() {
             ) : (
               <tr>
                 <td colSpan={4} className="py-6 px-4 text-center text-gray-400">
-                  No users match "{searchTerm}"
+                  {`No users match ${searchTerm}`}
                 </td>
               </tr>
             )}

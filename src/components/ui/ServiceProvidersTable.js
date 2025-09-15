@@ -231,7 +231,7 @@ export default function ServiceProvidersTable() {
             );
         }) : (
           <div className="text-center text-gray-400 text-sm py-4">
-            No providers match "{searchTerm}"
+            {`No providers match ${searchTerm}`}
           </div>
         )}
       </div>
@@ -311,7 +311,7 @@ export default function ServiceProvidersTable() {
                   colSpan={5}
                   className="py-6 px-4 text-center text-gray-400"
                 >
-                  No providers match "{searchTerm}"
+                  {`No providers match ${searchTerm}`}
                 </td>
               </tr>
             )}
@@ -320,7 +320,7 @@ export default function ServiceProvidersTable() {
       </div>
 
       {confirmOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50  z-50">
           <div className="bg-white p-6 rounded-xl shadow-lg w-80">
             <h2 className="text-lg font-semibold text-gray-800 mb-3">Remove Provider</h2>
             <p className="text-gray-600 mb-4">

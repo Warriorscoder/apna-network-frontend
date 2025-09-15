@@ -125,29 +125,46 @@ export default function CategoriesTable() {
   };
 
   const handleDelete = async () => {
-    if (!selectedCategory) return;
+  if (!selectedCategory) return;
 
-    // Still block default / protected categories
-    if (
-      selectedCategory.isProtected ||
-      selectedCategory.source === "default" ||
-      selectedCategory.source === "default-backend"
-    ) {
-      showToast("Default categories cannot be deleted", "error");
-      closeConfirm();
-      return;
+  // This protection check remains the same
+  if (
+    selectedCategory.isProtected ||
+    selectedCategory.source === "default" ||
+    selectedCategory.source === "default-backend"
+  ) {
+    showToast("Default categories cannot be deleted", "error");
+    closeConfirm();
+    return;
+  }
+
+  setDeleting(true);
+
+  try {
+    // Construct the API URL using the category's 'key'
+    const apiUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/categories/${selectedCategory.key}`;
+    
+    // Make the DELETE request using axios
+    const response = await axios.delete(apiUrl);
+
+    // If the API call is successful, update the frontend state
+    if (response.data.success) {
+      setCategories(prev => prev.filter(c => c.key !== selectedCategory.key));
+      showToast("Category deleted successfully", "success");
+      closeConfirm(); // Close the confirmation modal on success
+    } else {
+      // Handle cases where the API returns success: false
+      showToast(response.data.message || "Failed to delete category.", "error");
     }
-
-    setDeleting(true);
-
-    // Frontend-only removal (no backend call)
-    setTimeout(() => {
-      setCategories(prev => prev.filter(c => c._id !== selectedCategory._id));
-      showToast("Category removed locally (not persisted)", "success");
-      setDeleting(false);
-      closeConfirm();
-    }, 250); // tiny delay to show loading state
-  };
+  } catch (error) {
+    // Handle network errors or other exceptions
+    console.error("Error deleting category:", error);
+    showToast(error.response?.data?.message || "An error occurred.", "error");
+  } finally {
+    // This will run after the try/catch block, ensuring the loading state is always removed
+    setDeleting(false);
+  }
+};
 
   if (loading)
     return <div className="text-gray-500 text-center py-4">Loading categories...</div>;

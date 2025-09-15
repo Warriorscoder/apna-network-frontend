@@ -46,7 +46,7 @@ const UserFeedbackModal = ({ isOpen, onClose, onSubmitted, providerId, serviceId
       setFeedbackText("");
       setTags([]);
       setRecommend(null);
-      router.push('/');
+      // router.push('/');
       onClose();
     } catch (err) {
       console.error(err);

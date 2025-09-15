@@ -61,7 +61,7 @@ export default function AdminDashboard() {
   // Section refs (smooth scroll)
   const sectionRefs = {
     Dashboard: useRef(null),
-    "Service Approvals": useRef(null),
+    // "Service Approvals": useRef(null),
     "Manage Users": useRef(null),
     "Manage Services": useRef(null),
     Categories: useRef(null),
@@ -233,14 +233,14 @@ export default function AdminDashboard() {
               </section>
             )}
 
-            {selectedSection === "Service Approvals" && (
+            {/* {selectedSection === "Service Approvals" && (
               <section id="Service Approvals" ref={sectionRefs["Service Approvals"]}>
                 <h2 className="text-xl font-semibold mb-4">Pending Service Approvals</h2>
                 <div className="bg-white rounded-xl p-4 shadow overflow-x-auto">
                   <ServicesApprovalTable />
                 </div>
               </section>
-            )}
+            )} */}
 
             {selectedSection === "Manage Users" && (
               <section id="Manage Users" ref={sectionRefs["Manage Users"]} className="space-y-8">
@@ -291,14 +291,14 @@ export default function AdminDashboard() {
               </section>
             )}
 
-            {selectedSection === "Activity" && (
+            {/* {selectedSection === "Activity" && (
               <section id="Activity" ref={sectionRefs["Activity"]}>
                 <h2 className="text-xl font-semibold mb-4">Activity Log</h2>
                 <div className="bg-white rounded-xl p-4 shadow overflow-x-auto">
                   <ActivityLog />
                 </div>
               </section>
-            )}
+            )} */}
 
             {selectedSection === "Blogs" && (
               <section id="Blogs" ref={sectionRefs["Blogs"]}>

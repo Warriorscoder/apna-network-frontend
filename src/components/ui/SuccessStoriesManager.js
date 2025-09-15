@@ -8,12 +8,12 @@ export default function SuccessStoriesManager() {
   const [stories, setStories] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [statusFilter, setStatusFilter] = useState("all");
+  // const [statusFilter, setStatusFilter] = useState("all");
 
   const fetchStories = async () => {
     try {
       const res = await fetch(
-        `${API_BASE}${statusFilter !== "all" ? `?status=${statusFilter}` : ""}`
+        `${API_BASE}`
       );
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
@@ -26,9 +26,9 @@ export default function SuccessStoriesManager() {
     }
   };
 
-  useEffect(() => {
-    fetchStories();
-  }, [statusFilter]);
+  // useEffect(() => {
+  //   fetchStories();
+  // }, [statusFilter]);
 
   const handleSubmit = async (data) => {
     try {
@@ -90,7 +90,7 @@ export default function SuccessStoriesManager() {
   return (
     <div className="w-full">
       {/* Filter Buttons */}
-      <div className="flex flex-wrap gap-2 mb-4">
+      {/* <div className="flex flex-wrap gap-2 mb-4">
         {["all", "pending", "approved", "rejected"].map((status) => (
           <button
             key={status}
@@ -104,7 +104,7 @@ export default function SuccessStoriesManager() {
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </button>
         ))}
-      </div>
+      </div> */}
 
       {/* Table Section */}
       <div className="overflow-x-auto border rounded-xl border-yellow-400/20 shadow max-h-[500px] hidden md:block">
@@ -115,7 +115,7 @@ export default function SuccessStoriesManager() {
               <th className="py-2 px-3 font-semibold">User</th>
               <th className="py-2 px-3 font-semibold">Provider</th>
               <th className="py-2 px-3 font-semibold">Date</th>
-              <th className="py-2 px-3 font-semibold">Status</th>
+              {/* <th className="py-2 px-3 font-semibold">Status</th> */}
               <th className="py-2 px-3 font-semibold">Featured</th>
               <th className="py-2 px-3 font-semibold">Actions</th>
             </tr>
@@ -136,7 +136,7 @@ export default function SuccessStoriesManager() {
                   <td className="py-2 px-3">
                     {s.date ? new Date(s.date).toLocaleDateString() : "-"}
                   </td>
-                  <td className="py-2 px-3">
+                  {/* <td className="py-2 px-3">
                     <span
                       className={`px-2 py-1 rounded text-xs font-bold ${
                         s.status === "approved"
@@ -148,7 +148,7 @@ export default function SuccessStoriesManager() {
                     >
                       {s.status.charAt(0).toUpperCase() + s.status.slice(1)}
                     </span>
-                  </td>
+                  </td> */}
                   <td className="py-2 px-3">
                     <button
                       onClick={() => handleFeature(s._id)}
@@ -175,7 +175,7 @@ export default function SuccessStoriesManager() {
                     >
                       Delete
                     </button>
-                    {s.status === "pending" && (
+                    {/* {s.status === "pending" && (
                       <>
                         <button
                           onClick={() => handleApprove(s._id)}
@@ -190,7 +190,7 @@ export default function SuccessStoriesManager() {
                           Reject
                         </button>
                       </>
-                    )}
+                    )} */}
                   </td>
                 </tr>
               ))
@@ -213,11 +213,11 @@ export default function SuccessStoriesManager() {
                 <h3 className="font-semibold text-sm text-yellow-700">{s.title}</h3>
                 <p className="text-xs text-gray-500 mt-0.5">User: {s.user} • Provider: {s.provider}</p>
               </div>
-              <span className={`px-2 py-1 rounded text-[10px] font-bold ${
+              {/* <span className={`px-2 py-1 rounded text-[10px] font-bold ${
                 s.status === "approved" ? "bg-green-100 text-green-700" :
                 s.status === "pending" ? "bg-yellow-100 text-yellow-700" :
                 "bg-red-100 text-red-700"
-              }`}>{s.status}</span>
+              }`}>{s.status}</span> */}
             </div>
             <div className="flex flex-wrap gap-2">
               <button onClick={() => handleEdit(s)} className="px-3 py-1 bg-blue-500 text-white rounded text-xs">Edit</button>

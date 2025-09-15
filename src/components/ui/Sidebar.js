@@ -43,10 +43,10 @@ export default function Sidebar({
 
   const sections = [
     { name: "Dashboard", icon: "🏠" },
-    { name: "Service Approvals", icon: "⏳" },
+    // { name: "Service Approvals", icon: "⏳" },
     { name: "Manage Users", icon: "👥" },
     { name: "Categories", icon: "📂" },
-    { name: "Activity", icon: "📜" },
+    // { name: "Activity", icon: "📜" },
   ];
 
   const contentSections = [

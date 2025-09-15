@@ -819,59 +819,62 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  // Email code
-  const sendEmailNotification = async ({ name, phone, email, userEmail, category, now }) => {
-    try {
-      if (!name || !phone || !email || !userEmail || !category || !now || !validateEmail(email) || !validateEmail(userEmail)) {
-        // console.log("Validation failed for email notification:", { name, phone, email, userEmail, category, now });
-        toast.error("Missing or invalid input fields");
+  // Email code plus request code combined
+
+const createServiceRequestAndNotify = async ({ user_id, provider_id, service_id, provider_email, service_category }) => {
+
+  // 1. Check for login status
+  if (user.role === 'not logged in') {
+    toast.error("Please login to request a service");
+    router.push('/login');
+    return;
+  }
+
+  // A helper function to call your backend's email API
+  const sendEmailNotification = async () => {
+    const emailPayload = {
+      name: user?.name,
+      phone: user?.phone,
+      email: provider_email, // The provider's email
+      userEmail: user?.email, // The customer's email
+      category: service_category,
+      now: new Date().toISOString(),
+    };
+    
+    // Simple validation before sending
+    if (Object.values(emailPayload).some(field => !field)) {
+        toast.error("Could not send notification: missing data.");
         return;
-      }
-      setIsSending(true);
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/notify`, {
-        name, phone, email, userEmail, category, now,
-      });
-      if (response.data.success)
-        toast.success("Email sent successfully!");
-
-    } catch (error) {
-      console.error("Email send failed:", error?.response?.data || error.message);
-      toast.error("Failed to send email");
-    } finally {
-      setIsSending(false);
     }
-  };
 
-  // Request code
-  const createServiceRequest = async ({ user_id, provider_id, service_id }) => {
-    if (user.role === 'not logged in') {
-      toast.error("Please login to request a service");
-      router.push('/login');
-      return;
-    }
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/`,
-        { user_id, provider_id, service_id }
-      );
-      if (response.data.message) {
-        toast.warn(response.data.message);
-      } else {
-        toast.success("Service request made successfully!!");
-        sendEmailNotification({
-          name: user?.name,
-          phone: user?.phone,
-          email: data?.email || "gammingab752@gmail.com",
-          userEmail: user?.email || "codeaniket123@gmail.com",
-          category: data?.category,
-          now: new Date().toISOString(),
-        });
-      }
+      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/notify`, emailPayload);
+      toast.success("Notification email sent successfully!");
     } catch (error) {
-      console.error("Service request failed:", error?.response?.data || error.message);
-      toast.error("Failed to submit service request");
+      console.error("Email notification failed:", error?.response?.data || error.message);
+      toast.error("Failed to send notification email.");
     }
   };
+
+  // 2. Create the service request first
+  try {
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/`,
+      { user_id, provider_id, service_id }
+    );
+
+    if (response.data.message) {
+      toast.warn(response.data.message); // Handle cases like "request already exists"
+    } else {
+      toast.success("Service request made successfully!");
+      // 3. On success, trigger the email notification
+      await sendEmailNotification();
+    }
+  } catch (error) {
+    console.error("Service request failed:", error?.response?.data || error.message);
+    toast.error("Failed to submit service request");
+  }
+};
 
   if (!isOpen || !data) return null;
 
@@ -1059,7 +1062,7 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
               </div>
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                 <button
-                  onClick={() => createServiceRequest({ user_id: user.id, provider_id: data.provider_id, service_id: data.serviceId })}
+                  onClick={() => createServiceRequestAndNotify({ user_id: user.id, provider_id: data.provider_id, service_id: data.serviceId })}
                   disabled={isSending}
                   className={`flex-1 text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 font-medium text-sm sm:text-base ${isSending ? "opacity-60 cursor-not-allowed" : ""}`}
                   style={{ backgroundColor: "#695aa6" }}
