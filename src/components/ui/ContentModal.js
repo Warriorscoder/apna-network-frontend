@@ -285,10 +285,12 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
     
   };
 
- return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 px-2 sm:px-4">
-       <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 w-[95%] max-w-lg sm:max-w-xl md:max-w-2xl relative animate-fadeIn max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent transition-transform duration-300 ease-in-out transform scale-95 sm:scale-100">
-
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-2 sm:px-4">
+      <div
+        className="bg-white rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 w-full max-w-md sm:max-w-xl md:max-w-2xl relative animate-fadeIn max-h-[92vh] sm:max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent transition-transform duration-300 ease-in-out transform sm:scale-100 scale-[0.97]"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-[#695aa6] focus:outline-none text-2xl"
@@ -320,7 +322,7 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            {fields[type]}
+            <div className="space-y-5">{fields[type]}</div>
             <div className="flex flex-col sm:flex-row justify-end gap-2">
               <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition">
                 Cancel
@@ -351,6 +353,15 @@ export default function ContentModal({ open, onClose, onSubmit, type, initialDat
           to {
             opacity: 1;
             transform: none;
+          }
+        }
+        @media (max-width: 480px) {
+          .animate-fadeIn {
+            animation: fadeInMobile 0.28s;
+          }
+          @keyframes fadeInMobile {
+            from { opacity: 0; transform: translateY(18px) scale(.95); }
+            to { opacity: 1; transform: none; }
           }
         }
         .animate-bounceIn {

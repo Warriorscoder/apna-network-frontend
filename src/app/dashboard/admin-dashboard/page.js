@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import Sidebar from "@/components/ui/Sidebar";
-// import Header from "@/components/ui/Header" // removed: use common Navbar instead
 import StatCard from "@/components/ui/StatCard";
 import UsersTable from "@/components/ui/UsersTable";
 import ServiceProvidersTable from "@/components/ui/ServiceProvidersTable";
@@ -17,40 +16,49 @@ import NewletterManager from "@/components/ui/NewletterManager";
 import AddServiceModal from "@/components/ui/AddServiceModal";
 import ContentModal from "@/components/ui/ContentModal";
 import { ToastProvider } from "@/components/ui/ToastProvider";
-import Navbar from "@/app/Navbar"; // ✅ use the same Navbar as user/provider
+import Navbar from "@/app/Navbar";
 
 export default function AdminDashboard() {
+  // Desktop (persistent) collapse
   const [collapsed, setCollapsed] = useState(false);
+
+  // Active content section
   const [selectedSection, setSelectedSection] = useState("Dashboard");
+
+  // Modals
   const [showAddServiceModal, setShowAddServiceModal] = useState(false);
   const [contentModalOpen, setContentModalOpen] = useState(false);
   const [contentType, setContentType] = useState("");
   const [contentInitialData, setContentInitialData] = useState(null);
+
   const [authError, setAuthError] = useState(false);
 
+  // Mobile layout states (match user/provider dashboards)
+  const [isMobile, setIsMobile] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);   // mobile drawer open
+  const [showFloatingMenu, setShowFloatingMenu] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  // Fetch quick stats (auth check)
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/stats`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
-
         if (res.status === 401 || res.status === 403) {
           setAuthError(true);
           return;
         }
-
-        const result = await res.json();
-        console.log("Fetched stats:", result);
-      } catch (err) {
-        console.error("Failed to fetch stats", err);
+        await res.json();
+      } catch {
         setAuthError(true);
       }
     };
-
     fetchStats();
   }, []);
 
+  // Section refs (smooth scroll)
   const sectionRefs = {
     Dashboard: useRef(null),
     "Service Approvals": useRef(null),
@@ -67,23 +75,61 @@ export default function AdminDashboard() {
 
   const handleNavigate = (section) => {
     setSelectedSection(section);
+    if (isMobile) setSidebarOpen(false);
     setTimeout(() => {
       sectionRefs[section]?.current?.scrollIntoView({ behavior: "smooth" });
     }, 50);
   };
 
-  const toggleCollapse = () => {
-    setCollapsed((prev) => {
-      const newState = !prev;
-      localStorage.setItem("sidebarCollapsed", newState);
-      return newState;
-    });
-  };
-
+  // Persist desktop collapse only
   useEffect(() => {
     const saved = localStorage.getItem("sidebarCollapsed");
     if (saved === "true") setCollapsed(true);
   }, []);
+
+  const toggleCollapse = () => {
+    if (isMobile) {
+      setSidebarOpen((o) => !o);
+      return;
+    }
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("sidebarCollapsed", next);
+      return next;
+    });
+  };
+
+  // Responsive breakpoint (align with provider/user layout @ 1024px)
+  useEffect(() => {
+    const check = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (mobile) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(true); // show on desktop
+      }
+    };
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Hide floating button on downward scroll (mobile)
+  useEffect(() => {
+    if (!isMobile) return;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y > lastScrollY && y > 100) {
+        setShowFloatingMenu(false);
+      } else {
+        setShowFloatingMenu(true);
+      }
+      setLastScrollY(y);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isMobile, lastScrollY]);
 
   const handleOpenModal = (type, data = null) => {
     setContentType(type);
@@ -102,44 +148,85 @@ export default function AdminDashboard() {
     );
   }
 
+  // Sidebar width logic desktop
+  const desktopSidebarWidth = collapsed ? "w-20" : "w-64";
+
   return (
     <ToastProvider>
-      {/* ✅ Shared Navbar (fixed) */}
       <Navbar />
-
-      {/* Spacer to offset fixed navbar height */}
       <div className="h-16 sm:h-20" />
 
-      <div className="min-h-screen flex bg-gradient-to-tr from-white to-[#695aa6]/10">
-        {/* Sidebar */}
+      {/* Floating open button (mobile) */}
+      {isMobile && !sidebarOpen && (
+        <button
+          onClick={() => setSidebarOpen(true)}
+            className="lg:hidden"
+          style={{
+            position: "fixed",
+            top: "78px",
+            left: "12px",
+            zIndex: 40,
+            opacity: showFloatingMenu ? 0.85 : 0,
+            pointerEvents: showFloatingMenu ? "auto" : "none",
+            backgroundColor: "rgba(60,50,100,0.85)",
+            color: "white",
+            padding: "10px",
+            borderRadius: "10px",
+            border: "1px solid rgba(255,255,255,0.25)",
+            boxShadow: "0 4px 18px rgba(60,50,100,0.35)",
+            backdropFilter: "blur(6px)",
+            transition: "opacity 0.3s ease"
+          }}
+          aria-label="Open admin menu"
+        >
+          ☰
+        </button>
+      )}
+
+      {/* Overlay (mobile) */}
+      {isMobile && sidebarOpen && (
         <div
-          className={`fixed z-40 shadow-lg transition-all duration-300
-            ${collapsed ? "w-20" : "w-64"}
-            top-16 sm:top-20
-            h-[calc(100vh-4rem)] sm:h-[calc(100vh-5rem)]
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
+        />
+      )}
+
+      <div className="min-h-screen flex bg-gradient-to-br from-white to-[#695aa6]/10">
+        {/* Sidebar wrapper */}
+        <div
+          className={`
+            fixed top-16 sm:top-20 z-40 h-[calc(100vh-4rem)] sm:h-[calc(100vh-5rem)]
+             transition-all duration-300 shadow-lg
+             ${isMobile
+               ? `bg-[#695aa6] text-white w-64 ${
+                   sidebarOpen ? "translate-x-0" : "-translate-x-full"
+                 }`
+               : `${desktopSidebarWidth}`
+             }
           `}
         >
           <Sidebar
             onNavigate={handleNavigate}
             onAddServiceClick={() => setShowAddServiceModal(true)}
-            collapsed={collapsed}
+            collapsed={isMobile ? false : collapsed}
             toggleCollapse={toggleCollapse}
-            fixed={false}               // ✅ render inside fixed wrapper (no own positioning)
-          />
+            fixed={false}
+            activeSection={selectedSection}          />
         </div>
-
-        {/* Main Content */}
+        {/* Content */}
         <div
-          className={`flex-1 flex flex-col transition-all duration-300 ${
-            collapsed ? "pl-20" : "pl-64"
-          }`}
+          className={`
+            flex-1 flex flex-col transition-all duration-300
+            ${isMobile ? "" : (collapsed ? "pl-20" : "pl-64")}
+          `}
         >
-          {/* removed the old admin Header to avoid double bars */}
-          {/* <Header onToggleSidebar={toggleCollapse} onNavigate={handleNavigate} /> */}
-
-          <main className="p-4 md:p-8 overflow-y-auto space-y-8 max-w-7xl w-full mx-auto
-                           max-h-[calc(100vh-4rem)] sm:max-h-[calc(100vh-5rem)] /* ✅ respect navbar height */
-                           pt-4">
+          <main
+            className={`
+              p-3 sm:p-5 md:p-8 space-y-8 max-w-7xl w-full mx-auto
+               ${isMobile ? "" : "overflow-y-auto"}
+               max-h-[calc(100vh-4rem)] sm:max-h-[calc(100vh-5rem)]
+            `}
+          >
             {selectedSection === "Dashboard" && (
               <section id="Dashboard" ref={sectionRefs["Dashboard"]}>
                 <StatCard />

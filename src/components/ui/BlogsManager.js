@@ -121,7 +121,7 @@ export default function BlogsManager() {
       </div>
 
       <div className="overflow-auto rounded-xl shadow border border-[#695aa6]/20">
-        <table className="min-w-[600px] w-full text-left bg-white rounded-xl overflow-hidden">
+        <table className="min-w-[780px] w-full text-left bg-white rounded-xl overflow-hidden hidden md:table">
           <thead className="sticky top-0 z-10 bg-[#f3f0fa] border-b border-[#695aa6]/20">
             <tr className="text-[#695aa6]">
               <th className="py-2 px-3 font-semibold">Title</th>
@@ -210,6 +210,56 @@ export default function BlogsManager() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="grid gap-4 md:hidden mt-4">
+        {filteredBlogs.length === 0 && (
+          <div className="text-center text-gray-400 py-6 bg-white rounded-xl border border-[#695aa6]/20">
+            No blogs found.
+          </div>
+        )}
+        {filteredBlogs.map(b => (
+          <div key={b._id} className="bg-white rounded-xl border border-[#695aa6]/20 p-4 shadow-sm space-y-3">
+            <div className="flex justify-between items-start gap-3">
+              <div className="flex-1">
+                <h3 className="font-semibold text-[#695aa6] text-sm">{b.title || "Untitled"}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{b.author || "Unknown"} • {b.date ? new Date(b.date).toLocaleDateString() : "N/A"}</p>
+              </div>
+              <span className={`px-2 py-1 rounded text-[10px] font-bold ${
+                b.status === "approved" ? "bg-green-100 text-green-700"
+                : b.status === "pending" ? "bg-yellow-100 text-yellow-700"
+                : "bg-red-100 text-red-700"
+              }`}>{b.status}</span>
+            </div>
+            {b.tags?.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {b.tags.slice(0,5).map(t => (
+                  <span key={t} className="bg-[#695aa6]/10 text-[#695aa6] text-[10px] px-2 py-1 rounded-full">{t}</span>
+                ))}
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => handleEdit(b)} className="px-3 py-1 bg-blue-500 text-white rounded text-xs">Edit</button>
+              <button onClick={() => handleDelete(b._id)} className="px-3 py-1 bg-red-500 text-white rounded text-xs">Delete</button>
+              {b.status === "pending" && (
+                <>
+                  <button onClick={() => handleApprove(b._id)} className="px-3 py-1 bg-green-500 text-white rounded text-xs">Approve</button>
+                  <button onClick={() => handleReject(b._id)} className="px-3 py-1 bg-yellow-500 text-white rounded text-xs">Reject</button>
+                </>
+              )}
+              <button
+                onClick={() => handleFeature(b._id)}
+                disabled={b.featured}
+                className={`px-3 py-1 rounded text-xs font-semibold ${
+                  b.featured ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {b.featured ? "Featured" : "Feature"}
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
       <ContentModal
