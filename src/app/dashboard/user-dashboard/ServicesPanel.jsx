@@ -767,6 +767,7 @@
 // }
 
 // export default ServicesPanel;
+"use client";
 import {
   Briefcase,
   Search,
@@ -786,7 +787,6 @@ import LocationSelector from "@/components/LocationSelector";
 
 // --- Child Components (Memoized for Performance) ---
 
-// ✅ OPTIMIZATION: Wrapped in memo to prevent re-renders when props are unchanged.
 const ServiceCategoryCard = memo(({ service, onClick }) => {
   const [hovered, setHovered] = useState(false);
   
@@ -826,9 +826,8 @@ const ServiceCategoryCard = memo(({ service, onClick }) => {
     </div>
   );
 });
-ServiceCategoryCard.displayName = "ServiceCategoryCard"; // Good practice for memo components
+ServiceCategoryCard.displayName = "ServiceCategoryCard";
 
-// ✅ OPTIMIZATION: Wrapped in memo to prevent re-renders when props are unchanged.
 const EnhancedServiceCard = memo(({ service, onMoreDetails, index }) => (
   <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm hover:shadow-md transition-all">
     <div className="flex items-start justify-between mb-3">
@@ -895,7 +894,6 @@ function ServicesPanel() {
   const [allReviews, setAllReviews] = useState([]);
   const [reviewdata, setReviewdata] = useState([]);
 
-  // Data fetching useEffects (unchanged, they are correct)
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
@@ -918,7 +916,6 @@ function ServicesPanel() {
     fetchAllData();
   }, []);
 
-  // Filter reviews when a provider is selected
   useEffect(() => {
     if (selectedProvider && allReviews.length > 0) {
       const filtered = allReviews.filter(review =>
@@ -931,13 +928,11 @@ function ServicesPanel() {
     }
   }, [allReviews, selectedProvider]);
 
-  // ✅ OPTIMIZATION: Memoize expensive filtering operations.
   const filteredServiceCategories = useMemo(() =>
     allcategories.filter((category) =>
       category.title.toLowerCase().includes(categorySearchTerm.toLowerCase())
     ), [allcategories, categorySearchTerm]);
 
-  // ✅ OPTIMIZATION: Memoize the main provider filtering logic.
   const filteredAndSearchedProviders = useMemo(() => {
     return filteredProviders.filter((provider) => {
       const address = provider.address?.toLowerCase() || "";
@@ -961,7 +956,6 @@ function ServicesPanel() {
     });
   }, [filteredProviders, searchTerm, selectedState, selectedCity, selectedTehsil]);
 
-  // ✅ OPTIMIZATION: Memoize functions to stabilize their references.
   const fetchServiceProviders = useCallback(async (serviceKey) => {
     setLoading(true);
     setError(null);
@@ -1022,7 +1016,7 @@ function ServicesPanel() {
     } finally {
       setLoading(false);
     }
-  }, []); // This function doesn't depend on component state, so it's safe with an empty array.
+  }, []);
 
   const handleCategorySelect = useCallback(async (service) => {
     setSelectedService(service);
@@ -1068,10 +1062,8 @@ function ServicesPanel() {
     setSelectedTehsil("");
   }, []);
 
-  // JSX rendering part (no structural changes)
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="text-center mb-8">
         <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2" style={{ textShadow: "0 4px 24px rgba(60,50,100,0.65), 0 2px 4px rgba(0,0,0,0.3)" }}>
           {viewMode === "categories" ? "Browse Services" : `${selectedService?.title || "Service"} Providers`}
@@ -1148,7 +1140,6 @@ function ServicesPanel() {
                     </div>
                   </div>
                 </div>
-
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors mb-2"
@@ -1163,7 +1154,6 @@ function ServicesPanel() {
                     {showFilters ? <ChevronUp /> : <ChevronDown />}
                   </div>
                 </button>
-
                 {showFilters && (
                   <div className="border-t border-gray-200 pt-4">
                     <LocationSelector
@@ -1186,10 +1176,7 @@ function ServicesPanel() {
                           ))}
                         </select>
                         {selectedTehsil && (
-                          <button
-                            onClick={() => setSelectedTehsil("")}
-                            className="absolute right-8 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          >
+                          <button onClick={() => setSelectedTehsil("")} className="absolute right-8 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
                             <X className="w-4 h-4" />
                           </button>
                         )}
@@ -1197,9 +1184,7 @@ function ServicesPanel() {
                     </div>
                     {(selectedState || selectedCity || selectedTehsil) && (
                       <div className="mt-3 flex justify-end">
-                        <button onClick={clearAllFilters} className="px-4 py-2 text-sm text-[#695aa6] hover:text-[#5a4d8a] transition-colors">
-                          Clear All Filters
-                        </button>
+                        <button onClick={clearAllFilters} className="px-4 py-2 text-sm text-[#695aa6] hover:text-[#5a4d8a] transition-colors">Clear All Filters</button>
                       </div>
                     )}
                   </div>
@@ -1221,9 +1206,7 @@ function ServicesPanel() {
                   <div className="text-4xl mb-4">🔍</div>
                   <h3 className="text-xl font-bold text-gray-800 mb-2">No {selectedService?.title} Found</h3>
                   <p className="text-gray-600 text-sm mb-4">No providers found matching your search and filters.</p>
-                  <button onClick={clearAllFilters} className="px-4 sm:px-6 py-2 sm:py-3 bg-[#695aa6] text-white rounded-lg hover:bg-[#5a4d8a] transition-colors text-sm sm:text-base">
-                    Clear All Filters
-                  </button>
+                  <button onClick={clearAllFilters} className="px-4 sm:px-6 py-2 sm:py-3 bg-[#695aa6] text-white rounded-lg hover:bg-[#5a4d8a] transition-colors text-sm sm:text-base">Clear All Filters</button>
                 </div>
               ) : (
                 <div>
@@ -1232,9 +1215,39 @@ function ServicesPanel() {
                       Found {filteredAndSearchedProviders.length} {selectedService?.title?.toLowerCase()} provider{filteredAndSearchedProviders.length !== 1 ? "s" : ""}
                     </p>
                   </div>
+
+                  {/* ✅ BUG FIX: Restored the desktop table view code */}
                   <div className="hidden lg:block overflow-x-auto">
-                    {/* Desktop Table View */}
+                    <table className="w-full text-sm bg-white rounded-lg shadow-sm">
+                      <thead>
+                        <tr className="border-b-2 border-gray-200">
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">#</th>
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">Provider</th>
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">Location</th>
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredAndSearchedProviders.map((provider, index) => (
+                          <tr key={provider.provider_id || index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td className="py-4 px-4 text-gray-700">{index + 1}</td>
+                            <td className="py-4 px-4">
+                              <div className="font-medium text-gray-800">{provider.name}</div>
+                            </td>
+                            <td className="py-4 px-4 text-gray-700 max-w-xs">
+                              <div className="break-words">{provider.address}</div>
+                            </td>
+                            <td className="py-4 px-4">
+                              <button onClick={() => handleMoreDetails(provider)} className="px-4 py-2 bg-[#695aa6] text-white rounded text-sm hover:bg-[#5a4d8a] transition-colors">
+                                View Details
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
+
                   <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {filteredAndSearchedProviders.map((provider, index) => (
                       <EnhancedServiceCard
