@@ -64,7 +64,7 @@ export default function ActivityLog() {
   };
 
   return (
-    <ul className="space-y-3">
+    <ul className="space-y-3 sm:space-y-4">
       {activity.map((a, i) => {
         const { icon, color, bg } = getLogStyle(a.message);
         return (
@@ -73,13 +73,13 @@ export default function ActivityLog() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: i * 0.05 }}
-            className={`p-4 rounded-xl shadow-sm border ${bg} flex items-center justify-between`}
+            className={`p-3 sm:p-4 rounded-xl shadow-sm border ${bg} flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4`}
           >
-            <span className="flex items-center gap-3 text-sm">
+            <span className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
               <span className="p-2 rounded-full bg-white shadow">{icon}</span>
               <span className={`font-medium ${color}`}>{a.message}</span>
             </span>
-            <span className="text-xs text-gray-500 sm:text-right whitespace-nowrap">
+            <span className="text-[10px] sm:text-xs text-gray-500 sm:text-right whitespace-nowrap">
               {new Date(a.date).toLocaleString()}
             </span>
           </motion.li>

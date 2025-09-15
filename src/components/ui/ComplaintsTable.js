@@ -29,35 +29,56 @@ export default function ComplaintsTable() {
   if (!complaints.length) return <div className="text-center text-gray-400 py-4">No complaints found.</div>;
 
   return (
-    <div className="overflow-x-auto w-full max-w-full">
-      <table className="min-w-full table-auto border border-gray-300 rounded-xl overflow-hidden text-sm">
-        <thead className="bg-[#f9f7ff] sticky top-0 z-10 border-b border-gray-300">
-          <tr>
-            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Title</th>
-            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">User</th>
-            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Provider</th>
-            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {complaints.map((c) => (
-            <tr key={c._id} className="even:bg-gray-50 hover:bg-[#f3f0fa] border-b border-gray-200">
-              <td className="px-3 py-2 sm:px-4">{c.title}</td>
-              <td className="px-3 py-2 sm:px-4">{c.userName || c.user_id?.name || "N/A"}</td>
-              <td className="px-3 py-2 sm:px-4">{c.providerName || c.provider_id?.name || "N/A"}</td>
-              <td className="px-3 py-2 sm:px-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  c.status?.toLowerCase() === "resolved"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
-                }`}>
-                  {c.status}
-                </span>
-              </td>
+    <div className="w-full">
+      {/* Mobile */}
+      <div className="sm:hidden space-y-3">
+        {complaints.map(c => (
+          <div key={c._id} className="bg-white border rounded-lg p-4 text-xs shadow-sm">
+            <h3 className="font-semibold text-[#695aa6]">{c.title}</h3>
+            <p className="mt-1 text-gray-600"><span className="font-medium">User:</span> {c.userName || c.user_id?.name || "N/A"}</p>
+            <p className="text-gray-600"><span className="font-medium">Provider:</span> {c.providerName || c.provider_id?.name || "N/A"}</p>
+            <span className={`inline-block mt-2 px-2 py-0.5 rounded-full font-semibold ${
+              c.status?.toLowerCase() === "resolved"
+                ? "bg-green-100 text-green-700"
+                : "bg-yellow-100 text-yellow-700"
+            }`}>
+              {c.status}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop table */}
+      <div className="overflow-x-auto hidden sm:block w-full max-w-full">
+        <table className="min-w-full table-auto border border-gray-300 rounded-xl overflow-hidden text-sm">
+          <thead className="bg-[#f9f7ff] sticky top-0 z-10 border-b border-gray-300">
+            <tr>
+              <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Title</th>
+              <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">User</th>
+              <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Provider</th>
+              <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {complaints.map((c) => (
+              <tr key={c._id} className="even:bg-gray-50 hover:bg-[#f3f0fa] border-b border-gray-200">
+                <td className="px-3 py-2 sm:px-4">{c.title}</td>
+                <td className="px-3 py-2 sm:px-4">{c.userName || c.user_id?.name || "N/A"}</td>
+                <td className="px-3 py-2 sm:px-4">{c.providerName || c.provider_id?.name || "N/A"}</td>
+                <td className="px-3 py-2 sm:px-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    c.status?.toLowerCase() === "resolved"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}>
+                    {c.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

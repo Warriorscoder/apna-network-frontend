@@ -36,8 +36,9 @@ export default function TestimonialsTable() {
     return <div className="text-center text-gray-400 py-4">No testimonials found.</div>;
 
   return (
-    <div className="overflow-x-auto max-h-[400px] border rounded-xl border-[#695aa6]/10 shadow">
-      <table className="min-w-full bg-white text-sm text-left">
+    <>
+    <div className="overflow-x-auto max-h-[400px] border rounded-xl border-[#695aa6]/10 shadow hidden md:block">
+      <table className="min-w-[640px] bg-white text-sm text-left">
         <thead className="sticky top-0 bg-[#f3f0fa] z-10 border-b border-[#695aa6]/10">
           <tr>
             <th className="py-3 px-4 font-semibold text-[#695aa6]">User</th>
@@ -70,5 +71,30 @@ export default function TestimonialsTable() {
         </tbody>
       </table>
     </div>
+    {/* Mobile Cards */}
+    <div className="grid gap-3 md:hidden">
+      {testimonials.map(t => (
+        <div key={t._id} className="bg-white border border-[#695aa6]/10 rounded-xl p-4 shadow-sm space-y-2">
+          <div className="flex justify-between items-start">
+            <span className="font-semibold text-[#695aa6] text-sm">
+              {t.user || t.name || 'Anonymous'}
+            </span>
+            <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${
+              t.status === "approved"
+                ? "bg-green-100 text-green-700"
+                : t.status === "rejected"
+                ? "bg-red-100 text-red-700"
+                : "bg-yellow-100 text-yellow-700"
+            }`}>
+              {t.status?.charAt(0).toUpperCase() + t.status?.slice(1) || "Pending"}
+            </span>
+          </div>
+          <p className="text-xs text-gray-600 leading-relaxed">
+            {t.message || t.text || '-'}
+          </p>
+        </div>
+      ))}
+    </div>
+    </>
   );
 }

@@ -1,58 +1,3 @@
-// 'use client';
-
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
-
-// export default function CategoriesTable() {
-//   const [categories, setCategories] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-
-//   useEffect(() => {
-//     const fetchCategories = async () => {
-//       try {
-//         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/categories`);
-//         console.log("categories data", response.data)
-//         setCategories(response.data);
-//       } catch (err) {
-//         console.error("Failed to fetch categories:", err);
-//         setError("Unable to load categories.");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchCategories();
-//   }, []);
-
-//   if (loading) return <div className="text-gray-500 text-center py-4">Loading categories...</div>;
-//   if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
-//   if (!categories.length) return <div className="text-gray-400 text-center py-4">No categories found.</div>;
-
-//   return (
-//     <div className="overflow-x-auto">
-//       <table className="min-w-full table-auto border border-gray-300 rounded-xl overflow-hidden text-sm">
-//         <thead className="bg-[#f9f7ff] sticky top-0 z-10 border-b border-gray-300">
-//           <tr>
-//             <th className="px-4 py-3 text-left font-semibold text-[#695aa6]">Name</th>
-//             <th className="px-4 py-3 text-left font-semibold text-[#695aa6]">Description</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {categories.map((c) => (
-//             <tr
-//               key={c._id}
-//               className="even:bg-gray-50 hover:bg-[#f3f0fa] border-b border-gray-200"
-//             >
-//               <td className="px-4 py-2">{c.name}</td>
-//               <td className="px-4 py-2">{c.description}</td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   );
-// }
-
 'use client';
 
 import React, { useEffect, useState, useMemo } from "react";
@@ -212,68 +157,105 @@ export default function CategoriesTable() {
     return <div className="text-gray-400 text-center py-4">No categories found.</div>;
 
   return (
-    <div className="overflow-x-auto w-full max-w-full">
-      <table className="min-w-full table-auto border border-gray-300 rounded-xl overflow-hidden text-sm">
-        <thead className="bg-[#f9f7ff] sticky top-0 z-10 border-b border-gray-300">
-          <tr>
-            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Title</th>
-            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Subtitle</th>
-            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Image</th>
-            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Key</th>
-            <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {categories.map(cat => (
-            <tr
-              key={cat._id}
-              className="even:bg-gray-50 hover:bg-[#f3f0fa] border-b border-gray-200"
-            >
-              <td className="px-3 py-2 sm:px-4">{cat.title}</td>
-              <td className="px-3 py-2 sm:px-4">{cat.subtitle}</td>
-              <td className="py-2 px-4">
-                <div className="flex items-center gap-3">
-                  <CategoryImage cat={cat} />
-                  <span className="font-medium text-gray-800 truncate max-w-[160px]">
-                    {cat.title || cat.name || "Untitled"}
-                  </span>
-                  {(cat.isProtected || cat.source === "default" || cat.source === "default-backend") && (
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-[#695aa6]/10 text-[#695aa6] font-semibold">
-                      Default
-                    </span>
-                  )}
-                </div>
-              </td>
-              <td className="px-3 py-2 sm:px-4 text-gray-500 text-xs">{cat.key}</td>
-              <td className="px-3 py-2 sm:px-4">
-                <button
-                  onClick={() => openConfirm(cat)}
-                  disabled={
-                    deleting ||
-                    cat.isProtected ||
-                    cat.source === "default" ||
-                    cat.source === "default-backend"
-                  }
-                  className={`px-3 py-1 rounded text-xs sm:text-sm transition ${
-                    (cat.isProtected || cat.source === "default" || cat.source === "default-backend")
-                      ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                      : "bg-red-500 text-white hover:bg-red-600"
-                  }`}
-                  title={
-                    (cat.isProtected || cat.source === "default" || cat.source === "default-backend")
-                      ? "Default category cannot be removed"
-                      : "Remove category"
-                  }
-                >
-                  {(cat.isProtected || cat.source === "default" || cat.source === "default-backend")
-                    ? "Locked"
-                    : "Remove"}
-                </button>
-              </td>
+    <div className="w-full">
+      {/* Mobile */}
+      <div className="sm:hidden space-y-3">
+        {categories.map(cat => (
+          <div key={cat._id} className="bg-white border rounded-lg p-4 text-xs shadow-sm">
+            <div className="flex items-center gap-3">
+              <CategoryImage cat={cat} />
+              <div className="flex-1">
+                <h3 className="font-semibold text-[#695aa6]">{cat.title}</h3>
+                <p className="text-gray-500 text-[11px]">{cat.subtitle}</p>
+              </div>
+              {(cat.isProtected || cat.source?.startsWith("default")) && (
+                <span className="text-[10px] px-2 py-0.5 rounded bg-[#695aa6]/10 text-[#695aa6] font-semibold">
+                  Default
+                </span>
+              )}
+            </div>
+            <div className="mt-2 flex justify-between items-center">
+              <span className="text-gray-500 text-[11px]">{cat.key}</span>
+              <button
+                onClick={() => openConfirm(cat)}
+                disabled={cat.isProtected || cat.source?.startsWith("default")}
+                className={`text-[11px] px-2 py-1 rounded ${
+                  cat.isProtected || cat.source?.startsWith("default")
+                    ? "bg-gray-300 text-gray-600"
+                    : "bg-red-500 text-white hover:bg-red-600"
+                }`}
+              >
+                {cat.isProtected || cat.source?.startsWith("default") ? "Locked" : "Remove"}
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop table */}
+      <div className="overflow-x-auto hidden sm:block w-full max-w-full">
+        <table className="min-w-full table-auto border border-gray-300 rounded-xl overflow-hidden text-sm">
+          <thead className="bg-[#f9f7ff] sticky top-0 z-10 border-b border-gray-300">
+            <tr>
+              <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Title</th>
+              <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Subtitle</th>
+              <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Image</th>
+              <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Key</th>
+              <th className="px-3 py-2 sm:px-4 sm:py-3 text-left font-semibold text-[#695aa6]">Action</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {categories.map(cat => (
+              <tr
+                key={cat._id}
+                className="even:bg-gray-50 hover:bg-[#f3f0fa] border-b border-gray-200"
+              >
+                <td className="px-3 py-2 sm:px-4">{cat.title}</td>
+                <td className="px-3 py-2 sm:px-4">{cat.subtitle}</td>
+                <td className="py-2 px-4">
+                  <div className="flex items-center gap-3">
+                    <CategoryImage cat={cat} />
+                    <span className="font-medium text-gray-800 truncate max-w-[160px]">
+                      {cat.title || cat.name || "Untitled"}
+                    </span>
+                    {(cat.isProtected || cat.source === "default" || cat.source === "default-backend") && (
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-[#695aa6]/10 text-[#695aa6] font-semibold">
+                        Default
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-3 py-2 sm:px-4 text-gray-500 text-xs">{cat.key}</td>
+                <td className="px-3 py-2 sm:px-4">
+                  <button
+                    onClick={() => openConfirm(cat)}
+                    disabled={
+                      deleting ||
+                      cat.isProtected ||
+                      cat.source === "default" ||
+                      cat.source === "default-backend"
+                    }
+                    className={`px-3 py-1 rounded text-xs sm:text-sm transition ${
+                      (cat.isProtected || cat.source === "default" || cat.source === "default-backend")
+                        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                        : "bg-red-500 text-white hover:bg-red-600"
+                    }`}
+                    title={
+                      (cat.isProtected || cat.source === "default" || cat.source === "default-backend")
+                        ? "Default category cannot be removed"
+                        : "Remove category"
+                    }
+                  >
+                    {(cat.isProtected || cat.source === "default" || cat.source === "default-backend")
+                      ? "Locked"
+                      : "Remove"}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {confirmOpen && selectedCategory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">

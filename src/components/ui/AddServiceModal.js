@@ -74,8 +74,8 @@ export default function AddCategoryModal({ open, onClose, onAdd }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/10 px-4 sm:px-6">
-      <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md mx-auto relative animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/30 px-3 sm:px-6">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl p-5 sm:p-8 w-full max-w-md mx-auto relative animate-fadeIn max-h-[92vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-[#695aa6] focus:outline-none text-2xl"
@@ -101,53 +101,55 @@ export default function AddCategoryModal({ open, onClose, onAdd }) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Key */}
-            <div className="relative">
-              <input
-                ref={keyRef}
-                name="key"
-                placeholder="Unique Key (e.g. plumbing)"
-                value={formData.key}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
-                required
-                maxLength={40}
-              />
-            </div>
+            <div className="grid gap-4">
+              {/* Key */}
+              <div className="relative">
+                <input
+                  ref={keyRef}
+                  name="key"
+                  placeholder="Unique Key (e.g. plumbing)"
+                  value={formData.key}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
+                  required
+                  maxLength={40}
+                />
+              </div>
 
-            {/* Title */}
-            <div className="relative">
-              <input
-                name="title"
-                placeholder="Category Title (e.g. Plumbing)"
-                value={formData.title}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
-                required
-                maxLength={40}
-              />
-            </div>
+              {/* Title */}
+              <div className="relative">
+                <input
+                  name="title"
+                  placeholder="Category Title (e.g. Plumbing)"
+                  value={formData.title}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
+                  required
+                  maxLength={40}
+                />
+              </div>
 
-            {/* Subtitle */}
-            <div className="relative">
-              <input
-                name="subtitle"
-                placeholder="Subtitle (optional)"
-                value={formData.subtitle}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
-              />
-            </div>
+              {/* Subtitle */}
+              <div className="relative">
+                <input
+                  name="subtitle"
+                  placeholder="Subtitle (optional)"
+                  value={formData.subtitle}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
+                />
+              </div>
 
-            {/* Image */}
-            <div className="relative">
-              <input
-                name="image"
-                placeholder="Image URL (optional)"
-                value={formData.image}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
-              />
+              {/* Image */}
+              <div className="relative">
+                <input
+                  name="image"
+                  placeholder="Image URL (optional)"
+                  value={formData.image}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border-2 border-[#695aa6]/30 rounded-lg outline-none focus:border-[#695aa6] transition-all shadow-sm focus:shadow-lg text-lg"
+                />
+              </div>
             </div>
 
             {error && <div className="text-red-500 text-sm">{error}</div>}
@@ -188,6 +190,13 @@ export default function AddCategoryModal({ open, onClose, onAdd }) {
           50% { transform: scale(1.05); }
           70% { transform: scale(0.95); }
           100% { transform: scale(1); opacity: 1; }
+        }
+        @media (max-width:480px){
+          .animate-fadeIn{animation: fadeInMobile .25s;}
+          @keyframes fadeInMobile{
+            from{opacity:0;transform:translateY(16px) scale(.97);}
+            to{opacity:1;transform:none;}
+          }
         }
       `}</style>
     </div>

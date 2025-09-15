@@ -107,8 +107,8 @@ export default function SuccessStoriesManager() {
       </div>
 
       {/* Table Section */}
-      <div className="overflow-x-auto border rounded-xl border-yellow-400/20 shadow max-h-[500px]">
-        <table className="min-w-full text-left bg-white text-sm">
+      <div className="overflow-x-auto border rounded-xl border-yellow-400/20 shadow max-h-[500px] hidden md:block">
+        <table className="min-w-[780px] text-left bg-white text-sm">
           <thead className="sticky top-0 bg-yellow-50 z-10 border-b text-yellow-600">
             <tr>
               <th className="py-2 px-3 font-semibold">Title</th>
@@ -197,6 +197,49 @@ export default function SuccessStoriesManager() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="grid gap-4 md:hidden">
+        {stories.length === 0 && (
+          <div className="text-gray-400 py-4 text-center bg-white rounded-xl border border-yellow-400/20">
+            No success stories found.
+          </div>
+        )}
+        {stories.map(s => (
+          <div key={s._id} className="bg-white rounded-xl border border-yellow-400/20 p-4 shadow-sm space-y-3">
+            <div className="flex justify-between items-start gap-3">
+              <div>
+                <h3 className="font-semibold text-sm text-yellow-700">{s.title}</h3>
+                <p className="text-xs text-gray-500 mt-0.5">User: {s.user} • Provider: {s.provider}</p>
+              </div>
+              <span className={`px-2 py-1 rounded text-[10px] font-bold ${
+                s.status === "approved" ? "bg-green-100 text-green-700" :
+                s.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                "bg-red-100 text-red-700"
+              }`}>{s.status}</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => handleEdit(s)} className="px-3 py-1 bg-blue-500 text-white rounded text-xs">Edit</button>
+              <button onClick={() => handleDelete(s._id)} className="px-3 py-1 bg-red-500 text-white rounded text-xs">Delete</button>
+              {s.status === "pending" && (
+                <>
+                  <button onClick={() => handleApprove(s._id)} className="px-3 py-1 bg-green-500 text-white rounded text-xs">Approve</button>
+                  <button onClick={() => handleReject(s._id)} className="px-3 py-1 bg-yellow-500 text-white rounded text-xs">Reject</button>
+                </>
+              )}
+              <button
+                onClick={() => handleFeature(s._id)}
+                disabled={s.featured}
+                className={`px-3 py-1 rounded text-xs font-semibold ${
+                  s.featured ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {s.featured ? "Featured" : "Feature"}
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Edit Modal */}

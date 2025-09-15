@@ -172,8 +172,9 @@ export default function ServiceProvidersTable() {
     );
 
   return (
-    <div className="w-full overflow-x-auto px-2 sm:px-4 space-y-4">
-      <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+    <div className="w-full space-y-4">
+      {/* Search / count */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between px-1 sm:px-0">
         <div className="flex-1 max-w-xs">
           <input
             type="text"
@@ -188,85 +189,135 @@ export default function ServiceProvidersTable() {
         </div>
       </div>
 
-      <table className="min-w-full table-auto border border-gray-300 rounded-xl text-xs sm:text-sm md:text-base bg-white">
-        <thead className="bg-[#f9f7ff] sticky top-0 z-10 border-b border-gray-300">
-          <tr>
-            <th className="py-3 px-4 text-left font-semibold text-[#695aa6]">Name</th>
-            <th className="py-3 px-4 text-left font-semibold text-[#695aa6]">Phone</th>
-            <th className="py-3 px-4 text-left font-semibold text-[#695aa6]">Village</th>
-            <th className="py-3 px-4 text-left font-semibold text-[#695aa6]">Services</th>
-            <th className="py-3 px-4 text-left font-semibold text-[#695aa6]">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredProviders.length ? (
-            filteredProviders.map((p) => {
-              const services = providerServicesMap[p._id] || [];
-              const firstTwo = services.slice(0, 2).map(s => s.title).join(", ");
-              const remaining = services.length - 2;
-              return (
-                <tr key={p._id} className="even:bg-gray-50 hover:bg-[#f3f0fa] border-b border-gray-200">
-                  <td className="py-2 px-4">{p.name}</td>
-                  <td className="py-2 px-4">{p.phone}</td>
-                  <td className="py-2 px-4">{p.village || "—"}</td>
-                  <td className="py-2 px-4">
-                    {servicesLoading ? (
-                      <span className="text-gray-400 text-xs">Loading...</span>
-                    ) : services.length === 0 ? (
-                      <span className="text-gray-400 text-xs">None</span>
-                    ) : (
-                      <div className="flex flex-col gap-1">
-                        <span className="text-xs">
-                          {firstTwo}
-                          {remaining > 0 && (
-                            <span className="text-gray-500">
-                              {" "}+{remaining} more
-                            </span>
-                          )}
-                        </span>
+      {/* Mobile cards */}
+      <div className="grid gap-3 sm:hidden">
+        {filteredProviders.length ? filteredProviders.map(p => {
+          const services = providerServicesMap[p._id] || [];
+            return (
+              <div key={p._id} className="bg-white border rounded-lg p-4 shadow-sm">
+                <div className="flex justify-between">
+                  <h3 className="font-semibold text-sm text-[#695aa6]">{p.name}</h3>
+                  <button
+                    className="text-[11px] text-[#695aa6] underline"
+                    onClick={() => openServicesModal(p)}
+                  >
+                    Services
+                  </button>
+                </div>
+                <div className="mt-2 text-xs text-gray-600 space-y-1">
+                  <p><span className="font-medium">Phone:</span> {p.phone}</p>
+                  <p><span className="font-medium">Village:</span> {p.village || "—"}</p>
+                  <p>
+                    <span className="font-medium">Services:</span>{" "}
+                    {services.length === 0 ? "None" : services.slice(0,3).map(s=>s.title).join(", ")}
+                    {services.length > 3 && ` +${services.length - 3} more`}
+                  </p>
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => { setSelectedProvider(p); setConfirmOpen(true); }}
+                    className="flex-1 bg-red-500 text-white rounded px-2 py-1 text-[11px] hover:bg-red-600"
+                  >
+                    Remove
+                  </button>
+                  <button
+                    onClick={() => openServicesModal(p)}
+                    className="flex-1 bg-[#695aa6] text-white rounded px-2 py-1 text-[11px] hover:bg-[#5a4d8a]"
+                  >
+                    View
+                  </button>
+                </div>
+              </div>
+            );
+        }) : (
+          <div className="text-center text-gray-400 text-sm py-4">
+            No providers match "{searchTerm}"
+          </div>
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="overflow-x-auto hidden sm:block">
+        <table className="min-w-full table-auto border border-gray-300 rounded-xl text-xs sm:text-sm md:text-base bg-white">
+          <thead className="bg-[#f9f7ff] sticky top-0 z-10 border-b border-gray-300">
+            <tr>
+              <th className="py-3 px-4 text-left font-semibold text-[#695aa6]">Name</th>
+              <th className="py-3 px-4 text-left font-semibold text-[#695aa6]">Phone</th>
+              <th className="py-3 px-4 text-left font-semibold text-[#695aa6]">Village</th>
+              <th className="py-3 px-4 text-left font-semibold text-[#695aa6]">Services</th>
+              <th className="py-3 px-4 text-left font-semibold text-[#695aa6]">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProviders.length ? (
+              filteredProviders.map((p) => {
+                const services = providerServicesMap[p._id] || [];
+                const firstTwo = services.slice(0, 2).map(s => s.title).join(", ");
+                const remaining = services.length - 2;
+                return (
+                  <tr key={p._id} className="even:bg-gray-50 hover:bg-[#f3f0fa] border-b border-gray-200">
+                    <td className="py-2 px-4">{p.name}</td>
+                    <td className="py-2 px-4">{p.phone}</td>
+                    <td className="py-2 px-4">{p.village || "—"}</td>
+                    <td className="py-2 px-4">
+                      {servicesLoading ? (
+                        <span className="text-gray-400 text-xs">Loading...</span>
+                      ) : services.length === 0 ? (
+                        <span className="text-gray-400 text-xs">None</span>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs">
+                            {firstTwo}
+                            {remaining > 0 && (
+                              <span className="text-gray-500">
+                                {" "}+{remaining} more
+                              </span>
+                            )}
+                          </span>
+                          <button
+                            onClick={() => openServicesModal(p)}
+                            className="text-[11px] text-[#695aa6] hover:underline self-start"
+                          >
+                            View all
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-2 px-4">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedProvider(p);
+                            setConfirmOpen(true);
+                          }}
+                          className="bg-red-500 text-white px-3 py-1 rounded text-xs sm:text-sm hover:bg-red-600 transition"
+                        >
+                          Remove
+                        </button>
                         <button
                           onClick={() => openServicesModal(p)}
-                          className="text-[11px] text-[#695aa6] hover:underline self-start"
+                          className="bg-[#695aa6] text-white px-3 py-1 rounded text-xs sm:text-sm hover:bg-[#5a4d8a] transition"
                         >
-                          View all
+                          Services
                         </button>
                       </div>
-                    )}
-                  </td>
-                  <td className="py-2 px-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedProvider(p);
-                          setConfirmOpen(true);
-                        }}
-                        className="bg-red-500 text-white px-3 py-1 rounded text-xs sm:text-sm hover:bg-red-600 transition"
-                      >
-                        Remove
-                      </button>
-                      <button
-                        onClick={() => openServicesModal(p)}
-                        className="bg-[#695aa6] text-white px-3 py-1 rounded text-xs sm:text-sm hover:bg-[#5a4d8a] transition"
-                      >
-                        Services
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })
-          ) : (
-            <tr>
-              <td
-                colSpan={5}
-                className="py-6 px-4 text-center text-gray-400"
-              >
-                No providers match "{searchTerm}"
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="py-6 px-4 text-center text-gray-400"
+                >
+                  No providers match "{searchTerm}"
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {confirmOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">

@@ -74,8 +74,9 @@ export default function NewsletterManager() {
         </button>
       </div>
 
-      <div className="w-full overflow-x-auto rounded-md shadow-sm border border-sky-100">
-        <table className="min-w-[600px] w-full bg-white">
+      {/* Desktop Table */}
+      <div className="w-full overflow-x-auto rounded-md shadow-sm border border-sky-100 hidden md:block">
+        <table className="min-w-[720px] w-full bg-white">
           <thead className="bg-sky-50 text-sky-600 text-sm border-b">
             <tr>
               <th className="py-2 px-3 text-left font-medium">Image</th>
@@ -145,6 +146,36 @@ export default function NewsletterManager() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="grid gap-4 md:hidden">
+        {newsletters.length === 0 && (
+          <div className="text-gray-400 text-center py-6 text-sm bg-white rounded-md border">
+            No newsletters found.
+          </div>
+        )}
+        {newsletters.map(n => (
+          <div key={n._id} className="bg-white rounded-xl border shadow-sm p-4 space-y-3">
+            <div className="flex gap-3">
+              <img src={n.image_url} alt={n.title} className="w-16 h-16 rounded object-cover flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-sky-700 text-sm">{n.title}</h3>
+                <p className="text-xs text-gray-500">{n.category}</p>
+              </div>
+            </div>
+            <div className="text-xs text-gray-500 flex flex-wrap gap-2">
+              <span>{new Date(n.date).toLocaleDateString()}</span>
+              <a href={n.site_url} target="_blank" className="text-sky-600 underline truncate max-w-[60%]">
+                {n.site_url}
+              </a>
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <button onClick={() => handleEdit(n)} className="px-3 py-1 rounded bg-blue-500 text-white text-xs">Edit</button>
+              <button onClick={() => handleDelete(n._id)} className="px-3 py-1 rounded bg-red-500 text-white text-xs">Delete</button>
+            </div>
+          </div>
+        ))}
       </div>
 
       <ContentModal
