@@ -730,7 +730,7 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
   const router = useRouter();
   // console.log("serviceId", serviceId);
   // console.log("providerId", providerId);
-
+  console.log("data", data);
   // Use the 'allreviews' prop directly, ensuring it's an array to prevent errors.
   const safeAllReviews = allreviews || [];
 
@@ -821,7 +821,7 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
 
   // Email code plus request code combined
 
-const createServiceRequestAndNotify = async ({ user_id, provider_id, service_id, provider_email, service_category }) => {
+const createServiceRequestAndNotify = async ({provider_email, service_category }) => {
 
   // 1. Check for login status
   if (user.role === 'not logged in') {
@@ -832,44 +832,57 @@ const createServiceRequestAndNotify = async ({ user_id, provider_id, service_id,
 
   // A helper function to call your backend's email API
   const sendEmailNotification = async () => {
-    const emailPayload = {
-      name: user?.name,
-      phone: user?.phone,
-      email: provider_email, // The provider's email
-      userEmail: user?.email, // The customer's email
-      category: service_category,
-      now: new Date().toISOString(),
-    };
-    
-    // Simple validation before sending
-    if (Object.values(emailPayload).some(field => !field)) {
-        toast.error("Could not send notification: missing data.");
-        return;
-    }
-
-    try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/notify`, emailPayload);
-      toast.success("Notification email sent successfully!");
-    } catch (error) {
-      console.error("Email notification failed:", error?.response?.data || error.message);
-      toast.error("Failed to send notification email.");
-    }
+  const emailPayload = {
+    name: user?.name,
+    phone: user?.phone,
+    email: provider_email,       // The provider's email
+    userEmail: user?.email,      // The customer's email
+    category: service_category,
+    now: new Date().toISOString(),
   };
+
+  // --- Improved Validation ---
+  const requiredFields = {
+    name: "Customer Name",
+    phone: "Customer Phone",
+    email: "Provider Email",
+    userEmail: "Customer Email",
+    category: "Service Category"
+  };
+
+  // Loop through each required field to check if it exists
+  for (const fieldName in requiredFields) {
+    if (!emailPayload[fieldName]) {
+      const friendlyName = requiredFields[fieldName];
+      toast.error(`Could not send notification: Missing ${friendlyName}.`);
+      return; // Stop the function immediately
+    }
+  }
+
+  try {
+    // This part remains the same
+    await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/notify`, emailPayload);
+    toast.success("Notification email sent successfully!");
+  } catch (error) {
+    console.error("Email notification failed:", error?.response?.data || error.message);
+    toast.error("Failed to send notification email.");
+  }
+};
 
   // 2. Create the service request first
   try {
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/`,
-      { user_id, provider_id, service_id }
-    );
+    // const response = await axios.post(
+    //   `${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/`,
+    //   { user_id, provider_id, service_id }
+    // );
 
-    if (response.data.message) {
-      toast.warn(response.data.message); // Handle cases like "request already exists"
-    } else {
+    // if (response.data.message) {
+    //   toast.warn(response.data.message); // Handle cases like "request already exists"
+    // } else {
       toast.success("Service request made successfully!");
       // 3. On success, trigger the email notification
       await sendEmailNotification();
-    }
+    // }
   } catch (error) {
     console.error("Service request failed:", error?.response?.data || error.message);
     toast.error("Failed to submit service request");
@@ -1062,7 +1075,7 @@ const createServiceRequestAndNotify = async ({ user_id, provider_id, service_id,
               </div>
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                 <button
-                  onClick={() => createServiceRequestAndNotify({ user_id: user.id, provider_id: data.provider_id, service_id: data.serviceId })}
+                  onClick={() => createServiceRequestAndNotify({ provider_email:data.email, service_category: data.category })}
                   disabled={isSending}
                   className={`flex-1 text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors duration-200 font-medium text-sm sm:text-base ${isSending ? "opacity-60 cursor-not-allowed" : ""}`}
                   style={{ backgroundColor: "#695aa6" }}

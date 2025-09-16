@@ -357,7 +357,7 @@ export const AuthProvider = ({ children }) => {
       return { success: false, message: "Invalid or corrupt token" };
     }
   };
-console.log("userdate" ,user);
+// console.log("userdate" ,user);
   const logout = () => {
     setUser(null);
     localStorage.removeItem("token");

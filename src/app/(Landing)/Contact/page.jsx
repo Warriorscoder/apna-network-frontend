@@ -6,13 +6,16 @@ import { Phone, Mail, Clock, Send, ArrowRight, CheckCircle, ChevronDown, Chevron
 import ConditionalNavbar from "@/components/ConditionalNavbar"
 import axios from "axios"
 import { toast } from "react-toastify"
+import { useAuth } from "@/app/context/Authcontext"
 
 const ContactPage = () => {
+  const {user} = useAuth() 
+  // console.log(user)
   const router = useRouter()
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
     subject: "",
     message: "",
     serviceType: "",
