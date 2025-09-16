@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useMemo } from "react"; // ✅ ADDED useMemo
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { services } from "@/data/services";
+import axios from "axios";
 import {
   ArrowLeft,
   Home,
@@ -17,60 +17,87 @@ import {
 } from "lucide-react";
 import Dialoguebox from "@/components/servicePage/Dialoguebox";
 import LocationSelector from "@/components/LocationSelector";
-import axios from "axios";
 import ConditionalNavbar from "./ConditionalNavbar";
 
 // ✅ Himachal Pradesh (HP) Tehsil data (City-wise). Fill / extend as needed.
 const HP_TEHSILS = {
   Kangra: [
-    "Kangra", "Nagrota Bagwan", "Rait", "Baijnath", "Dehra",
-    "Bhawarna", "Fatehpur", "Indora", "Lambagaon", "Nurpur",
-    "Panchrukhi", "Sulah", "Pragpur", "Nagrota Surian",
-    "Dharamshala", "Baroh", "Surani", "Palampur"
+    "Kangra",
+    "Nagrota Bagwan",
+    "Rait",
+    "Baijnath",
+    "Dehra",
+    "Bhawarna",
+    "Fatehpur",
+    "Indora",
+    "Lambagaon",
+    "Nurpur",
+    "Panchrukhi",
+    "Sulah",
+    "Pragpur",
+    "Nagrota Surian",
+    "Dharamshala",
+    "Baroh",
+    "Surani",
+    "Palampur",
   ],
   Shimla: [
-    "Mashobra", "Basantpur", "Theog", "Nankhari", "Rampur",
-    "Jubbal", "Kotkhai", "Chopal", "Narkanda", "Rohru",
-    "Chohara", "Totu", "Kupvi"
+    "Mashobra",
+    "Basantpur",
+    "Theog",
+    "Nankhari",
+    "Rampur",
+    "Jubbal",
+    "Kotkhai",
+    "Chopal",
+    "Narkanda",
+    "Rohru",
+    "Chohara",
+    "Totu",
+    "Kupvi",
   ],
   Mandi: [
-    "Mandi Sadar", "Balh", "Sunder Nagar", "Gopalpur",
-    "Dharampur", "Drang", "Chauntra", "Seraj",
-    "Gohar", "Karsog", "BaliChowki", "Nihri",
-    "Dhanotu", "Churag"
+    "Mandi Sadar",
+    "Balh",
+    "Sunder Nagar",
+    "Gopalpur",
+    "Dharampur",
+    "Drang",
+    "Chauntra",
+    "Seraj",
+    "Gohar",
+    "Karsog",
+    "BaliChowki",
+    "Nihri",
+    "Dhanotu",
+    "Churag",
   ],
   Chamba: [
-    "Chamba", "Mehla", "Bharmour", "Tissa", "Salooni",
-    "Bhattiyat", "Pangi"
+    "Chamba",
+    "Mehla",
+    "Bharmour",
+    "Tissa",
+    "Salooni",
+    "Bhattiyat",
+    "Pangi",
   ],
-  Kullu: [
-    "Kullu", "Naggar", "Banjar", "Anni", "Nirmand", "Bhuntar"
-  ],
-  Solan: [
-    "Dharmpur", "Kandaghat", "Nalagarh", "Solan", "Kunihar", "Patta"
-  ],
+  Kullu: ["Kullu", "Naggar", "Banjar", "Anni", "Nirmand", "Bhuntar"],
+  Solan: ["Dharmpur", "Kandaghat", "Nalagarh", "Solan", "Kunihar", "Patta"],
   Sirmaur: [
-    "Nahan", "Paonta Sahib", "Rajgarh", "Sangrah",
-    "Shillai", "Pachhad", "Tilordhar"
+    "Nahan",
+    "Paonta Sahib",
+    "Rajgarh",
+    "Sangrah",
+    "Shillai",
+    "Pachhad",
+    "Tilordhar",
   ],
-  Una: [
-    "Una", "Amb", "Bangana", "Haroli", "Gagret"
-  ],
-  Hamirpur: [
-    "Hamirpur", "Nadaun", "Bijhari", "Bhoranj",
-    "Sujanpur", "Bamson"
-  ],
-  Bilaspur: [
-    "Bilaspur", "Ghumarwin", "Jhandutta", "Shri Naina Devi"
-  ],
-  Kinnaur: [
-    "Nichar", "Kalpa", "Pooh"
-  ],
-  LahaulSpiti: [
-    "Lahaul", "Spiti"
-  ]
+  Una: ["Una", "Amb", "Bangana", "Haroli", "Gagret"],
+  Hamirpur: ["Hamirpur", "Nadaun", "Bijhari", "Bhoranj", "Sujanpur", "Bamson"],
+  Bilaspur: ["Bilaspur", "Ghumarwin", "Jhandutta", "Shri Naina Devi"],
+  Kinnaur: ["Nichar", "Kalpa", "Pooh"],
+  LahaulSpiti: ["Lahaul", "Spiti"],
 };
-
 
 // ServiceCard component - Mobile Optimized
 const ServiceCard = ({ service, onClick }) => {
@@ -144,16 +171,22 @@ const LoginModal = ({ onClose }) => (
   </div>
 );
 
-// Main Unified Component
+// ================== Main Unified Component (Dynamic Categories) ==================
 const AllServicesComponent = ({
   openInNewPage = false,
   showBackButton = false,
   showNavbar = false,
-  initialServiceKey, // ✅ NEW: open list directly for a given service
-  backBehavior = "inline", // "inline" | "history"
+  initialServiceKey,
+  backBehavior = "inline",
 }) => {
   const router = useRouter();
-  const [providers, setProviders] = useState([]);
+
+  // Dynamic categories (was static `services`)
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState(null);
+
+  // (providers state not directly used – removed unused `providers`)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showLogin, setShowLogin] = useState(false);
@@ -184,14 +217,55 @@ const AllServicesComponent = ({
 
   const [categorySearchTerm, setCategorySearchTerm] = useState(""); // ✅ ADDED: Category search state
 
-  // Handle service click - UNIFIED LOGIC
+  // ================== Fetch Categories (Dynamic) ==================
+  const fetchCategories = useCallback(async () => {
+    try {
+      setCategoriesLoading(true);
+      setCategoriesError(null);
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/categories`
+      );
+      if (res.data?.success === false)
+        throw new Error(res.data?.message || "Failed to load");
+      const raw = res.data?.data || [];
+      // Normalize shape to match previous static `services` usage
+      const normalized = raw.map((c) => ({
+        ...c,
+        serviceKey: c.key || c.serviceKey, // ensure serviceKey present
+        title: c.title || c.name || "Untitled",
+        subtitle: c.subtitle || c.description || "",
+        description: c.description || c.subtitle || "",
+        image: c.image,
+      }));
+      setCategories(normalized);
+    } catch (e) {
+      setCategoriesError("Failed to load service categories.");
+    } finally {
+      setCategoriesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  // Auto-refresh on window focus & every 60s (light-weight)
+  useEffect(() => {
+    const onFocus = () => fetchCategories();
+    window.addEventListener("focus", onFocus);
+    const interval = setInterval(fetchCategories, 60000);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      clearInterval(interval);
+    };
+  }, [fetchCategories]);
+
+  // ================== Handle Category (Service) Click ==================
   const handleServiceClick = (service) => {
     if (openInNewPage) {
-      // Featured Services: open separate page
       router.push(`/service/${service.serviceKey}`);
       return;
     }
-    // Navbar service page: open inline provider list
     setSelectedService(service);
     setShowProviderList(true);
     fetchServiceProviders(service.serviceKey);
@@ -430,22 +504,27 @@ const AllServicesComponent = ({
     setSelectedTehsil("");
   };
 
-  // Filter services based on search term
-  const filteredServices = services.filter(
-    (service) =>
-      service.title.toLowerCase().includes(categorySearchTerm.toLowerCase()) ||
-      service.subtitle?.toLowerCase().includes(categorySearchTerm.toLowerCase())
-  );
+  // Filter categories now (replaces static services)
+  const filteredServices = useMemo(() => {
+    if (!categories.length) return [];
+    const term = categorySearchTerm.toLowerCase();
+    return categories.filter(
+      (s) =>
+        s.title.toLowerCase().includes(term) ||
+        (s.subtitle && s.subtitle.toLowerCase().includes(term)) ||
+        (s.description && s.description.toLowerCase().includes(term))
+    );
+  }, [categories, categorySearchTerm]);
 
   // ✅ Auto-open provider list on pages that pass initialServiceKey (service category page)
   useEffect(() => {
-    if (!initialServiceKey) return;
-    const svc = services.find((s) => s.serviceKey === initialServiceKey);
+    if (!initialServiceKey || categoriesLoading) return;
+    const svc = categories.find((c) => c.serviceKey === initialServiceKey);
     if (!svc) return;
     setSelectedService(svc);
     setShowProviderList(true);
     fetchServiceProviders(svc.serviceKey);
-  }, [initialServiceKey]);
+  }, [initialServiceKey, categories, categoriesLoading]);
 
   // ✅ Himachal Pradesh-specific tehsil logic
   useEffect(() => {
@@ -942,9 +1021,25 @@ const AllServicesComponent = ({
             </div>
           </div>
 
-          {/* Mobile-Optimized Services Grid with Search Results */}
+          {/* Services Grid (Dynamic) */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-            {filteredServices.length > 0 ? (
+            {categoriesLoading ? (
+              <div className="col-span-full py-12 text-center text-gray-500">
+                Loading services...
+              </div>
+            ) : categoriesError ? (
+              <div className="col-span-full py-12 text-center text-red-600">
+                {categoriesError}
+                <div>
+                  <button
+                    onClick={fetchCategories}
+                    className="mt-4 px-4 py-2 bg-[#695aa6] text-white rounded hover:bg-[#5a4d8a] text-sm"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
+            ) : filteredServices.length > 0 ? (
               filteredServices.map((service, index) => (
                 <ServiceCard
                   key={service.serviceKey || index}

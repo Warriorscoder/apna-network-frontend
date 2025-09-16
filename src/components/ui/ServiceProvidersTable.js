@@ -43,14 +43,14 @@ export default function ServiceProvidersTable() {
         const map = {};
         all.forEach(s => {
           const pid = s.provider_id?._id || s.provider_id || s.provider || s.providerId;
-            if (!pid) return;
-            if (!map[pid]) map[pid] = [];
-            map[pid].push({
-              _id: s._id,
-              title: s.title,
-              category: s.category,
-              status: s.status
-            });
+          if (!pid) return;
+          if (!map[pid]) map[pid] = [];
+          map[pid].push({
+            _id: s._id,
+            title: s.title,
+            category: s.category,
+            status: s.status
+          });
         });
         setProviderServicesMap(map);
       } else {
@@ -107,7 +107,7 @@ export default function ServiceProvidersTable() {
       if (res.ok && data.success !== false) {
         setProviderServicesMap(prev => {
           const copy = { ...prev };
-            copy[providerId] = (copy[providerId] || []).filter(s => s._id !== serviceId);
+          copy[providerId] = (copy[providerId] || []).filter(s => s._id !== serviceId);
           return copy;
         });
         showToast("Service removed", "success");
@@ -173,7 +173,6 @@ export default function ServiceProvidersTable() {
 
   return (
     <div className="w-full space-y-4">
-      {/* Search / count */}
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between px-1 sm:px-0">
         <div className="flex-1 max-w-xs">
           <input
@@ -189,46 +188,45 @@ export default function ServiceProvidersTable() {
         </div>
       </div>
 
-      {/* Mobile cards */}
       <div className="grid gap-3 sm:hidden">
         {filteredProviders.length ? filteredProviders.map(p => {
           const services = providerServicesMap[p._id] || [];
-            return (
-              <div key={p._id} className="bg-white border rounded-lg p-4 shadow-sm">
-                <div className="flex justify-between">
-                  <h3 className="font-semibold text-sm text-[#695aa6]">{p.name}</h3>
-                  <button
-                    className="text-[11px] text-[#695aa6] underline"
-                    onClick={() => openServicesModal(p)}
-                  >
-                    Services
-                  </button>
-                </div>
-                <div className="mt-2 text-xs text-gray-600 space-y-1">
-                  <p><span className="font-medium">Phone:</span> {p.phone}</p>
-                  <p><span className="font-medium">Village:</span> {p.village || "—"}</p>
-                  <p>
-                    <span className="font-medium">Services:</span>{" "}
-                    {services.length === 0 ? "None" : services.slice(0,3).map(s=>s.title).join(", ")}
-                    {services.length > 3 && ` +${services.length - 3} more`}
-                  </p>
-                </div>
-                <div className="flex gap-2 mt-3">
-                  <button
-                    onClick={() => { setSelectedProvider(p); setConfirmOpen(true); }}
-                    className="flex-1 bg-red-500 text-white rounded px-2 py-1 text-[11px] hover:bg-red-600"
-                  >
-                    Remove
-                  </button>
-                  <button
-                    onClick={() => openServicesModal(p)}
-                    className="flex-1 bg-[#695aa6] text-white rounded px-2 py-1 text-[11px] hover:bg-[#5a4d8a]"
-                  >
-                    View
-                  </button>
-                </div>
+          return (
+            <div key={p._id} className="bg-white border rounded-lg p-4 shadow-sm">
+              <div className="flex justify-between">
+                <h3 className="font-semibold text-sm text-[#695aa6]">{p.name}</h3>
+                <button
+                  className="text-[11px] text-[#695aa6] underline"
+                  onClick={() => openServicesModal(p)}
+                >
+                  Services
+                </button>
               </div>
-            );
+              <div className="mt-2 text-xs text-gray-600 space-y-1">
+                <p><span className="font-medium">Phone:</span> {p.phone}</p>
+                <p><span className="font-medium">Village:</span> {p.village || "—"}</p>
+                <p>
+                  <span className="font-medium">Services:</span>{" "}
+                  {services.length === 0 ? "None" : services.slice(0,3).map(s=>s.title).join(", ")}
+                  {services.length > 3 && ` +${services.length - 3} more`}
+                </p>
+              </div>
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={() => { setSelectedProvider(p); setConfirmOpen(true); }}
+                  className="flex-1 bg-red-500 text-white rounded px-2 py-1 text-[11px] hover:bg-red-600"
+                >
+                  Remove
+                </button>
+                <button
+                  onClick={() => openServicesModal(p)}
+                  className="flex-1 bg-[#695aa6] text-white rounded px-2 py-1 text-[11px] hover:bg-[#5a4d8a]"
+                >
+                  View
+                </button>
+              </div>
+            </div>
+          );
         }) : (
           <div className="text-center text-gray-400 text-sm py-4">
             {`No providers match ${searchTerm}`}
@@ -236,7 +234,6 @@ export default function ServiceProvidersTable() {
         )}
       </div>
 
-      {/* Desktop table */}
       <div className="overflow-x-auto hidden sm:block">
         <table className="min-w-full table-auto border border-gray-300 rounded-xl text-xs sm:text-sm md:text-base bg-white">
           <thead className="bg-[#f9f7ff] sticky top-0 z-10 border-b border-gray-300">
@@ -320,25 +317,38 @@ export default function ServiceProvidersTable() {
       </div>
 
       {confirmOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50  z-50">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-80">
-            <h2 className="text-lg font-semibold text-gray-800 mb-3">Remove Provider</h2>
-            <p className="text-gray-600 mb-4">
-              Are you sure you want to remove <b>{selectedProvider?.name}</b>?
-            </p>
-            <div className="flex justify-end gap-3">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/45 backdrop-blur-sm z-50 p-4">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm relative">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold">
+                !
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Remove Provider
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  This will permanently remove
+                  <span className="font-medium text-[#695aa6]">
+                    {" "}{selectedProvider?.name}
+                  </span>{" "}
+                  and associated services listing links. Continue?
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-4">
               <button
                 onClick={() => {
                   setConfirmOpen(false);
                   setSelectedProvider(null);
                 }}
-                className="px-4 py-2 rounded-md border text-gray-600 hover:bg-gray-100"
+                className="px-4 py-2 rounded-md border text-sm hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRemove}
-                className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600"
+                className="px-4 py-2 rounded-md bg-red-600 text-white text-sm hover:bg-red-700"
               >
                 Remove
               </button>
@@ -351,67 +361,47 @@ export default function ServiceProvidersTable() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
             <div className="px-5 py-4 border-b flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Services by {servicesModalProvider.name}
-              </h3>
-              <button
-                onClick={closeServicesModal}
-                className="text-gray-500 text-sm hover:text-gray-700"
-              >
-                ✕
-              </button>
+              <h3 className="text-lg font-semibold text-gray-800">Services by {servicesModalProvider.name}</h3>
+              <button onClick={closeServicesModal} className="text-gray-500 text-sm hover:text-gray-700">✕</button>
             </div>
             <div className="p-5 overflow-y-auto">
               {servicesLoading ? (
                 <p className="text-sm text-gray-500">Loading services...</p>
               ) : (
-                <>
-                  {(providerServicesMap[servicesModalProvider._id] || []).length === 0 ? (
-                    <p className="text-sm text-gray-500">
-                      No services listed for this provider.
-                    </p>
-                  ) : (
-                    <ul className="space-y-3">
-                      {providerServicesMap[servicesModalProvider._id].map(s => (
-                        <li
-                          key={s._id}
-                          className="border rounded-lg px-3 py-2 flex items-center justify-between bg-gray-50"
-                        >
-                          <div className="pr-3 flex-1">
-                            <p className="text-sm font-medium text-gray-800">{s.title}</p>
-                            <p className="text-[11px] text-gray-500">
-                              {s.category || "—"}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleDeleteService(s._id, servicesModalProvider._id)}
-                              disabled={deletingServiceId === s._id}
-                              className="text-[10px] px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
-                              title="Remove service"
-                            >
-                              {deletingServiceId === s._id ? "..." : "Delete"}
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </>
+                (providerServicesMap[servicesModalProvider._id] || []).length === 0 ? (
+                  <p className="text-sm text-gray-500">No services listed for this provider.</p>
+                ) : (
+                  <ul className="space-y-3">
+                    {providerServicesMap[servicesModalProvider._id].map(s => (
+                      <li key={s._id} className="border rounded-lg px-3 py-2 flex items-center justify-between bg-gray-50">
+                        <div className="pr-3 flex-1">
+                          <p className="text-sm font-medium text-gray-800">{s.title}</p>
+                          <p className="text-[11px] text-gray-500">{s.category || "—"}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleDeleteService(s._id, servicesModalProvider._id)}
+                            disabled={deletingServiceId === s._id}
+                            className="text-[10px] px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                            title="Remove service"
+                          >
+                            {deletingServiceId === s._id ? "..." : "Delete"}
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )
               )}
             </div>
             <div className="px-5 py-3 border-t flex justify-end">
-              <button
-                onClick={closeServicesModal}
-                className="px-4 py-2 text-sm rounded-md border hover:bg-gray-50"
-              >
+              <button onClick={closeServicesModal} className="px-4 py-2 text-sm rounded-md border hover:bg-gray-50">
                 Close
               </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

@@ -7,6 +7,8 @@ export default function ServiceTakersTable() {
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [confirmUser, setConfirmUser] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchUsers = () => {
     setLoading(true);
@@ -40,6 +42,34 @@ export default function ServiceTakersTable() {
     } catch (err) {
       console.error("Error deleting user:", err);
       showToast("Something went wrong", "error");
+    }
+  };
+
+  const requestDeleteUser = (user) => {
+    setConfirmUser(user);
+  };
+
+  const performDeleteUser = async () => {
+    if (!confirmUser) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/delete/${confirmUser._id}`,
+        { method: "DELETE" }
+      );
+      const data = await res.json();
+      if (data.success) {
+        setUsers(prev => prev.filter(u => u._id !== confirmUser._id));
+        showToast("User removed successfully", "success");
+      } else {
+        showToast(data.message || "Failed to remove user.", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Something went wrong", "error");
+    } finally {
+      setDeleting(false);
+      setConfirmUser(null);
     }
   };
 
@@ -80,7 +110,7 @@ export default function ServiceTakersTable() {
             <div className="flex justify-between items-start">
               <h3 className="font-semibold text-[#695aa6] text-sm">{u.name || "N/A"}</h3>
               <button
-                onClick={() => handleRemove(u._id)}
+                onClick={() => requestDeleteUser(u)}
                 className="text-[11px] bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
               >
                 Remove
@@ -117,7 +147,7 @@ export default function ServiceTakersTable() {
                   <td className="py-2 px-4">{u.phone || "N/A"}</td>
                   <td className="py-2 px-4">
                     <button
-                      onClick={() => handleRemove(u._id)}
+                      onClick={() => requestDeleteUser(u)}
                       className="bg-red-500 text-white px-3 py-1 rounded text-xs sm:text-sm hover:bg-red-600 transition"
                     >
                       Remove
@@ -135,6 +165,38 @@ export default function ServiceTakersTable() {
           </tbody>
         </table>
       </div>
+
+      {confirmUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-sm p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
+              <span className="w-6 h-6 flex items-center justify-center rounded-full bg-red-100 text-red-600 text-sm font-bold">!</span>
+              Remove User
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Are you sure you want to permanently remove
+              <span className="font-medium text-[#695aa6]"> {confirmUser.name || "this user"}</span>?
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setConfirmUser(null)}
+                disabled={deleting}
+                className="px-4 py-2 text-sm rounded border hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={performDeleteUser}
+                disabled={deleting}
+                className="px-4 py-2 text-sm rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+              >
+                {deleting ? "Removing..." : "Remove"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
