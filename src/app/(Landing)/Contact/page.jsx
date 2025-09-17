@@ -316,11 +316,11 @@ const ContactPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-sm sm:text-base">+91 12345 67890</span>
+                  <span className="text-sm sm:text-base">+91 86290-58403</span>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Mail className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-sm sm:text-base">info@apnanetwork.com</span>
+                  <span className="text-sm sm:text-base">sfhelpdesk25@gmail.com</span>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Clock className="w-4 h-4 sm:w-5 sm:h-5" />

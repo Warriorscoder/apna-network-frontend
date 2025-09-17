@@ -5,7 +5,6 @@ import { useState, useRef, useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { User, LogOut, ChevronDown, Menu, X } from "lucide-react"
 import { useAuth } from "@/app/context/Authcontext"
-import { userAgentFromString } from "next/server"
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -24,18 +23,16 @@ const HamburgerIcon = ({ open }) => (
   </div>
 )
 
-export default function Navbar() {
+export default function Navbar({ isAdmin = false }) {
   const pathname = usePathname()
   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
-  const profileRef = useRef(null) 
+  const profileRef = useRef(null)
 
   const { isAuthenticated, logout, loading, getCurrentUser, getUserRole, authInitialized } = useAuth()
-
-   const isLoggedIn = authInitialized && isAuthenticated()
-
+  const isLoggedIn = authInitialized && isAuthenticated()
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10)
@@ -55,12 +52,10 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [profileOpen])
 
-  // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false)
   }, [pathname])
 
-   
   const handleNavigate = (href) => {
     setIsMobileMenuOpen(false)
     setProfileOpen(false)
@@ -73,13 +68,13 @@ export default function Navbar() {
     logout()
     setProfileOpen(false)
     setIsMobileMenuOpen(false)
-    router.push("/")  
+    router.push("/")
   }
 
   const getDashboardLink = () => {
     if (!authInitialized) return "/dashboard/user-dashboard"
     const role = getUserRole()
- 
+
     switch (role) {
       case "user":
         return "/dashboard/user-dashboard"
@@ -91,11 +86,9 @@ export default function Navbar() {
         return "/dashboard/user-dashboard"
     }
   }
-  
 
   const getUserDisplayName = () => {
     const current = getCurrentUser()
-    // console.log("current" , current)
     if (current?.name) return current.name.split(" ")[0]
     if (current?.fullName) return current.fullName
     if (current?.firstName) {
@@ -112,8 +105,6 @@ export default function Navbar() {
     }
     return "User"
   }
-
-  
 
   const getRoleBadge = () => {
     const role = getUserRole()
@@ -148,7 +139,7 @@ export default function Navbar() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-white backdrop-blur-lg shadow border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20">
-            <div 
+            <div
               className="text-2xl sm:text-3xl md:text-4xl font-bold"
               style={{
                 background: "linear-gradient(to right, #695aa6, #5a4d8a)",
@@ -161,7 +152,6 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-        {/* Bottom line for loading state - only when not scrolled */}
         <div className="h-0.5 w-full bg-gradient-to-r from-[#695aa6] to-[#5a4d8a] opacity-0"></div>
       </header>
     )
@@ -171,14 +161,15 @@ export default function Navbar() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
-          scrolled || isMobileMenuOpen
+          isAdmin
+            ? "bg-[#e5dffc]" // Fixed purple background when isAdmin=true
+            : scrolled || isMobileMenuOpen
             ? "bg-white/95 backdrop-blur-lg shadow-lg border-b border-gray-200"
             : "bg-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20">
-            {/* Logo */}
             <button
               onClick={() => handleNavigate("/")}
               className="text-2xl sm:text-3xl md:text-4xl font-bold transition-transform hover:scale-105 focus:outline-none"
@@ -192,7 +183,6 @@ export default function Navbar() {
               Apna Network
             </button>
 
-            {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-6">
               {navLinks.map(({ href, label }) => (
                 <Link
@@ -209,7 +199,6 @@ export default function Navbar() {
               ))}
             </nav>
 
-            {/* Desktop Auth Section */}
             <div className="hidden lg:flex items-center space-x-3">
               {isLoggedIn ? (
                 <div className="relative" ref={profileRef}>
@@ -228,7 +217,6 @@ export default function Navbar() {
 
                   {profileOpen && (
                     <div className="absolute right-0 mt-3 w-64 rounded-2xl shadow-2xl border backdrop-blur-lg overflow-hidden z-50 bg-white/95 border-[#695aa6]/20">
-                      {/* User Info Section */}
                       <div className="px-6 py-4 bg-gradient-to-br from-[#695aa6]/10 to-[#695aa6]/5 border-b border-[#695aa6]/10">
                         <div className="flex items-center space-x-3">
                           <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-[#695aa6] to-[#5a4d8a] shadow-lg">
@@ -243,7 +231,6 @@ export default function Navbar() {
                         </div>
                       </div>
 
-                      {/* Menu Items */}
                       <div className="py-2">
                         <button
                           onClick={handleDashboardClick}
@@ -254,7 +241,6 @@ export default function Navbar() {
                         </button>
                       </div>
 
-                      {/* Logout Section */}
                       <div className="border-t border-gray-100 pt-2">
                         <button
                           onClick={handleLogout}
@@ -277,7 +263,6 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
             <div className="lg:hidden">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -290,7 +275,6 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Bottom gradient line - only visible when not scrolled and mobile menu is closed */}
         <div
           className={`h-0.5 w-full bg-gradient-to-r from-[#ffffff] to-[#ffffff] transition-opacity duration-300 ${
             scrolled || isMobileMenuOpen ? "opacity-0" : "opacity-40"
@@ -298,13 +282,11 @@ export default function Navbar() {
         ></div>
       </header>
 
-      {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
           <div className="fixed top-16 sm:top-20 left-0 right-0 bg-white/95 backdrop-blur-lg shadow-2xl border-b border-gray-200 max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="px-4 py-6 space-y-4">
-              {/* Navigation Links */}
               <div className="space-y-2">
                 {navLinks.map(({ href, label }) => (
                   <button
@@ -321,11 +303,9 @@ export default function Navbar() {
                 ))}
               </div>
 
-              {/* Auth Section */}
               <div className="border-t border-gray-200 pt-4 space-y-3">
                 {isLoggedIn ? (
                   <>
-                    {/* User Info Card */}
                     <div className="px-4 py-4 rounded-xl bg-gradient-to-br from-[#695aa6]/10 to-[#695aa6]/5 border border-[#695aa6]/20">
                       <div className="flex items-center space-x-3">
                         <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-[#695aa6] to-[#5a4d8a] shadow-lg">
@@ -340,7 +320,6 @@ export default function Navbar() {
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
                     <button
                       onClick={handleDashboardClick}
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-semibold text-base transition-all hover:bg-[#695aa6]/10 text-[#695aa6]"

@@ -2,10 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { useAuth } from "@/app/context/Authcontext"; // ✅ use central auth
+import axios from "axios";
+import { useAuth } from "@/app/context/Authcontext";
 
-// Simple local-only modal (no backend connection)
+// Define your API base URL in one place
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/success`;
+
+// ✅ MODAL COMPONENT: Updated the API endpoint for submission.
 function SuccessStoryModal({ open, onClose, onSubmitted }) {
+  const { getUserRole } = useAuth();
   const [form, setForm] = useState({
     title: "",
     date: new Date().toISOString().slice(0, 10),
@@ -31,9 +36,13 @@ function SuccessStoryModal({ open, onClose, onSubmitted }) {
       return;
     }
     setLoading(true);
-    await new Promise((res) => setTimeout(res, 600)); // simulate
-    console.log("Simulated Success Story payload:", {
-      ...form,
+
+    const payload = {
+      title: form.title.trim(),
+      user: getUserRole?.() || "Unknown User",
+      provider: getUserRole?.() || "Unknown Provider",
+      date: form.date,
+      content: form.content.trim(),
       tags: form.tags
         .split(",")
         .map((t) => t.trim())
@@ -42,10 +51,22 @@ function SuccessStoryModal({ open, onClose, onSubmitted }) {
         .split(",")
         .map((u) => u.trim())
         .filter(Boolean),
-    });
-    setLoading(false);
-    onSubmitted && onSubmitted();
-    onClose();
+    };
+
+    try {
+      // ✅ CHANGED: Corrected API endpoint from "/" to "/add"
+      await axios.post(`${API_BASE_URL}/add`, payload);
+      onSubmitted?.(); // Trigger the callback to refetch stories
+      onClose();
+      alert("Success story submitted! It will appear after admin approval.");
+    } catch (err) {
+      console.error("Failed to submit success story:", err);
+      setError(
+        err.response?.data?.message || "An error occurred while submitting."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -71,6 +92,7 @@ function SuccessStoryModal({ open, onClose, onSubmitted }) {
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Form fields remain the same */}
           <div>
             <label className="block text-sm font-medium mb-1">Title *</label>
             <input
@@ -146,22 +168,45 @@ function SuccessStoryModal({ open, onClose, onSubmitted }) {
               {loading ? "Saving..." : "Submit"}
             </button>
           </div>
-          <p className="text-[11px] text-gray-500 mt-2">
-            This is a preview submission (not yet sent to backend).
-          </p>
         </form>
       </div>
     </div>
   );
 }
 
+// ✅ MAIN COMPONENT: Now fetches dynamic data from the backend.
 const Testimonial = () => {
   const { authInitialized, isAuthenticated, getUserRole } = useAuth();
   const [isProvider, setIsProvider] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  // ✅ ADDED: State for managing fetched stories
+  const [stories, setStories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
-  // Determine provider role (fallback to localStorage if needed)
+  // Function to fetch approved stories from the backend
+  const fetchStories = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${API_BASE_URL}?status=approved`);
+      setStories(response.data.data || []);
+    } catch (err) {
+      console.error("Failed to fetch success stories:", err);
+      setError("Could not load success stories.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch stories on component mount
+  useEffect(() => {
+    fetchStories();
+  }, []);
+
+  // Effect for checking user role
   useEffect(() => {
     if (!authInitialized) return;
     let role = getUserRole?.();
@@ -171,33 +216,14 @@ const Testimonial = () => {
     setIsProvider(isAuthenticated() && role === "provider");
   }, [authInitialized, isAuthenticated, getUserRole]);
 
+  // Effect for auto-rotating testimonials
   useEffect(() => {
+    if (stories.length === 0) return;
     const id = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+      setCurrentTestimonial((prev) => (prev + 1) % stories.length);
     }, 5000);
     return () => clearInterval(id);
-  }, []);
-
-  const testimonials = [
-    {
-      name: "Rajesh Kumar",
-      location: "Bareilly, UP",
-      role: "Electrician",
-      text: "Apna Network transformed my business. I now serve 5 villages and my income has tripled!",
-    },
-    {
-      name: "Priya Sharma",
-      location: "Sitapur, UP",
-      role: "Seamstress",
-      text: "Through this platform, I found consistent work and learned new skills. My family's life has improved significantly.",
-    },
-    {
-      name: "Mohammad Ali",
-      location: "Hardoi, UP",
-      role: "Farmer",
-      text: "The agricultural consultancy services helped me increase my crop yield by 40%. Truly game-changing!",
-    },
-  ];
+  }, [stories.length]); // Dependency is now on the number of stories
 
   return (
     <section
@@ -232,54 +258,67 @@ const Testimonial = () => {
 
         <div className="max-w-4xl mx-auto">
           <div
-            className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-lg border"
+            className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 shadow-lg border min-h-[250px] flex items-center justify-center"
             style={{ borderColor: "#695aa6" }}
           >
-            <div className="text-center">
-              <blockquote className="text-base sm:text-lg md:text-xl text-gray-700 mb-4 sm:mb-6 italic leading-relaxed">
-                "{testimonials[currentTestimonial].text}"
-              </blockquote>
-              <div>
-                <div className="font-semibold text-gray-800 text-base sm:text-lg">
-                  {testimonials[currentTestimonial].name}
-                </div>
-                <div
-                  className="font-medium text-sm sm:text-base"
-                  style={{ color: "#695aa6" }}
-                >
-                  {testimonials[currentTestimonial].role}
-                </div>
-                <div className="text-gray-500 text-xs sm:text-sm">
-                  {testimonials[currentTestimonial].location}
+            {/* ✅ DYNAMIC CONTENT: Renders based on fetched data */}
+            {loading && <p>Loading Stories...</p>}
+            {error && <p className="text-red-500">{error}</p>}
+            {!loading && !error && stories.length > 0 && (
+              <div className="text-center">
+                <blockquote className="text-base sm:text-lg md:text-xl text-gray-700 mb-4 sm:mb-6 italic leading-relaxed">
+                  "{stories[currentTestimonial].content}"
+                </blockquote>
+                <div>
+                  <div className="font-semibold text-gray-800 text-base sm:text-lg">
+                    {stories[currentTestimonial].user}
+                  </div>
+                  <div
+                    className="font-medium text-sm sm:text-base"
+                    style={{ color: "#695aa6" }}
+                  >
+                    {stories[currentTestimonial].title}
+                  </div>
                 </div>
               </div>
+            )}
+            {!loading && !error && stories.length === 0 && (
+              <p>
+                No success stories have been approved yet. Check back later!
+              </p>
+            )}
+          </div>
+          {stories.length > 1 && (
+            <div className="flex justify-center mt-4 sm:mt-6 space-x-2">
+              {stories.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentTestimonial(index)}
+                  className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors duration-300 ${
+                    index === currentTestimonial
+                      ? "hover:opacity-80"
+                      : "bg-gray-300 hover:bg-gray-400"
+                  }`}
+                  style={{
+                    backgroundColor:
+                      index === currentTestimonial ? "#695aa6" : undefined,
+                  }}
+                />
+              ))}
             </div>
-          </div>
-          <div className="flex justify-center mt-4 sm:mt-6 space-x-2">
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentTestimonial(index)}
-                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors duration-300 ${
-                  index === currentTestimonial
-                    ? "hover:opacity-80"
-                    : "bg-gray-300 hover:bg-gray-400"
-                }`}
-                style={{
-                  backgroundColor:
-                    index === currentTestimonial ? "#695aa6" : undefined,
-                }}
-              />
-            ))}
-          </div>
+          )}
         </div>
       </div>
 
       <SuccessStoryModal
         open={showModal}
         onClose={() => setShowModal(false)}
+        // The public view won't update immediately as stories need approval,
+        // but this is good practice for other features.
         onSubmitted={() => {
-          console.log("Local success story simulated.");
+          alert(
+            "Success story submitted! It will appear after admin approval."
+          );
         }}
       />
     </section>

@@ -153,7 +153,7 @@ export default function AdminDashboard() {
 
   return (
     <ToastProvider>
-      <Navbar />
+      <Navbar isAdmin={true} />
       <div className="h-16 sm:h-20" />
 
       {/* Floating open button (mobile) */}

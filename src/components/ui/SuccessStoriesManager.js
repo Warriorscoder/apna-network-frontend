@@ -8,13 +8,14 @@ export default function SuccessStoriesManager() {
   const [stories, setStories] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  // const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(false);
 
   const fetchStories = async () => {
     try {
-      const res = await fetch(
-        `${API_BASE}`
-      );
+      setLoading(true);
+      const query = statusFilter === "all" ? "" : `?status=${statusFilter}`;
+      const res = await fetch(`${API_BASE}${query}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
         setStories(data.data);
@@ -23,12 +24,14 @@ export default function SuccessStoriesManager() {
       }
     } catch (err) {
       console.error("Failed to fetch stories:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // useEffect(() => {
-  //   fetchStories();
-  // }, [statusFilter]);
+  useEffect(() => {
+    fetchStories();
+  }, [statusFilter]);
 
   const handleSubmit = async (data) => {
     try {
@@ -41,19 +44,16 @@ export default function SuccessStoriesManager() {
         tags: data.tags?.length ? data.tags : [],
         images: data.images?.length ? data.images : [],
       };
-
       const url = `${API_BASE}/update/${editing._id}`;
       const res = await fetch(url, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formattedData),
       });
-
       if (!res.ok) {
         const errorRes = await res.json();
-        throw new Error(`Update failed: ${errorRes.message || res.statusText}`);
+        throw new Error(errorRes.message || "Update failed");
       }
-
       setModalOpen(false);
       setEditing(null);
       fetchStories();
@@ -89,41 +89,53 @@ export default function SuccessStoriesManager() {
 
   return (
     <div className="w-full">
-      {/* Filter Buttons */}
-      {/* <div className="flex flex-wrap gap-2 mb-4">
+      {/* Status Filter */}
+      <div className="flex flex-wrap gap-2 mb-4">
         {["all", "pending", "approved", "rejected"].map((status) => (
           <button
             key={status}
             onClick={() => setStatusFilter(status)}
-            className={`px-3 py-1 rounded text-sm ${
+            className={`px-3 py-1 rounded text-sm transition ${
               statusFilter === status
                 ? "bg-yellow-500 text-white font-semibold"
-                : "bg-gray-100 text-gray-600"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </button>
         ))}
-      </div> */}
+        <button
+          onClick={fetchStories}
+          className="ml-auto px-3 py-1 rounded text-sm bg-gray-100 hover:bg-gray-200"
+        >
+          Refresh
+        </button>
+      </div>
 
-      {/* Table Section */}
+      {/* Desktop Table */}
       <div className="overflow-x-auto border rounded-xl border-yellow-400/20 shadow max-h-[500px] hidden md:block">
-        <table className="min-w-[780px] text-left bg-white text-sm">
+        <table className="min-w-[880px] text-left bg-white text-sm">
           <thead className="sticky top-0 bg-yellow-50 z-10 border-b text-yellow-600">
             <tr>
               <th className="py-2 px-3 font-semibold">Title</th>
               <th className="py-2 px-3 font-semibold">User</th>
               <th className="py-2 px-3 font-semibold">Provider</th>
               <th className="py-2 px-3 font-semibold">Date</th>
-              {/* <th className="py-2 px-3 font-semibold">Status</th> */}
+              <th className="py-2 px-3 font-semibold">Status</th>
               <th className="py-2 px-3 font-semibold">Featured</th>
               <th className="py-2 px-3 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {stories.length === 0 ? (
+            {loading ? (
               <tr>
-                <td colSpan={7} className="text-gray-400 py-4 text-center">
+                <td colSpan={7} className="py-6 text-center text-gray-500">
+                  Loading...
+                </td>
+              </tr>
+            ) : stories.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="text-gray-400 py-6 text-center">
                   No success stories found.
                 </td>
               </tr>
@@ -136,7 +148,7 @@ export default function SuccessStoriesManager() {
                   <td className="py-2 px-3">
                     {s.date ? new Date(s.date).toLocaleDateString() : "-"}
                   </td>
-                  {/* <td className="py-2 px-3">
+                  <td className="py-2 px-3">
                     <span
                       className={`px-2 py-1 rounded text-xs font-bold ${
                         s.status === "approved"
@@ -146,9 +158,9 @@ export default function SuccessStoriesManager() {
                           : "bg-red-100 text-red-700"
                       }`}
                     >
-                      {s.status.charAt(0).toUpperCase() + s.status.slice(1)}
+                      {s.status}
                     </span>
-                  </td> */}
+                  </td>
                   <td className="py-2 px-3">
                     <button
                       onClick={() => handleFeature(s._id)}
@@ -159,23 +171,11 @@ export default function SuccessStoriesManager() {
                       }`}
                       disabled={s.featured}
                     >
-                      {s.featured ? "Featured" : "Set as Featured"}
+                      {s.featured ? "Featured" : "Set Featured"}
                     </button>
                   </td>
                   <td className="py-2 px-3 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => handleEdit(s)}
-                      className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(s._id)}
-                      className="px-2 py-1 bg-red-500 text-white rounded text-xs"
-                    >
-                      Delete
-                    </button>
-                    {/* {s.status === "pending" && (
+                    {s.status === "pending" && (
                       <>
                         <button
                           onClick={() => handleApprove(s._id)}
@@ -190,7 +190,19 @@ export default function SuccessStoriesManager() {
                           Reject
                         </button>
                       </>
-                    )} */}
+                    )}
+                    <button
+                      onClick={() => handleEdit(s)}
+                      className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(s._id)}
+                      className="px-2 py-1 bg-red-500 text-white rounded text-xs"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))
@@ -201,38 +213,78 @@ export default function SuccessStoriesManager() {
 
       {/* Mobile Cards */}
       <div className="grid gap-4 md:hidden">
-        {stories.length === 0 && (
+        {loading && (
+          <div className="text-gray-500 py-4 text-center bg-white rounded-xl border border-yellow-400/20">
+            Loading...
+          </div>
+        )}
+        {!loading && stories.length === 0 && (
           <div className="text-gray-400 py-4 text-center bg-white rounded-xl border border-yellow-400/20">
             No success stories found.
           </div>
         )}
-        {stories.map(s => (
-          <div key={s._id} className="bg-white rounded-xl border border-yellow-400/20 p-4 shadow-sm space-y-3">
+        {stories.map((s) => (
+          <div
+            key={s._id}
+            className="bg-white rounded-xl border border-yellow-400/20 p-4 shadow-sm space-y-3"
+          >
             <div className="flex justify-between items-start gap-3">
               <div>
-                <h3 className="font-semibold text-sm text-yellow-700">{s.title}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">User: {s.user} • Provider: {s.provider}</p>
+                <h3 className="font-semibold text-sm text-yellow-700">
+                  {s.title}
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  User: {s.user} • Provider: {s.provider}
+                </p>
               </div>
-              {/* <span className={`px-2 py-1 rounded text-[10px] font-bold ${
-                s.status === "approved" ? "bg-green-100 text-green-700" :
-                s.status === "pending" ? "bg-yellow-100 text-yellow-700" :
-                "bg-red-100 text-red-700"
-              }`}>{s.status}</span> */}
+              <span
+                className={`px-2 py-1 rounded text-[10px] font-bold ${
+                  s.status === "approved"
+                    ? "bg-green-100 text-green-700"
+                    : s.status === "pending"
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {s.status}
+              </span>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button onClick={() => handleEdit(s)} className="px-3 py-1 bg-blue-500 text-white rounded text-xs">Edit</button>
-              <button onClick={() => handleDelete(s._id)} className="px-3 py-1 bg-red-500 text-white rounded text-xs">Delete</button>
               {s.status === "pending" && (
                 <>
-                  <button onClick={() => handleApprove(s._id)} className="px-3 py-1 bg-green-500 text-white rounded text-xs">Approve</button>
-                  <button onClick={() => handleReject(s._id)} className="px-3 py-1 bg-yellow-500 text-white rounded text-xs">Reject</button>
+                  <button
+                    onClick={() => handleApprove(s._id)}
+                    className="px-3 py-1 bg-green-500 text-white rounded text-xs"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleReject(s._id)}
+                    className="px-3 py-1 bg-yellow-500 text-white rounded text-xs"
+                  >
+                    Reject
+                  </button>
                 </>
               )}
+              <button
+                onClick={() => handleEdit(s)}
+                className="px-3 py-1 bg-blue-500 text-white rounded text-xs"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(s._id)}
+                className="px-3 py-1 bg-red-500 text-white rounded text-xs"
+              >
+                Delete
+              </button>
               <button
                 onClick={() => handleFeature(s._id)}
                 disabled={s.featured}
                 className={`px-3 py-1 rounded text-xs font-semibold ${
-                  s.featured ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                  s.featured
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-600"
                 }`}
               >
                 {s.featured ? "Featured" : "Feature"}
@@ -242,7 +294,6 @@ export default function SuccessStoriesManager() {
         ))}
       </div>
 
-      {/* Edit Modal */}
       <ContentModal
         open={modalOpen}
         onClose={() => {

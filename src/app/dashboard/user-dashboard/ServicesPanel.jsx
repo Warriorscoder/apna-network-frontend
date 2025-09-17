@@ -148,7 +148,7 @@
 //       );
 
 //       setReviewdata(filtered); // Set the filtered reviews to your state
-//       // console.log("filtered review ", reviewdata) 
+//       // console.log("filtered review ", reviewdata)
 //     } else {
 //       // Optional: If no provider is selected, clear the reviews
 //       setReviewdata([]);
@@ -767,6 +767,7 @@
 // }
 
 // export default ServicesPanel;
+
 "use client";
 import {
   Briefcase,
@@ -774,7 +775,6 @@ import {
   Star,
   MapPin,
   Clock,
-  Filter,
   ArrowLeft,
   ChevronDown,
   ChevronUp,
@@ -785,11 +785,87 @@ import axios from "axios";
 import Dialoguebox from "@/components/servicePage/Dialoguebox";
 import LocationSelector from "@/components/LocationSelector";
 
-// --- Child Components (Memoized for Performance) ---
+const HP_TEHSILS = {
+  Kangra: [
+    "Kangra",
+    "Nagrota Bagwan",
+    "Rait",
+    "Baijnath",
+    "Dehra",
+    "Bhawarna",
+    "Fatehpur",
+    "Indora",
+    "Lambagaon",
+    "Nurpur",
+    "Panchrukhi",
+    "Sulah",
+    "Pragpur",
+    "Nagrota Surian",
+    "Dharamshala",
+    "Baroh",
+    "Surani",
+    "Palampur",
+  ],
+  Shimla: [
+    "Mashobra",
+    "Basantpur",
+    "Theog",
+    "Nankhari",
+    "Rampur",
+    "Jubbal",
+    "Kotkhai",
+    "Chopal",
+    "Narkanda",
+    "Rohru",
+    "Chohara",
+    "Totu",
+    "Kupvi",
+  ],
+  Mandi: [
+    "Mandi Sadar",
+    "Balh",
+    "Sunder Nagar",
+    "Gopalpur",
+    "Dharampur",
+    "Drang",
+    "Chauntra",
+    "Seraj",
+    "Gohar",
+    "Karsog",
+    "BaliChowki",
+    "Nihri",
+    "Dhanotu",
+    "Churag",
+  ],
+  Chamba: [
+    "Chamba",
+    "Mehla",
+    "Bharmour",
+    "Tissa",
+    "Salooni",
+    "Bhattiyat",
+    "Pangi",
+  ],
+  Kullu: ["Kullu", "Naggar", "Banjar", "Anni", "Nirmand", "Bhuntar"],
+  Solan: ["Dharmpur", "Kandaghat", "Nalagarh", "Solan", "Kunihar", "Patta"],
+  Sirmaur: [
+    "Nahan",
+    "Paonta Sahib",
+    "Rajgarh",
+    "Sangrah",
+    "Shillai",
+    "Pachhad",
+    "Tilordhar",
+  ],
+  Una: ["Una", "Amb", "Bangana", "Haroli", "Gagret"],
+  Hamirpur: ["Hamirpur", "Nadaun", "Bijhari", "Bhoranj", "Sujanpur", "Bamson"],
+  Bilaspur: ["Bilaspur", "Ghumarwin", "Jhandutta", "Shri Naina Devi"],
+  Kinnaur: ["Nichar", "Kalpa", "Pooh"],
+  LahaulSpiti: ["Lahaul", "Spiti"],
+};
 
 const ServiceCategoryCard = memo(({ service, onClick }) => {
   const [hovered, setHovered] = useState(false);
-  
   return (
     <div
       onMouseEnter={() => setHovered(true)}
@@ -870,45 +946,51 @@ const EnhancedServiceCard = memo(({ service, onMoreDetails, index }) => (
 ));
 EnhancedServiceCard.displayName = "EnhancedServiceCard";
 
-// --- Main Component ---
+// ========== Main Component ==========
 
 function ServicesPanel() {
+  // Core state
   const [viewMode, setViewMode] = useState("categories");
-  const [selectedService, setSelectedService] = useState(null);
+  const [allcategories, setAllcategories] = useState([]);
   const [filteredProviders, setFilteredProviders] = useState([]);
+  const [availableTehsils, setAvailableTehsils] = useState([]);
   const [serviceData, setServiceData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [selectedService, setSelectedService] = useState(null);
+  const [selectedProvider, setSelectedProvider] = useState(null);
+
+  // Filters & search
   const [searchTerm, setSearchTerm] = useState("");
   const [categorySearchTerm, setCategorySearchTerm] = useState("");
-  const [selectedProvider, setSelectedProvider] = useState(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [allcategories, setAllcategories] = useState([]);
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedTehsil, setSelectedTehsil] = useState("");
-  const [availableTehsils, setAvailableTehsils] = useState([]);
-  const [providerId, setProviderId] = useState();
-  const [serviceId, setServiceId] = useState();
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Reviews / dialog
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [allReviews, setAllReviews] = useState([]);
   const [reviewdata, setReviewdata] = useState([]);
+  const [providerId, setProviderId] = useState();
+  const [serviceId, setServiceId] = useState();
 
+  // UI state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Initial fetch (categories + reviews)
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
       try {
         const [categoriesRes, reviewsRes] = await Promise.all([
           axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/categories/`),
-          axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/`)
+          axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reviews/`),
         ]);
-
-        if (categoriesRes.data.success) setAllcategories(categoriesRes.data.data);
+        if (categoriesRes.data.success)
+          setAllcategories(categoriesRes.data.data);
         if (reviewsRes.data.success) setAllReviews(reviewsRes.data.data);
-
-      } catch (error) {
-        console.log("Error fetching initial data", error);
-        setError("Failed to load page data.");
+      } catch (e) {
+        setError("Failed to load data.");
       } finally {
         setLoading(false);
       }
@@ -916,23 +998,28 @@ function ServicesPanel() {
     fetchAllData();
   }, []);
 
+  // Filter reviews when provider selected
   useEffect(() => {
-    if (selectedProvider && allReviews.length > 0) {
-      const filtered = allReviews.filter(review =>
-        review.provider_id === selectedProvider.provider_id &&
-        review.serviceId === selectedProvider.serviceId
+    if (selectedProvider && allReviews.length) {
+      const filtered = allReviews.filter(
+        (r) =>
+          r.provider_id === selectedProvider.provider_id &&
+          r.serviceId === selectedProvider.serviceId
       );
       setReviewdata(filtered);
-    } else {
-      setReviewdata([]);
-    }
+    } else setReviewdata([]);
   }, [allReviews, selectedProvider]);
 
-  const filteredServiceCategories = useMemo(() =>
-    allcategories.filter((category) =>
-      category.title.toLowerCase().includes(categorySearchTerm.toLowerCase())
-    ), [allcategories, categorySearchTerm]);
+  // Derived category list
+  const filteredServiceCategories = useMemo(
+    () =>
+      allcategories.filter((c) =>
+        c.title.toLowerCase().includes(categorySearchTerm.toLowerCase())
+      ),
+    [allcategories, categorySearchTerm]
+  );
 
+  // Provider filtering
   const filteredAndSearchedProviders = useMemo(() => {
     return filteredProviders.filter((provider) => {
       const address = provider.address?.toLowerCase() || "";
@@ -941,76 +1028,109 @@ function ServicesPanel() {
       const tehsil = provider.tehsil?.toLowerCase() || "";
       const district = provider.district?.toLowerCase() || "";
       const location = provider.location?.toLowerCase() || "";
-      
-      const searchTermLower = searchTerm.toLowerCase();
-      const selectedStateLower = selectedState.toLowerCase();
-      const selectedCityLower = selectedCity.toLowerCase();
-      const selectedTehsilLower = selectedTehsil.toLowerCase();
 
-      const matchesSearchTerm = !searchTerm || name.includes(searchTermLower) || address.includes(searchTermLower) || village.includes(searchTermLower) || tehsil.includes(searchTermLower) || district.includes(searchTermLower) || location.includes(searchTermLower);
-      const matchesState = !selectedState || location.includes(selectedStateLower) || district.includes(selectedStateLower) || address.includes(selectedStateLower);
-      const matchesCity = !selectedCity || district.includes(selectedCityLower) || location.includes(selectedCityLower) || address.includes(selectedCityLower) || village.includes(selectedCityLower);
-      const matchesTehsil = !selectedTehsil || tehsil.includes(selectedTehsilLower) || address.includes(selectedTehsilLower);
+      const sTerm = searchTerm.toLowerCase();
+      const stState = selectedState.toLowerCase();
+      const stCity = selectedCity.toLowerCase();
+      const stTehsil = selectedTehsil.toLowerCase();
 
-      return matchesSearchTerm && matchesState && matchesCity && matchesTehsil;
+      const matchesSearch =
+        !searchTerm ||
+        name.includes(sTerm) ||
+        address.includes(sTerm) ||
+        village.includes(sTerm) ||
+        tehsil.includes(sTerm) ||
+        district.includes(sTerm) ||
+        location.includes(sTerm);
+
+      const matchesState =
+        !selectedState ||
+        location.includes(stState) ||
+        district.includes(stState) ||
+        address.includes(stState);
+
+      const matchesCity =
+        !selectedCity ||
+        district.includes(stCity) ||
+        location.includes(stCity) ||
+        address.includes(stCity) ||
+        village.includes(stCity);
+
+      const matchesTehsil =
+        !selectedTehsil ||
+        tehsil.includes(stTehsil) ||
+        address.includes(stTehsil);
+
+      return matchesSearch && matchesState && matchesCity && matchesTehsil;
     });
-  }, [filteredProviders, searchTerm, selectedState, selectedCity, selectedTehsil]);
+  }, [
+    filteredProviders,
+    searchTerm,
+    selectedState,
+    selectedCity,
+    selectedTehsil,
+  ]);
 
+  // Fetch providers for a category
   const fetchServiceProviders = useCallback(async (serviceKey) => {
     setLoading(true);
     setError(null);
     try {
       const apiurl = process.env.NEXT_PUBLIC_API_BASE_URL;
       const response = await axios.get(`${apiurl}/services/`);
-      if (!response.data.success) throw new Error("Failed to fetch services");
-
+      if (!response.data.success) throw new Error();
       const services = response.data.data || [];
-      const filteredServices = services.filter((item) => item.category === serviceKey);
+      const filteredServices = services.filter(
+        (item) => item.category === serviceKey
+      );
       setServiceData(filteredServices);
 
-      if (filteredServices.length > 0) {
-        const providerIds = filteredServices.map((item) => item.provider_id);
-        const result = await axios.post(`${apiurl}/providers/multi-by-id`, { ids: providerIds });
-        if (!result.data.success) throw new Error("Failed to fetch providers");
-        
-        const providersData = result.data.providers || [];
-        const getAddressComponent = (value) => (value && String(value).trim() ? String(value).trim() : null);
+      if (filteredServices.length) {
+        const providerIds = filteredServices.map((i) => i.provider_id);
+        const providersRes = await axios.post(
+          `${apiurl}/providers/multi-by-id`,
+          { ids: providerIds }
+        );
+        if (!providersRes.data.success) throw new Error();
+        const providersData = providersRes.data.providers || [];
 
-        const transformedData = providersData.map((provider) => {
-          const addressComponents = [
-            getAddressComponent(provider.village),
-            getAddressComponent(provider.panchayat_ward),
-            getAddressComponent(provider.tehsil),
-            getAddressComponent(provider.district),
-            getAddressComponent(provider.location),
+        const clean = (v) =>
+          v && String(v).trim() && String(v).trim() !== "undefined"
+            ? String(v).trim()
+            : null;
+
+        const transformed = providersData.map((p) => {
+          const parts = [
+            clean(p.village),
+            clean(p.panchayat_ward),
+            clean(p.tehsil),
+            clean(p.district),
+            clean(p.location),
           ].filter(Boolean);
-          const formattedAddress = addressComponents.length > 0 ? addressComponents.join(", ") : "Address not available";
-
           return {
-            name: provider.name || "Name not available",
-            email: provider.email || "Email not available",
-            provider_id: provider._id,
-            village: getAddressComponent(provider.village) || "Not specified",
-            tehsil: getAddressComponent(provider.tehsil) || "Not specified",
-            district: getAddressComponent(provider.district) || "Not specified",
-            location: getAddressComponent(provider.location) || "Not specified",
-            address: formattedAddress,
+            name: p.name || "Name not available",
+            email: p.email || "Email not available",
+            provider_id: p._id,
+            village: clean(p.village) || "Not specified",
+            tehsil: clean(p.tehsil) || "Not specified",
+            district: clean(p.district) || "Not specified",
+            location: clean(p.location) || "Not specified",
+            address: parts.length ? parts.join(", ") : "Address not available",
             rating: Math.floor(Math.random() * 5) + 1,
-            availability: `${provider.availability?.from || "9 AM"} - ${provider.availability?.to || "6 PM"}`,
-            phone: provider.phone || "Not provided",
+            availability: `${p.availability?.from || "9 AM"} - ${
+              p.availability?.to || "6 PM"
+            }`,
+            phone: p.phone || "Not provided",
           };
         });
-        
-        const tehsilSet = new Set(transformedData.map(p => p.tehsil).filter(t => t && t !== 'Not specified'));
-        setAvailableTehsils(Array.from(tehsilSet).sort());
-        setFilteredProviders(transformedData);
+
+        setFilteredProviders(transformed);
       } else {
         setFilteredProviders([]);
         setAvailableTehsils([]);
       }
-    } catch (error) {
-      console.error("Error fetching providers:", error);
-      setError("Failed to load providers. Please try again later.");
+    } catch {
+      setError("Failed to load providers. Please try again.");
       setFilteredProviders([]);
       setAvailableTehsils([]);
     } finally {
@@ -1018,28 +1138,59 @@ function ServicesPanel() {
     }
   }, []);
 
-  const handleCategorySelect = useCallback(async (service) => {
-    setSelectedService(service);
-    setViewMode("providers");
-    fetchServiceProviders(service.key);
-  }, [fetchServiceProviders]);
+  // HP (Himachal Pradesh) Tehsil population logic (match AllServicesComponent)
+  useEffect(() => {
+    if (selectedState !== "HP") {
+      if (selectedTehsil) setSelectedTehsil("");
+      if (availableTehsils.length) setAvailableTehsils([]);
+      return;
+    }
+    if (selectedCity) {
+      const normalized =
+        selectedCity === "Lahaul and Spiti" ? "LahaulSpiti" : selectedCity;
+      const list = HP_TEHSILS[normalized] || [];
+      setAvailableTehsils(list);
+      if (list.length === 0) setSelectedTehsil("");
+      if (list.length > 0 && selectedTehsil && !list.includes(selectedTehsil)) {
+        setSelectedTehsil("");
+      }
+    } else {
+      setAvailableTehsils([]);
+      setSelectedTehsil("");
+    }
+  }, [selectedState, selectedCity, selectedTehsil]);
 
-  const handleMoreDetails = useCallback((provider) => {
-    const serviceInfo = serviceData.find((item) => item.provider_id === provider.provider_id);
-    const cardData = {
-      ...provider,
-      title: serviceInfo?.title,
-      description: serviceInfo?.description,
-      tags: serviceInfo?.tags || [selectedService?.title?.toLowerCase()],
-      category: serviceInfo?.category || selectedService?.serviceKey,
-      experience: serviceInfo?.experience_level,
-      serviceId: serviceInfo?._id,
-    };
-    setSelectedProvider(cardData);
-    setProviderId(cardData?.provider_id);
-    setServiceId(cardData?.serviceId);
-    setIsDialogOpen(true);
-  }, [serviceData, selectedService]);
+  // Handlers
+  const handleCategorySelect = useCallback(
+    (service) => {
+      setSelectedService(service);
+      setViewMode("providers");
+      fetchServiceProviders(service.key);
+    },
+    [fetchServiceProviders]
+  );
+
+  const handleMoreDetails = useCallback(
+    (provider) => {
+      const serviceInfo = serviceData.find(
+        (s) => s.provider_id === provider.provider_id
+      );
+      const cardData = {
+        ...provider,
+        title: serviceInfo?.title,
+        description: serviceInfo?.description,
+        tags: serviceInfo?.tags || [selectedService?.title?.toLowerCase()],
+        category: serviceInfo?.category || selectedService?.serviceKey,
+        experience: serviceInfo?.experience_level,
+        serviceId: serviceInfo?._id,
+      };
+      setSelectedProvider(cardData);
+      setProviderId(cardData.provider_id);
+      setServiceId(cardData.serviceId);
+      setIsDialogOpen(true);
+    },
+    [serviceData, selectedService]
+  );
 
   const handleBackToCategories = useCallback(() => {
     setViewMode("categories");
@@ -1062,14 +1213,33 @@ function ServicesPanel() {
     setSelectedTehsil("");
   }, []);
 
+  // ========== UI ==========
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2" style={{ textShadow: "0 4px 24px rgba(60,50,100,0.65), 0 2px 4px rgba(0,0,0,0.3)" }}>
-          {viewMode === "categories" ? "Browse Services" : `${selectedService?.title || "Service"} Providers`}
+        <h1
+          className="text-3xl sm:text-4xl font-bold text-white mb-2"
+          style={{
+            textShadow:
+              "0 4px 24px rgba(60,50,100,0.65), 0 2px 4px rgba(0,0,0,0.3)",
+          }}
+        >
+          {viewMode === "categories"
+            ? "Browse Services"
+            : `${selectedService?.title || "Service"} Providers`}
         </h1>
-        <p className="text-white/90 text-lg" style={{ textShadow: "0 2px 12px rgba(60,50,100,0.45), 0 1px 2px rgba(0,0,0,0.3)" }}>
-          {viewMode === "categories" ? "Find trusted professionals for all your needs" : `Connect with verified ${selectedService?.title?.toLowerCase()} in your area`}
+        <p
+          className="text-white/90 text-lg"
+          style={{
+            textShadow:
+              "0 2px 12px rgba(60,50,100,0.45), 0 1px 2px rgba(0,0,0,0.3)",
+          }}
+        >
+          {viewMode === "categories"
+            ? "Find trusted professionals for all your needs"
+            : `Connect with verified ${selectedService?.title?.toLowerCase()} in your area`}
         </p>
       </div>
 
@@ -1079,11 +1249,16 @@ function ServicesPanel() {
             <h2 className="text-xl sm:text-2xl font-semibold text-[#695aa6] flex items-center">
               <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 mr-2 flex-shrink-0" />
               <span className="truncate">
-                {viewMode === "categories" ? "Service Categories" : `${selectedService?.title || "Service"} Providers`}
+                {viewMode === "categories"
+                  ? "Service Categories"
+                  : `${selectedService?.title || "Service"} Providers`}
               </span>
             </h2>
             {viewMode === "providers" && (
-              <button onClick={handleBackToCategories} className="flex items-center space-x-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-gray-800 px-3 py-1.5 rounded-lg transition-all text-sm flex-shrink-0">
+              <button
+                onClick={handleBackToCategories}
+                className="flex items-center space-x-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-gray-800 px-3 py-1.5 rounded-lg transition-all text-sm flex-shrink-0"
+              >
                 <ArrowLeft className="w-4 h-4" />
                 <span className="font-medium hidden sm:inline">Back</span>
               </button>
@@ -1096,7 +1271,7 @@ function ServicesPanel() {
             <>
               <div className="mb-6">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
                     placeholder="Search categories (e.g., carpenter)"
@@ -1107,7 +1282,7 @@ function ServicesPanel() {
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-                {filteredServiceCategories.length > 0 ? (
+                {filteredServiceCategories.length ? (
                   filteredServiceCategories.map((category) => (
                     <ServiceCategoryCard
                       key={category.key}
@@ -1118,13 +1293,16 @@ function ServicesPanel() {
                 ) : (
                   <div className="col-span-full flex flex-col items-center justify-center text-center py-10">
                     <div className="text-4xl mb-4">🔍</div>
-                    <p className="text-gray-500">No services found for "{categorySearchTerm}"</p>
+                    <p className="text-gray-500">
+                      No services found for "{categorySearchTerm}"
+                    </p>
                   </div>
                 )}
               </div>
             </>
           ) : (
             <>
+              {/* Filters */}
               <div className="mb-6 bg-white rounded-lg shadow-sm p-4 border border-gray-200">
                 <div className="mb-4">
                   <div className="relative">
@@ -1140,61 +1318,96 @@ function ServicesPanel() {
                     </div>
                   </div>
                 </div>
+
                 <button
-                  onClick={() => setShowFilters(!showFilters)}
+                  onClick={() => setShowFilters((s) => !s)}
                   className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors mb-2"
                 >
-                  <span className="font-medium text-[#695aa6]">Location Filters</span>
+                  <span className="font-medium text-[#695aa6]">
+                    Location Filters
+                  </span>
                   <div className="flex items-center space-x-2">
                     {(selectedState || selectedCity || selectedTehsil) && (
                       <span className="bg-[#695aa6] text-white text-xs px-2 py-1 rounded-full">
-                        {[selectedState, selectedCity, selectedTehsil].filter(Boolean).length} selected
+                        {
+                          [selectedState, selectedCity, selectedTehsil].filter(
+                            Boolean
+                          ).length
+                        }{" "}
+                        selected
                       </span>
                     )}
                     {showFilters ? <ChevronUp /> : <ChevronDown />}
                   </div>
                 </button>
+
                 {showFilters && (
-                  <div className="border-t border-gray-200 pt-4">
+                  <div className="border-t border-gray-200 pt-4 space-y-5">
                     <LocationSelector
                       selectedState={selectedState}
                       selectedCity={selectedCity}
                       onStateChange={setSelectedState}
                       onCityChange={setSelectedCity}
                     />
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Tehsil</label>
-                      <div className="relative">
-                        <select
-                          value={selectedTehsil}
-                          onChange={(e) => setSelectedTehsil(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#695aa6] focus:border-transparent text-sm bg-white"
-                        >
-                          <option value="">All Tehsils</option>
-                          {availableTehsils.map((tehsil, index) => (
-                            <option key={index} value={tehsil}>{tehsil}</option>
-                          ))}
-                        </select>
-                        {selectedTehsil && (
-                          <button onClick={() => setSelectedTehsil("")} className="absolute right-8 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
+
+                    {selectedState === "HP" && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Filter by Tehsil (Himachal Pradesh)
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={selectedTehsil}
+                            onChange={(e) => setSelectedTehsil(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#695aa6] focus:border-transparent text-sm bg-white disabled:opacity-50"
+                            disabled={availableTehsils.length === 0}
+                          >
+                            <option value="">All Tehsils</option>
+                            {availableTehsils.map((t) => (
+                              <option key={t} value={t}>
+                                {t}
+                              </option>
+                            ))}
+                          </select>
+                          {selectedTehsil && (
+                            <button
+                              onClick={() => setSelectedTehsil("")}
+                              className="absolute right-8 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {availableTehsils.length > 0
+                            ? `Loaded ${availableTehsils.length} tehsils`
+                            : selectedCity
+                            ? "No tehsils data for this city"
+                            : "Select a city to load tehsils"}
+                        </p>
                       </div>
-                    </div>
+                    )}
+
                     {(selectedState || selectedCity || selectedTehsil) && (
-                      <div className="mt-3 flex justify-end">
-                        <button onClick={clearAllFilters} className="px-4 py-2 text-sm text-[#695aa6] hover:text-[#5a4d8a] transition-colors">Clear All Filters</button>
+                      <div className="flex justify-end pt-1">
+                        <button
+                          onClick={clearAllFilters}
+                          className="px-4 py-2 text-sm text-[#695aa6] hover:text-[#5a4d8a] transition-colors"
+                        >
+                          Clear All Filters
+                        </button>
                       </div>
                     )}
                   </div>
                 )}
               </div>
-              
+
               {loading ? (
                 <div className="flex flex-col items-center justify-center text-center py-10">
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#695aa6] mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading {selectedService?.title?.toLowerCase()}...</p>
+                  <p className="text-gray-600">
+                    Loading {selectedService?.title?.toLowerCase()}...
+                  </p>
                 </div>
               ) : error ? (
                 <div className="flex flex-col items-center justify-center text-center py-10">
@@ -1204,41 +1417,131 @@ function ServicesPanel() {
               ) : filteredAndSearchedProviders.length === 0 ? (
                 <div className="flex flex-col items-center justify-center text-center py-10">
                   <div className="text-4xl mb-4">🔍</div>
-                  <h3 className="text-xl font-bold text-gray-800 mb-2">No {selectedService?.title} Found</h3>
-                  <p className="text-gray-600 text-sm mb-4">No providers found matching your search and filters.</p>
-                  <button onClick={clearAllFilters} className="px-4 sm:px-6 py-2 sm:py-3 bg-[#695aa6] text-white rounded-lg hover:bg-[#5a4d8a] transition-colors text-sm sm:text-base">Clear All Filters</button>
+                  <h3 className="text-xl font-bold text-gray-800 mb-2">
+                    No {selectedService?.title} Found
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4">
+                    No providers found matching your search and filters.
+                    {selectedTehsil && (
+                      <span className="block mt-1">
+                        No providers found in <strong>{selectedTehsil}</strong>{" "}
+                        tehsil.
+                      </span>
+                    )}
+                  </p>
+
+                  {selectedTehsil && availableTehsils.length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-500 mb-2">
+                        Available tehsils for this service:
+                      </p>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {availableTehsils.slice(0, 5).map((t) => (
+                          <button
+                            key={t}
+                            onClick={() => setSelectedTehsil(t)}
+                            className="bg-[#695aa6] text-white px-3 py-1 rounded-full text-xs hover:bg-[#5a4d8a] transition-colors"
+                          >
+                            {t}
+                          </button>
+                        ))}
+                        {availableTehsils.length > 5 && (
+                          <span className="text-xs text-gray-500 px-2 py-1">
+                            +{availableTehsils.length - 5} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={clearAllFilters}
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-[#695aa6] text-white rounded-lg hover:bg-[#5a4d8a] transition-colors text-sm sm:text-base"
+                  >
+                    Clear All Filters
+                  </button>
                 </div>
               ) : (
                 <div>
                   <div className="mb-4 text-center">
                     <p className="text-sm text-gray-600">
-                      Found {filteredAndSearchedProviders.length} {selectedService?.title?.toLowerCase()} provider{filteredAndSearchedProviders.length !== 1 ? "s" : ""}
+                      Found {filteredAndSearchedProviders.length}{" "}
+                      {selectedService?.title?.toLowerCase()} provider
+                      {filteredAndSearchedProviders.length !== 1 ? "s" : ""}
+                      {(selectedState ||
+                        selectedCity ||
+                        selectedTehsil ||
+                        searchTerm) && (
+                        <span className="text-[#695aa6] font-medium">
+                          {" "}
+                          matching your criteria
+                        </span>
+                      )}
                     </p>
+                    {(selectedState || selectedCity || selectedTehsil) && (
+                      <div className="flex flex-wrap justify-center gap-2 mt-2">
+                        {selectedState && (
+                          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                            State: {selectedState}
+                          </span>
+                        )}
+                        {selectedCity && (
+                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+                            City: {selectedCity}
+                          </span>
+                        )}
+                        {selectedTehsil && (
+                          <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">
+                            Tehsil: {selectedTehsil}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  {/* ✅ BUG FIX: Restored the desktop table view code */}
+                  {/* Desktop table */}
                   <div className="hidden lg:block overflow-x-auto">
                     <table className="w-full text-sm bg-white rounded-lg shadow-sm">
                       <thead>
                         <tr className="border-b-2 border-gray-200">
-                          <th className="py-4 px-4 text-left font-semibold text-gray-800">#</th>
-                          <th className="py-4 px-4 text-left font-semibold text-gray-800">Provider</th>
-                          <th className="py-4 px-4 text-left font-semibold text-gray-800">Location</th>
-                          <th className="py-4 px-4 text-left font-semibold text-gray-800">Actions</th>
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">
+                            #
+                          </th>
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">
+                            Provider
+                          </th>
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">
+                            Location
+                          </th>
+                          <th className="py-4 px-4 text-left font-semibold text-gray-800">
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredAndSearchedProviders.map((provider, index) => (
-                          <tr key={provider.provider_id || index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                            <td className="py-4 px-4 text-gray-700">{index + 1}</td>
+                          <tr
+                            key={provider.provider_id || index}
+                            className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                          >
+                            <td className="py-4 px-4 text-gray-700">
+                              {index + 1}
+                            </td>
                             <td className="py-4 px-4">
-                              <div className="font-medium text-gray-800">{provider.name}</div>
+                              <div className="font-medium text-gray-800">
+                                {provider.name}
+                              </div>
                             </td>
                             <td className="py-4 px-4 text-gray-700 max-w-xs">
-                              <div className="break-words">{provider.address}</div>
+                              <div className="break-words">
+                                {provider.address}
+                              </div>
                             </td>
                             <td className="py-4 px-4">
-                              <button onClick={() => handleMoreDetails(provider)} className="px-4 py-2 bg-[#695aa6] text-white rounded text-sm hover:bg-[#5a4d8a] transition-colors">
+                              <button
+                                onClick={() => handleMoreDetails(provider)}
+                                className="px-4 py-2 bg-[#695aa6] text-white rounded text-sm hover:bg-[#5a4d8a] transition-colors"
+                              >
                                 View Details
                               </button>
                             </td>
@@ -1248,10 +1551,11 @@ function ServicesPanel() {
                     </table>
                   </div>
 
+                  {/* Cards (mobile/tablet) */}
                   <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {filteredAndSearchedProviders.map((provider, index) => (
                       <EnhancedServiceCard
-                        key={provider.provider_id}
+                        key={provider.provider_id || index}
                         service={provider}
                         onMoreDetails={handleMoreDetails}
                         index={index}
@@ -1264,7 +1568,7 @@ function ServicesPanel() {
           )}
         </div>
       </div>
-      
+
       <Dialoguebox
         data={selectedProvider}
         isOpen={isDialogOpen}

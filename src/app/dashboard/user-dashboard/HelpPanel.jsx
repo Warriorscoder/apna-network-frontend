@@ -182,8 +182,8 @@ export default function HelpPanel() {
               </ul>
             </div>
             <div className="text-center text-xs sm:text-sm text-gray-500 pt-2">
-              <p>Email: support@apnanetwork.com</p>
-              <p>Phone: +91 1234567890</p>
+              <p>Email: sfhelpdesk25@gmail.com</p>
+              <p>Phone: +91 86290-58403</p>
             </div>
           </div>
         </div>

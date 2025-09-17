@@ -118,11 +118,11 @@ export default function HelpPanel() {
             <div className="text-center text-xs sm:text-sm text-gray-500 pt-2">
               <p className="flex items-center justify-center gap-1 mb-1">
                 <Mail className="w-3 h-3" />
-                Email: providers@apnanetwork.com
+                Email: sfhelpdesk25@gmail.com
               </p>
               <p className="flex items-center justify-center gap-1">
                 <Phone className="w-3 h-3" />
-                Phone: +91 1234567890 (Provider Support)
+                Phone: +91 86290-58403 (Provider Support)
               </p>
             </div>
           </div>
