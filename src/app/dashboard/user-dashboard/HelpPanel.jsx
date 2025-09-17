@@ -74,12 +74,14 @@ import React, { useState } from "react";
 import { HelpCircle, Mail, MessageCircle } from "lucide-react";
 import axios from 'axios';
 import { toast } from 'react-toastify'; // Assuming you use react-toastify
+import { useAuth } from "@/app/context/Authcontext";
 
 export default function HelpPanel() {
   // State for the contact form
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    name: user?.name || "",
+    email: user?.email || "",
     subject: "",
     message: "",
     serviceType: "User Help & Support"
@@ -114,7 +116,10 @@ export default function HelpPanel() {
       if (response.status === 200) {
         toast.success("Your message has been sent successfully!");
         setSubmitStatus("success");
-        setFormData({ name: "", email: "", subject: "", message: "" });
+        setFormData({
+          name: user?.name || "",
+          email: user?.email || "", subject: "", message: ""
+        });
       } else {
         throw new Error(response.data.message || 'An unexpected error occurred.');
       }

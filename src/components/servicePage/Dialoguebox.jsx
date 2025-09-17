@@ -726,11 +726,12 @@ const Dialoguebox = ({ data, isOpen, onClose, allreviews, providerId, serviceId 
   const [showReviews, setShowReviews] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const { user } = useAuth();
+  // console.log("user from dialog box", user);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const router = useRouter();
   // console.log("serviceId", serviceId);
   // console.log("providerId", providerId);
-  console.log("data", data);
+  // console.log("data", data);
   // Use the 'allreviews' prop directly, ensuring it's an array to prevent errors.
   const safeAllReviews = allreviews || [];
 
@@ -871,18 +872,18 @@ const createServiceRequestAndNotify = async ({provider_email, service_category }
 
   // 2. Create the service request first
   try {
-    // const response = await axios.post(
-    //   `${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/`,
-    //   { user_id, provider_id, service_id }
-    // );
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/service-requests/`,
+      { user_id:user.id, provider_id:providerId, service_id:serviceId }
+    );
 
-    // if (response.data.message) {
-    //   toast.warn(response.data.message); // Handle cases like "request already exists"
-    // } else {
+    if (response.data.message) {
+      toast.warn(response.data.message); // Handle cases like "request already exists"
+    } else {
       toast.success("Service request made successfully!");
       // 3. On success, trigger the email notification
       await sendEmailNotification();
-    // }
+    }
   } catch (error) {
     console.error("Service request failed:", error?.response?.data || error.message);
     toast.error("Failed to submit service request");

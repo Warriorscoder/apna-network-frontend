@@ -61,9 +61,9 @@ const ContactPage = () => {
         toast.success("Your message has been sent successfully!");
 
         setFormData({
-          name: "",
-          email: "",
-          phone: "",
+          name: user?.name || "",
+          email: user?.email || "",
+          phone: user?.phone || "",
           subject: "",
           message: "",
           serviceType: "",

@@ -1376,8 +1376,10 @@ const ServiceCard = memo(({ service, onEdit, onDelete, categoryName, experienceL
                 <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3">{service.title || "Unnamed Service"}</h3>
                 <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">{service.description || "No description provided"}</p>
                 <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-3">
-                    {service.experience_level && (<span className="flex items-center gap-1"><User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" /><span>{experienceLabel}</span></span>)}
-                    {service.contact && (<span className="flex items-center gap-1"><Phone className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" /><span className="truncate">{service.contact}</span></span>)}
+                    {`${service.experience_level} years of experience `
+                    // && (<span className="flex items-center gap-1"><User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" /><span>{experienceLabel}</span></span>)}
+                    // {service.contact && (<span className="flex items-center gap-1"><Phone className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" /><span className="truncate">{service.contact}</span></span>)
+                    }
                 </div>
                 {service.tags && service.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-3">

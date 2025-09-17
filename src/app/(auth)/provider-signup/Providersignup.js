@@ -188,8 +188,8 @@ export default function ServiceProviderSignUp({ onSuccess }) {
       }
 
     } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Error submitting form. Please try again later.');
+      console.error(`Error submitting form. ${error?.response.data.message}`  );
+      toast.error(`Error submitting form. ${error?.response.data.message}`);
 
     }
     finally {
